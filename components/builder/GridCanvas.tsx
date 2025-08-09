@@ -151,7 +151,7 @@ function GhostOverlay({ cellSize, isValid }: { cellSize: number; isValid: boolea
       });
   }, [indices, grid, mod]);
   const mismatchFraction = cells.length > 0 ? cells.filter((c) => c.mismatch).length / cells.length : 0;
-  const baseBW = (mod as any).baseBW ?? sizeDefaultBW[mod.shape.sizeClass] ?? 10;
+  const baseBW = (mod.baseBW ?? sizeDefaultBW[mod.shape.sizeClass] ?? 10);
   const bwMult = 1 + mismatchFraction;
   const bwModule = Math.round(baseBW * bwMult);
   const badgeText = `Mismatch: ${Math.round(mismatchFraction * 100)}% → BW ×${bwMult.toFixed(2)} (${bwModule})`;

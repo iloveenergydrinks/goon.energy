@@ -71,7 +71,7 @@ export function computeDerivedStats(
   let bwLimit = 0;
   if (sizeId && shipSizesById) {
     const shipSize = shipSizesById[sizeId];
-    bwLimit = (shipSize as any)?.bwLimit ?? ((): number => {
+    bwLimit = shipSize?.bwLimit ?? ((): number => {
       switch (sizeId) {
         case "Frigate":
           return 60;
@@ -117,7 +117,7 @@ export function computeDerivedStats(
       const m = totalCells > 0 ? mismatched / totalCells : 0;
       mismatchAccumulator += m;
       mismatchCount += 1;
-      const baseBW = (mod as any).baseBW ?? baseBwBySize[mod.shape.sizeClass] ?? 10;
+      const baseBW = (mod.baseBW ?? baseBwBySize[mod.shape.sizeClass] ?? 10);
       bwTotal += baseBW * (1 + m);
     }
   }
