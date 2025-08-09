@@ -1,0 +1,177 @@
+[
+  {
+    "id": "Railgun Battery",
+    "shape": "long_narrow",
+    "baseRatio": { "P": 0.60, "A": 0.25, "U": 0.15 },
+    "description": "Long-range precision strikes with massive alpha damage. Requires sustained lock for progressive accuracy bonus.",
+    "icon": "railgun.svg",
+    "baseStats": {
+      "damage": 150,
+      "range": 100,
+      "rateOfFire": 20,
+      "tracking": 30,
+      "traverseSpeed": 25,
+      "lockTime": 3.0,
+      "heatGeneration": 80,
+      "powerDraw": 100
+    }
+  },
+  {
+    "id": "Plasma Cannons",
+    "shape": "square",
+    "baseRatio": { "P": 0.35, "A": 0.45, "U": 0.20 },
+    "description": "Close-mid range area damage with high heat generation. Melts armor on direct hits.",
+    "icon": "plasma.svg",
+    "baseStats": {
+      "damage": 100,
+      "range": 50,
+      "rateOfFire": 40,
+      "tracking": 50,
+      "traverseSpeed": 40,
+      "lockTime": 2.0,
+      "heatGeneration": 120,
+      "powerDraw": 60
+    }
+  },
+  {
+    "id": "Guided Missiles",
+    "shape": "wide",
+    "baseRatio": { "P": 0.20, "A": 0.65, "U": 0.15 },
+    "description": "Smart munitions with flexible trajectories. Can track targets outside direct firing arcs.",
+    "icon": "missiles.svg",
+    "baseStats": {
+      "damage": 80,
+      "range": 80,
+      "rateOfFire": 30,
+      "tracking": 70,
+      "traverseSpeed": 60,
+      "lockTime": 2.5,
+      "heatGeneration": 40,
+      "powerDraw": 40
+    }
+  },
+  {
+    "id": "Laser Batteries",
+    "shape": "long_narrow",
+    "baseRatio": { "P": 0.55, "A": 0.20, "U": 0.25 },
+    "description": "Sustained beam weapons with instant hit registration. No ammo required but high power draw.",
+    "icon": "laser.svg",
+    "baseStats": {
+      "damage": 60,
+      "range": 70,
+      "rateOfFire": 60,
+      "tracking": 45,
+      "traverseSpeed": 35,
+      "lockTime": 2.0,
+      "heatGeneration": 90,
+      "powerDraw": 120
+    }
+  },
+  {
+    "id": "Flak Cannons",
+    "shape": "wide",
+    "baseRatio": { "P": 0.25, "A": 0.60, "U": 0.15 },
+    "description": "Rapid-fire area denial weapons. Excellent against swarms and missiles.",
+    "icon": "flak.svg",
+    "baseStats": {
+      "damage": 30,
+      "range": 40,
+      "rateOfFire": 80,
+      "tracking": 60,
+      "traverseSpeed": 50,
+      "lockTime": 1.5,
+      "heatGeneration": 60,
+      "powerDraw": 50
+    }
+  },
+  {
+    "id": "Heavy Siege Cannons",
+    "shape": "central_pockets",
+    "baseRatio": { "P": 0.70, "A": 0.20, "U": 0.10 },
+    "description": "Extreme range artillery with slow traverse. Devastating alpha but requires stable platform.",
+    "icon": "siege.svg",
+    "baseStats": {
+      "damage": 200,
+      "range": 120,
+      "rateOfFire": 10,
+      "tracking": 20,
+      "traverseSpeed": 15,
+      "lockTime": 4.0,
+      "heatGeneration": 100,
+      "powerDraw": 150
+    }
+  },
+  {
+    "id": "EMP Disruptors",
+    "shape": "irregular",
+    "baseRatio": { "P": 0.30, "A": 0.20, "U": 0.50 },
+    "description": "Close-range electronic warfare weapons. Disrupts targeting and disables subsystems.",
+    "icon": "emp.svg",
+    "baseStats": {
+      "damage": 20,
+      "range": 30,
+      "rateOfFire": 50,
+      "tracking": 55,
+      "traverseSpeed": 45,
+      "lockTime": 1.0,
+      "heatGeneration": 50,
+      "powerDraw": 80,
+      "disruption": 50
+    }
+  },
+  {
+    "id": "Deployable Turrets",
+    "shape": "irregular",
+    "baseRatio": { "P": 0.30, "A": 0.40, "U": 0.30 },
+    "description": "Autonomous weapon platforms for zone control. Requires drone control modules.",
+    "icon": "turrets.svg",
+    "baseStats": {
+      "damage": 40,
+      "range": 60,
+      "rateOfFire": 35,
+      "tracking": 40,
+      "traverseSpeed": 30,
+      "lockTime": 2.5,
+      "heatGeneration": 30,
+      "powerDraw": 60,
+      "droneCapacity": 3
+    }
+  },
+  {
+    "id": "Scanning Array",
+    "shape": "wide",
+    "baseRatio": { "P": 0.20, "A": 0.15, "U": 0.65 },
+    "description": "Enhanced sensors for recon and target acquisition. Reduces lock time and increases range.",
+    "icon": "scanner.svg",
+    "baseStats": {
+      "damage": 0,
+      "range": 150,
+      "rateOfFire": 0,
+      "tracking": 80,
+      "traverseSpeed": 70,
+      "lockTime": 0.5,
+      "heatGeneration": 20,
+      "powerDraw": 40,
+      "sensorStrength": 100
+    }
+  },
+  {
+    "id": "Repair Drones",
+    "shape": "square",
+    "baseRatio": { "P": 0.25, "A": 0.25, "U": 0.50 },
+    "description": "Fleet support system for hull and subsystem repair. Can target allies or self.",
+    "icon": "repair.svg",
+    "baseStats": {
+      "damage": 0,
+      "range": 50,
+      "rateOfFire": 0,
+      "tracking": 50,
+      "traverseSpeed": 40,
+      "lockTime": 1.5,
+      "heatGeneration": 30,
+      "powerDraw": 50,
+      "repairRate": 20,
+      "droneCapacity": 4
+    }
+  }
+]

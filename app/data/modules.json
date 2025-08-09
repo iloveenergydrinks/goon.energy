@@ -1,0 +1,205 @@
+[
+  {
+    "id": "Heat Sink Banks",
+    "slot": "Power",
+    "shape": { "id": "HeatSink_1x1", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
+    "stats": { "heatSink": 15 },
+    "description": "Passively lowers weapon heat buildup"
+  },
+  {
+    "id": "Thermal Siphons",
+    "slot": "Power",
+    "shape": { "id": "ThermalSiphon_1x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 } ], "rotations": [0,90], "sizeClass": "M" },
+    "stats": { "heatSink": 10, "powerGen": 5 },
+    "description": "Redirects waste heat to secondary systems"
+  },
+  {
+    "id": "Phase Coolers",
+    "slot": "Power",
+    "shape": { "id": "PhaseCooler_2x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 }, { "dr": 1, "dc": 0 }, { "dr": 1, "dc": 1 } ], "rotations": [0], "sizeClass": "L" },
+    "stats": { "heatSink": 30 },
+    "description": "Emergency burst cooling system"
+  },
+  {
+    "id": "Auxiliary Reactor",
+    "slot": "Power",
+    "shape": { "id": "AuxReactor_2x1", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 1, "dc": 0 } ], "rotations": [0,90], "sizeClass": "M" },
+    "stats": { "powerGen": 20, "heatSink": -5 },
+    "description": "Boosts power output at cost of heat"
+  },
+  {
+    "id": "Flux Capacitors",
+    "slot": "Power",
+    "shape": { "id": "FluxCap_1x1", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
+    "stats": { "capBuffer": 25 },
+    "description": "Stores excess energy for burst windows"
+  },
+  {
+    "id": "Overdrive Converter",
+    "slot": "Power",
+    "shape": { "id": "Overdrive_2x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 }, { "dr": 1, "dc": 0 }, { "dr": 1, "dc": 1 } ], "rotations": [0], "sizeClass": "L" },
+    "stats": { "rofBonus": 10, "powerGen": 10 },
+    "description": "Overcharges turrets for higher performance"
+  },
+  {
+    "id": "High-Throughput Conduits",
+    "slot": "Power",
+    "shape": { "id": "Conduits_1x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 } ], "rotations": [0,90], "sizeClass": "M" },
+    "stats": { "powerGen": 15 },
+    "description": "Reduces power loss at long cable runs"
+  },
+  {
+    "id": "Stability Regulators",
+    "slot": "Power",
+    "shape": { "id": "StabReg_1x1", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
+    "stats": { "trackingBonus": 3, "powerGen": 5 },
+    "description": "Improves accuracy for energy weapons"
+  },
+  {
+    "id": "Pulse Modulators",
+    "slot": "Power",
+    "shape": { "id": "PulseMod_L", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 1, "dc": 0 }, { "dr": 1, "dc": 1 } ], "rotations": [0,90,180,270], "sizeClass": "M" },
+    "stats": { "rofBonus": 8 },
+    "description": "Increases fire rate for beam weapons"
+  },
+  {
+    "id": "Expanded Ammo Bunker",
+    "slot": "Ammo",
+    "shape": { "id": "AmmoBunker_1x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 } ], "rotations": [0,90], "sizeClass": "M" },
+    "stats": { "ammoCap": 50 },
+    "description": "Increases total carried munitions"
+  },
+  {
+    "id": "Quick-Feed Loader",
+    "slot": "Ammo",
+    "shape": { "id": "QuickFeed_1x1", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
+    "stats": { "reloadBonus": 10 },
+    "description": "Reduces reload times for ballistics"
+  },
+  {
+    "id": "Multi-Caliber Racks",
+    "slot": "Ammo",
+    "shape": { "id": "MultiRack_2x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 }, { "dr": 1, "dc": 0 }, { "dr": 1, "dc": 1 } ], "rotations": [0], "sizeClass": "L" },
+    "stats": { "ammoCap": 30, "reloadBonus": 5 },
+    "description": "Multiple ammo types for same weapon"
+  },
+  {
+    "id": "Sabot Casings",
+    "slot": "Ammo",
+    "shape": { "id": "Sabot_1x1", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
+    "stats": { "penetration": 15 },
+    "description": "Increases armor penetration"
+  },
+  {
+    "id": "Stabilizer Fins",
+    "slot": "Ammo",
+    "shape": { "id": "StabFins_1x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 } ], "rotations": [0,90], "sizeClass": "M" },
+    "stats": { "trackingBonus": 5 },
+    "description": "Improves projectile stability at range"
+  },
+  {
+    "id": "Auto-Aim Gyros",
+    "slot": "Ammo",
+    "shape": { "id": "AutoGyro_T", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 }, { "dr": 0, "dc": 2 }, { "dr": 1, "dc": 1 } ], "rotations": [0,90,180,270], "sizeClass": "L" },
+    "stats": { "trackingBonus": 8, "rofBonus": 3 },
+    "description": "Corrects shell trajectory after firing"
+  },
+  {
+    "id": "Rotary Feed Adapters",
+    "slot": "Ammo",
+    "shape": { "id": "RotaryFeed_2x1", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 1, "dc": 0 } ], "rotations": [0,90], "sizeClass": "M" },
+    "stats": { "rofBonus": 12 },
+    "description": "Boosts ROF for smaller turrets"
+  },
+  {
+    "id": "Impact Fuze Modulators",
+    "slot": "Ammo",
+    "shape": { "id": "ImpactFuze_1x1", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
+    "stats": { "critChance": 5 },
+    "description": "Adjusts detonation timing"
+  },
+  {
+    "id": "Tracking Enhancer",
+    "slot": "Utility",
+    "shape": { "id": "TrackEnh_1x1", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
+    "stats": { "trackingBonus": 8 },
+    "description": "Reduces lead deviation for targets"
+  },
+  {
+    "id": "Long-Range Optics",
+    "slot": "Utility",
+    "shape": { "id": "LROptics_1x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 } ], "rotations": [0,90], "sizeClass": "M" },
+    "stats": { "lockRange": 20, "trackingBonus": 3 },
+    "description": "Extends lock range and reduces penalties"
+  },
+  {
+    "id": "Arc Control Servo",
+    "slot": "Utility",
+    "shape": { "id": "ArcServo_1x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 } ], "rotations": [0,90], "sizeClass": "M" },
+    "stats": { "arcBonus": 10 },
+    "description": "Widens turret firing arcs"
+  },
+  {
+    "id": "ECM Suite",
+    "slot": "Utility",
+    "shape": { "id": "ECM_2x1", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 1, "dc": 0 } ], "rotations": [0,90], "sizeClass": "M" },
+    "stats": { "ecm": 15 },
+    "description": "Increases enemy lock times"
+  },
+  {
+    "id": "Signal Amplifiers",
+    "slot": "Utility",
+    "shape": { "id": "SigAmp_1x1", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
+    "stats": { "lockStrength": 10 },
+    "description": "Improves lock-breaking resistance"
+  },
+  {
+    "id": "Spoof Emitters",
+    "slot": "Utility",
+    "shape": { "id": "Spoof_L", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 1, "dc": 0 }, { "dr": 1, "dc": 1 } ], "rotations": [0,90,180,270], "sizeClass": "M" },
+    "stats": { "ecm": 10, "mobility": 3 },
+    "description": "Sends false telemetry to guided weapons"
+  },
+  {
+    "id": "Micro-Thruster Bank",
+    "slot": "Utility",
+    "shape": { "id": "MicroThrust_1x1", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
+    "stats": { "mobility": 5 },
+    "description": "Improves fine repositioning"
+  },
+  {
+    "id": "Rotation Assist Gyros",
+    "slot": "Utility",
+    "shape": { "id": "RotGyro_2x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 }, { "dr": 1, "dc": 0 }, { "dr": 1, "dc": 1 } ], "rotations": [0], "sizeClass": "L" },
+    "stats": { "mobility": 8, "arcBonus": 5 },
+    "description": "Boosts pitch/yaw/roll for arc realignment"
+  },
+  {
+    "id": "Vector Dampers",
+    "slot": "Utility",
+    "shape": { "id": "VecDamp_1x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 } ], "rotations": [0,90], "sizeClass": "M" },
+    "stats": { "mobility": 4, "trackingBonus": 4 },
+    "description": "Reduces drift after maneuvers"
+  },
+  {
+    "id": "Drone Command Processor",
+    "slot": "Utility",
+    "shape": { "id": "DroneCmd_2x1", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 1, "dc": 0 } ], "rotations": [0,90], "sizeClass": "M" },
+    "stats": { "droneControl": 2 },
+    "description": "Increases deployable unit count"
+  },
+  {
+    "id": "Autonomy Firmware",
+    "slot": "Utility",
+    "shape": { "id": "AutoFirm_1x1", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
+    "stats": { "droneAI": 15 },
+    "description": "Boosts drone reaction speed"
+  },
+  {
+    "id": "Maintenance Bay",
+    "slot": "Utility",
+    "shape": { "id": "MaintBay_Z", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 }, { "dr": 1, "dc": 1 }, { "dr": 1, "dc": 2 } ], "rotations": [0,90,180,270], "sizeClass": "L" },
+    "stats": { "droneRepair": 20 },
+    "description": "Repairs drones between sorties"
+  }
+]

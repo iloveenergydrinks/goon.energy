@@ -1,0 +1,70 @@
+[
+  {
+    "id": "Frigate",
+    "rows": 3,
+    "cols": 5,
+    "cellCount": 14,
+    "description": "Small, nimble craft with limited module space",
+    "baseStats": {
+      "hull": 1000,
+      "armor": 500,
+      "speed": 100,
+      "evasion": 30,
+      "sensorStrength": 50,
+      "heatCapacity": 100,
+      "powerCapacity": 100,
+      "ammoCapacity": 100
+    }
+  },
+  {
+    "id": "Destroyer",
+    "rows": 4,
+    "cols": 5,
+    "cellCount": 18,
+    "description": "Balanced vessel with moderate firepower and defense",
+    "baseStats": {
+      "hull": 1500,
+      "armor": 750,
+      "speed": 80,
+      "evasion": 20,
+      "sensorStrength": 60,
+      "heatCapacity": 150,
+      "powerCapacity": 150,
+      "ammoCapacity": 150
+    }
+  },
+  {
+    "id": "Cruiser",
+    "rows": 5,
+    "cols": 5,
+    "cellCount": 23,
+    "description": "Heavy combat platform with substantial module capacity",
+    "baseStats": {
+      "hull": 2500,
+      "armor": 1200,
+      "speed": 60,
+      "evasion": 10,
+      "sensorStrength": 70,
+      "heatCapacity": 200,
+      "powerCapacity": 200,
+      "ammoCapacity": 200
+    }
+  },
+  {
+    "id": "Capital",
+    "rows": 5,
+    "cols": 6,
+    "cellCount": 28,
+    "description": "Massive warship with overwhelming firepower",
+    "baseStats": {
+      "hull": 4000,
+      "armor": 2000,
+      "speed": 40,
+      "evasion": 5,
+      "sensorStrength": 80,
+      "heatCapacity": 300,
+      "powerCapacity": 300,
+      "ammoCapacity": 300
+    }
+  }
+]
