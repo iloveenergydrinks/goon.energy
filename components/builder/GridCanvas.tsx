@@ -11,15 +11,15 @@ export default function GridCanvas() {
   const grid = useFittingStore((s) => s.grid);
   const setHoverCell = useFittingStore((s) => s.setHoverCell);
   const rotateGhost = useFittingStore((s) => s.rotateGhost);
+  const modulesById = useFittingStore((s) => s.modulesById);
+  const draggingModuleId = useFittingStore((s) => s.draggingModuleId);
+  const ghostRotation = useFittingStore((s) => s.ghostRotation);
+  const hoverCell = useFittingStore((s) => s.hoverCell);
+  const commitPlacement = useFittingStore((s) => s.commitPlacement);
+  const placed = useFittingStore((s) => s.placed);
+  
   const cellSize = 40;
   
-  if (!grid) {
-    return (
-      <div className="flex items-center justify-center h-64 text-neutral-500">
-        No grid generated. Please configure your ship first.
-      </div>
-    );
-  }
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === "r") rotateGhost();
@@ -35,13 +35,14 @@ export default function GridCanvas() {
       window.removeEventListener("wheel", onWheel);
     };
   }, [rotateGhost]);
-  const modulesById = useFittingStore((s) => s.modulesById);
-  const draggingModuleId = useFittingStore((s) => s.draggingModuleId);
-  const ghostRotation = useFittingStore((s) => s.ghostRotation);
-  const hoverCell = useFittingStore((s) => s.hoverCell);
-  const commitPlacement = useFittingStore((s) => s.commitPlacement);
-  const placed = useFittingStore((s) => s.placed);
-  if (!grid) return null;
+  
+  if (!grid) {
+    return (
+      <div className="flex items-center justify-center h-64 text-neutral-500">
+        No grid generated. Please configure your ship first.
+      </div>
+    );
+  }
 
   // Get the dragging module details
   const draggingModule = draggingModuleId ? modulesById[draggingModuleId] : null;

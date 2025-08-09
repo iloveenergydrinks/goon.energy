@@ -1,4 +1,4 @@
-import type { Fit, ModuleDef, ModulesById, PlacedModule } from "@/types/fitting";
+import type { Fit, ModulesById, PlacedModule } from "@/types/fitting";
 import { computeDerivedStats } from "@/lib/fit/computeDerivedStats";
 
 export type PlacementAction =

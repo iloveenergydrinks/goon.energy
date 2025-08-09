@@ -1,5 +1,4 @@
 import type { GridCell, SlotType } from "@/types/fitting";
-import type { RNG } from "@/lib/rng";
 import { seededShuffle } from "@/lib/rng";
 
 function centerOf(rows: number, cols: number): { r: number; c: number } {

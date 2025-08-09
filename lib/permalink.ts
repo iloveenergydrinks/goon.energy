@@ -68,7 +68,7 @@ export function decodePermalink(
       derivedStats: {},
       version: parsed.v,
     };
-  } catch (e) {
+  } catch {
     return null;
   }
 }

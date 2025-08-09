@@ -177,7 +177,6 @@ export default function StatsPanel() {
           ) : (
             <div className="bg-neutral-100 border border-neutral-200 p-2 rounded space-y-1">
               {placed.map((p, idx) => {
-                const mod = modulesById[p.moduleId];
                 return (
                   <div key={idx} className="flex items-center gap-2 text-xs">
                     <span className="w-6 font-mono text-neutral-500">#{idx + 1}</span>
