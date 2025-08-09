@@ -8,7 +8,7 @@ export interface ShipSize {
   cols: number;
   cellCount?: number;
   description?: string;
-  baseStats?: Record<string, number>;
+  baseStats?: Record<string, number | undefined>;
 }
 
 export interface PrimaryArchetype {
@@ -17,7 +17,7 @@ export interface PrimaryArchetype {
   baseRatio: { P: number; A: number; U: number };
   description?: string;
   icon?: string;
-  baseStats?: Record<string, number>;
+  baseStats?: Record<string, number | undefined>;
 }
 
 export interface SecondaryDef {
@@ -30,7 +30,7 @@ export interface SecondaryDef {
     inner_utility?: number;
   };
   description?: string;
-  baseStats?: Record<string, number>;
+  baseStats?: Record<string, number | undefined>;
 }
 
 export interface GridCell {

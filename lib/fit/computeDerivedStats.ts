@@ -28,7 +28,9 @@ export function computeDerivedStats(
     const shipSize = shipSizesById[sizeId];
     if (shipSize?.baseStats) {
       for (const [k, v] of Object.entries(shipSize.baseStats)) {
-        totals[k] = (totals[k] || 0) + v;
+        if (v !== undefined) {
+          totals[k] = (totals[k] || 0) + v;
+        }
       }
     }
   }
@@ -38,7 +40,9 @@ export function computeDerivedStats(
     const primary = primariesById[primaryId];
     if (primary?.baseStats) {
       for (const [k, v] of Object.entries(primary.baseStats)) {
-        totals[k] = (totals[k] || 0) + v;
+        if (v !== undefined) {
+          totals[k] = (totals[k] || 0) + v;
+        }
       }
     }
   }
@@ -49,7 +53,9 @@ export function computeDerivedStats(
       const secondary = secondariesById[secId];
       if (secondary?.baseStats) {
         for (const [k, v] of Object.entries(secondary.baseStats)) {
-          totals[k] = (totals[k] || 0) + v;
+          if (v !== undefined) {
+            totals[k] = (totals[k] || 0) + v;
+          }
         }
       }
     }
