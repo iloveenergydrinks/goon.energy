@@ -54,7 +54,7 @@ export function canPlace(
     const idx = r * grid.cols + c;
     const cell = grid.cells[idx];
     if (cell.hole) return { ok: false, reason: "hole" };
-    if (cell.slot !== module.slot) return { ok: false, reason: "slot-mismatch" };
+    // Allow slot mismatch; BW system will apply soft penalties based on mismatch.
     if (occupied.has(idx)) return { ok: false, reason: "overlap" };
   }
   return { ok: true };

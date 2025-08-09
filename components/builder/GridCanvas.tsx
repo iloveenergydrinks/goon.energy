@@ -180,16 +180,12 @@ function CompatibleSlots({ cellSize, moduleSlot }: { cellSize: number; moduleSlo
   return (
     <div className="pointer-events-none absolute inset-0">
       {grid.cells.map((cell, idx) => {
-        if (cell.hole || cell.slot !== moduleSlot) return null;
+        if (cell.hole) return null;
         const r = Math.floor(idx / grid.cols);
         const c = idx % grid.cols;
-        return (
-          <div
-            key={`compat-${idx}`}
-            className="bg-blue-400/10 outline outline-1 outline-blue-400/30"
-            style={{ position: "absolute", top: r * cellSize, left: c * cellSize, width: cellSize, height: cellSize }}
-          />
-        );
+        const match = cell.slot === moduleSlot;
+        const cls = match ? "bg-blue-400/10 outline outline-1 outline-blue-400/30" : "bg-amber-400/5 outline outline-1 outline-amber-300/30";
+        return <div key={`compat-${idx}`} className={cls} style={{ position: "absolute", top: r * cellSize, left: c * cellSize, width: cellSize, height: cellSize }} />;
       })}
     </div>
   );
