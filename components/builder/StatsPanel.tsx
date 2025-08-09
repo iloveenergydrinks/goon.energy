@@ -80,7 +80,6 @@ function formatStat(key: string, value: number): string {
 export default function StatsPanel() {
   const derived = useFittingStore((s) => s.derivedStats);
   const placed = useFittingStore((s) => s.placed);
-  const modulesById = useFittingStore((s) => s.modulesById);
   const primaryId = useFittingStore((s) => s.primaryId);
   const secondaryIds = useFittingStore((s) => s.secondaryIds);
   const sizeId = useFittingStore((s) => s.sizeId);

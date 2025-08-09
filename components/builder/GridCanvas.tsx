@@ -98,7 +98,7 @@ export default function GridCanvas() {
                   height: cellSize,
                   background: cell.hole
                     ? "#111"
-                    : isOccupied
+                    : isOccupied && cell.slot
                     ? `${SLOT_COLORS[cell.slot]}99`
                     : cell.slot
                     ? `${SLOT_COLORS[cell.slot]}22`
