@@ -139,26 +139,38 @@ function GhostOverlay({ cellSize, isValid }: { cellSize: number; isValid: boolea
   const modulesById = useFittingStore((s) => s.modulesById);
   const mod = modulesById[moduleId];
   const indices = useMemo(() => getCoveredIndices(mod, hoverCell, rotation, grid.cols), [mod, hoverCell, rotation, grid.cols]);
-  const color = isValid ? "bg-green-500/40 outline-green-600/60" : "bg-red-500/40 outline-red-600/60";
+  const sizeDefaultBW: Record<string, number> = { S: 7, M: 12, L: 21 };
+  const cells = useMemo(() => {
+    return indices
+      .map((idx) => ({ idx, r: Math.floor(idx / grid.cols), c: idx % grid.cols }))
+      .filter(({ r, c }) => r >= 0 && c >= 0 && r < grid.rows && c < grid.cols)
+      .map(({ idx, r, c }) => {
+        const cell = grid.cells[idx];
+        const mismatch = !!(cell?.slot && mod.slot !== cell.slot);
+        return { idx, r, c, mismatch };
+      });
+  }, [indices, grid, mod]);
+  const mismatchFraction = cells.length > 0 ? cells.filter((c) => c.mismatch).length / cells.length : 0;
+  const baseBW = (mod as any).baseBW ?? sizeDefaultBW[mod.shape.sizeClass] ?? 10;
+  const bwMult = 1 + mismatchFraction;
+  const bwModule = Math.round(baseBW * bwMult);
+  const badgeText = `Mismatch: ${Math.round(mismatchFraction * 100)}% → BW ×${bwMult.toFixed(2)} (${bwModule})`;
+  const colorFor = (mismatch: boolean) =>
+    isValid ? (mismatch ? "bg-amber-500/40 outline-amber-600/60" : "bg-green-500/40 outline-green-600/60") : "bg-red-500/40 outline-red-600/60";
   return (
     <div className="pointer-events-none absolute inset-0">
-      {indices.map((idx) => {
-        const r = Math.floor(idx / grid.cols);
-        const c = idx % grid.cols;
-        return (
-          <div
-            key={`ghost-${idx}`}
-            className={`${color} outline outline-2`}
-            style={{
-              position: "absolute",
-              top: r * cellSize,
-              left: c * cellSize,
-              width: cellSize,
-              height: cellSize,
-            }}
-          />
-        );
-      })}
+      {cells.map(({ idx, r, c, mismatch }) => (
+        <div
+          key={`ghost-${idx}`}
+          className={`${colorFor(mismatch)} outline outline-2`}
+          style={{ position: "absolute", top: r * cellSize, left: c * cellSize, width: cellSize, height: cellSize }}
+        />
+      ))}
+      <div className="absolute -top-6 left-0">
+        <div className="inline-flex items-center gap-1 text-[10px] font-medium text-white bg-black/80 px-2 py-0.5 rounded border border-white/20">
+          <span>{badgeText}</span>
+        </div>
+      </div>
     </div>
   );
 }
