@@ -4,6 +4,7 @@
     "rows": 3,
     "cols": 5,
     "cellCount": 14,
+    "bwLimit": 60,
     "description": "Small, nimble craft with limited module space",
     "baseStats": {
       "hull": 1000,
@@ -21,6 +22,7 @@
     "rows": 4,
     "cols": 5,
     "cellCount": 18,
+    "bwLimit": 85,
     "description": "Balanced vessel with moderate firepower and defense",
     "baseStats": {
       "hull": 1500,
@@ -38,6 +40,7 @@
     "rows": 5,
     "cols": 5,
     "cellCount": 23,
+    "bwLimit": 110,
     "description": "Heavy combat platform with substantial module capacity",
     "baseStats": {
       "hull": 2500,
@@ -55,6 +58,7 @@
     "rows": 5,
     "cols": 6,
     "cellCount": 28,
+    "bwLimit": 150,
     "description": "Massive warship with overwhelming firepower",
     "baseStats": {
       "hull": 4000,

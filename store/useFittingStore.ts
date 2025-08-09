@@ -126,7 +126,8 @@ export const useFittingStore = create<FittingState>((set, get) => ({
       secondaryIds,
       catalog.shipSizesById,
       catalog.primariesById,
-      catalog.secondariesById
+      catalog.secondariesById,
+      grid
     );
     set({ grid, placed: [], derivedStats: initialStats, undoStack: [], redoStack: [] });
   },
@@ -175,7 +176,8 @@ export const useFittingStore = create<FittingState>((set, get) => ({
           get().secondaryIds,
           catalog.shipSizesById,
           catalog.primariesById,
-          catalog.secondariesById
+          catalog.secondariesById,
+          grid
         ),
       undoStack: [...undoStack, { placed }].slice(-100),
       redoStack: [],
@@ -199,7 +201,8 @@ export const useFittingStore = create<FittingState>((set, get) => ({
           get().secondaryIds,
           catalog.shipSizesById,
           catalog.primariesById,
-          catalog.secondariesById
+          catalog.secondariesById,
+          get().grid ?? undefined
         ),
       undoStack: newUndo,
       redoStack: newRedo,
@@ -221,7 +224,8 @@ export const useFittingStore = create<FittingState>((set, get) => ({
           get().secondaryIds,
           catalog.shipSizesById,
           catalog.primariesById,
-          catalog.secondariesById
+          catalog.secondariesById,
+          get().grid ?? undefined
         ),
       undoStack: newUndo,
       redoStack: newRedo,
@@ -259,7 +263,8 @@ export const useFittingStore = create<FittingState>((set, get) => ({
       decoded.secondaryIds,
       catalog.shipSizesById,
       catalog.primariesById,
-      catalog.secondariesById
+      catalog.secondariesById,
+      decoded.grid
     );
     set({
       seed: decoded.seed,

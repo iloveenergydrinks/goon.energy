@@ -19,7 +19,9 @@ export function computeDerivedStats(
   secondaryIds?: string[],
   shipSizesById?: ShipSizesById,
   primariesById?: PrimariesById,
-  secondariesById?: SecondariesById
+  secondariesById?: SecondariesById,
+  grid?: { rows: number; cols: number; cells: Array<{ r: number; c: number; slot?: string; hole?: boolean }> },
+  bwConfig?: { k_bw?: number }
 ): Record<string, number> {
   const totals: Record<string, number> = Object.create(null);
   
@@ -61,6 +63,74 @@ export function computeDerivedStats(
     }
   }
   
+  // --- Bandwidth (BW) computation ---
+  // Defaults
+  const baseBwBySize: Record<string, number> = { S: 7, M: 12, L: 21 };
+  const k_bw = bwConfig?.k_bw ?? 0.01;
+  // Determine BW limit from size
+  let bwLimit = 0;
+  if (sizeId && shipSizesById) {
+    const shipSize = shipSizesById[sizeId];
+    bwLimit = (shipSize as any)?.bwLimit ?? ((): number => {
+      switch (sizeId) {
+        case "Frigate":
+          return 60;
+        case "Destroyer":
+          return 85;
+        case "Cruiser":
+          return 110;
+        case "Capital":
+          return 150;
+        default:
+          return 85;
+      }
+    })();
+  }
+
+  let bwTotal = 0;
+  let mismatchAccumulator = 0;
+  let mismatchCount = 0;
+
+  if (grid && placed.length > 0) {
+    for (const pm of placed) {
+      const mod = modulesById[pm.moduleId];
+      if (!mod) continue;
+      const rotated = (mod.shape?.cells ?? []).map(({ dr, dc }) => {
+        switch (pm.rotation) {
+          case 90:
+            return { dr: dc, dc: -dr };
+          case 180:
+            return { dr: -dr, dc: -dc };
+          case 270:
+            return { dr: -dc, dc: dr };
+          default:
+            return { dr, dc };
+        }
+      });
+      const covered = rotated
+        .map(({ dr, dc }) => ({ r: pm.anchor.r + dr, c: pm.anchor.c + dc }))
+        .filter(({ r, c }) => r >= 0 && c >= 0 && r < grid.rows && c < grid.cols)
+        .map(({ r, c }) => grid.cells[r * grid.cols + c]);
+      const totalCells = covered.length;
+      if (totalCells === 0) continue;
+      const mismatched = covered.filter((cell) => cell.slot && mod.slot !== cell.slot).length;
+      const m = totalCells > 0 ? mismatched / totalCells : 0;
+      mismatchAccumulator += m;
+      mismatchCount += 1;
+      const baseBW = (mod as any).baseBW ?? baseBwBySize[mod.shape.sizeClass] ?? 10;
+      bwTotal += baseBW * (1 + m);
+    }
+  }
+  const bwOver = Math.max(0, bwTotal - bwLimit);
+  const responsivenessMult = 1 / (1 + k_bw * bwOver);
+  const avgMismatch = mismatchCount > 0 ? mismatchAccumulator / mismatchCount : 0;
+
+  totals["BW_total"] = Math.round(bwTotal);
+  totals["BW_limit"] = bwLimit;
+  totals["BW_over"] = Math.round(bwOver);
+  totals["BW_mismatchAvg"] = Math.round(avgMismatch * 100);
+  totals["responsivenessMult"] = Math.round(responsivenessMult * 100) / 100;
+
   // Add module stats
   for (const p of placed) {
     const mod: ModuleDef | undefined = modulesById[p.moduleId];

@@ -4,63 +4,76 @@
     "slot": "Power",
     "shape": { "id": "HeatSink_1x1", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
     "stats": { "heatSink": 15 },
-    "description": "Passively lowers weapon heat buildup"
+    "description": "Passively lowers weapon heat buildup",
+    "baseBW": 6,
+    "baseHeat": 2
   },
   {
     "id": "Thermal Siphons",
     "slot": "Power",
     "shape": { "id": "ThermalSiphon_1x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 } ], "rotations": [0,90], "sizeClass": "M" },
     "stats": { "heatSink": 10, "powerGen": 5 },
-    "description": "Redirects waste heat to secondary systems"
+    "description": "Redirects waste heat to secondary systems",
+    "baseBW": 12,
+    "baseHeat": 3
   },
   {
     "id": "Phase Coolers",
     "slot": "Power",
     "shape": { "id": "PhaseCooler_2x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 }, { "dr": 1, "dc": 0 }, { "dr": 1, "dc": 1 } ], "rotations": [0], "sizeClass": "L" },
     "stats": { "heatSink": 30 },
-    "description": "Emergency burst cooling system"
+    "description": "Emergency burst cooling system",
+    "baseBW": 20,
+    "baseHeat": 4
   },
   {
     "id": "Auxiliary Reactor",
     "slot": "Power",
     "shape": { "id": "AuxReactor_2x1", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 1, "dc": 0 } ], "rotations": [0,90], "sizeClass": "M" },
     "stats": { "powerGen": 20, "heatSink": -5 },
-    "description": "Boosts power output at cost of heat"
+    "description": "Boosts power output at cost of heat",
+    "baseBW": 12,
+    "baseHeat": 5
   },
   {
     "id": "Flux Capacitors",
     "slot": "Power",
     "shape": { "id": "FluxCap_1x1", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
     "stats": { "capBuffer": 25 },
-    "description": "Stores excess energy for burst windows"
+    "description": "Stores excess energy for burst windows",
+    "baseBW": 7
   },
   {
     "id": "Overdrive Converter",
     "slot": "Power",
     "shape": { "id": "Overdrive_2x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 }, { "dr": 1, "dc": 0 }, { "dr": 1, "dc": 1 } ], "rotations": [0], "sizeClass": "L" },
     "stats": { "rofBonus": 10, "powerGen": 10 },
-    "description": "Overcharges turrets for higher performance"
+    "description": "Overcharges turrets for higher performance",
+    "baseBW": 22
   },
   {
     "id": "High-Throughput Conduits",
     "slot": "Power",
     "shape": { "id": "Conduits_1x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 } ], "rotations": [0,90], "sizeClass": "M" },
     "stats": { "powerGen": 15 },
-    "description": "Reduces power loss at long cable runs"
+    "description": "Reduces power loss at long cable runs",
+    "baseBW": 12
   },
   {
     "id": "Stability Regulators",
     "slot": "Power",
     "shape": { "id": "StabReg_1x1", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
     "stats": { "trackingBonus": 3, "powerGen": 5 },
-    "description": "Improves accuracy for energy weapons"
+    "description": "Improves accuracy for energy weapons",
+    "baseBW": 7
   },
   {
     "id": "Pulse Modulators",
     "slot": "Power",
     "shape": { "id": "PulseMod_L", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 1, "dc": 0 }, { "dr": 1, "dc": 1 } ], "rotations": [0,90,180,270], "sizeClass": "M" },
     "stats": { "rofBonus": 8 },
-    "description": "Increases fire rate for beam weapons"
+    "description": "Increases fire rate for beam weapons",
+    "baseBW": 12
   },
   {
     "id": "Expanded Ammo Bunker",

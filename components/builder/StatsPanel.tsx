@@ -105,6 +105,38 @@ export default function StatsPanel() {
         </div>
       </div>
 
+      {/* Bandwidth */}
+      <div>
+        <div className="font-semibold mb-2 text-lg text-neutral-900">Bandwidth</div>
+        <div className="space-y-2 bg-neutral-100 border border-neutral-200 p-3 rounded text-sm">
+          {(() => {
+            const bwTotal = derived["BW_total"] || 0;
+            const bwLimit = derived["BW_limit"] || 0;
+            const over = Math.max(0, bwTotal - bwLimit);
+            const resp = derived["responsivenessMult"] || 1;
+            const pct = bwLimit > 0 ? Math.min(100, Math.round((bwTotal / bwLimit) * 100)) : 0;
+            const color = pct <= 90 ? "bg-green-600" : pct <= 100 ? "bg-amber-500" : "bg-red-600";
+            return (
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="text-neutral-600">BW</span>
+                  <span className="font-medium text-neutral-900">{bwTotal} / {bwLimit}</span>
+                </div>
+                <div className="h-2 bg-neutral-200 rounded">
+                  <div className={`h-2 ${color} rounded`} style={{ width: `${Math.min(100, pct)}%` }} />
+                </div>
+                {over > 0 && (
+                  <div className="text-xs text-red-700 mt-1">Systems saturated (−{Math.round((1 - resp) * 100)}% responsiveness)</div>
+                )}
+                {derived["BW_mismatchAvg"] !== undefined && (
+                  <div className="text-xs text-neutral-600 mt-1">Avg mismatch: {derived["BW_mismatchAvg"]}%</div>
+                )}
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+
       {/* Global Ship Stats */}
       <div>
         <div className="font-semibold mb-2 text-lg text-neutral-900">Ship Stats</div>

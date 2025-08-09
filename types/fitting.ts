@@ -9,6 +9,7 @@ export interface ShipSize {
   cellCount?: number;
   description?: string;
   baseStats?: Record<string, number | undefined>;
+  bwLimit?: number;
 }
 
 export interface PrimaryArchetype {
@@ -87,6 +88,8 @@ export interface ModuleDef {
     droneRepair: number;
   }>;
   description?: string;
+  baseBW?: number;
+  baseHeat?: number;
 }
 
 export interface PlacedModule {
