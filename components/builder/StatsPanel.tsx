@@ -88,7 +88,7 @@ export default function StatsPanel() {
     <div className="space-y-4 h-full overflow-y-auto">
       {/* Ship Configuration */}
       <div>
-        <div className="font-semibold mb-2 text-lg text-neutral-900">Ship Configuration</div>
+        <div className="font-semibold mb-2 text-lg">Ship Configuration</div>
         <div className="space-y-1 text-sm bg-neutral-100 border border-neutral-200 p-3 rounded">
           <div className="flex justify-between">
             <span className="text-neutral-600">Class:</span>
@@ -107,7 +107,7 @@ export default function StatsPanel() {
 
       {/* Bandwidth */}
       <div>
-        <div className="font-semibold mb-2 text-lg text-neutral-900">Bandwidth</div>
+        <div className="font-semibold mb-2 text-lg">Bandwidth</div>
         <div className="space-y-2 bg-neutral-100 border border-neutral-200 p-3 rounded text-sm">
           {(() => {
             const bwTotal = derived["BW_total"] || 0;
@@ -139,7 +139,7 @@ export default function StatsPanel() {
 
       {/* Global Ship Stats */}
       <div>
-        <div className="font-semibold mb-2 text-lg text-neutral-900">Ship Stats</div>
+        <div className="font-semibold mb-2 text-lg">Ship Stats</div>
         {Object.keys(derived).length === 0 ? (
           <div className="text-sm text-neutral-500">Configure ship to see stats</div>
         ) : (
@@ -201,7 +201,7 @@ export default function StatsPanel() {
 
       {/* Placed Modules */}
       <div>
-        <div className="font-semibold mb-2 text-lg text-neutral-900">Fitted Modules ({placed.length})</div>
+        <div className="font-semibold mb-2 text-lg">Fitted Modules ({placed.length})</div>
         <div className="space-y-1 text-sm">
           {placed.length === 0 ? (
             <div className="text-neutral-500">No modules fitted</div>

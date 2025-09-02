@@ -18,21 +18,15 @@ export default function GridCanvas() {
   const commitPlacement = useFittingStore((s) => s.commitPlacement);
   const placed = useFittingStore((s) => s.placed);
   
-  const cellSize = 40;
+  const cellSize = 48;
   
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === "r") rotateGhost();
     };
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      rotateGhost();
-    };
     window.addEventListener("keydown", onKey);
-    window.addEventListener("wheel", onWheel, { passive: false });
     return () => {
       window.removeEventListener("keydown", onKey);
-      window.removeEventListener("wheel", onWheel);
     };
   }, [rotateGhost]);
   
@@ -70,11 +64,17 @@ export default function GridCanvas() {
     }
   }
   return (
-    <div className="flex items-start justify-center">
+    <div className="flex flex-col items-center py-4">
       <div className="relative" style={{ width: grid.cols * cellSize, height: grid.rows * cellSize }}>
         <div
           className="grid"
           style={{ gridTemplateColumns: `repeat(${grid.cols}, ${cellSize}px)` }}
+          onWheel={(e) => {
+            if (draggingModuleId) {
+              e.preventDefault();
+              rotateGhost();
+            }
+          }}
           onContextMenu={(e) => {
             e.preventDefault();
             rotateGhost();

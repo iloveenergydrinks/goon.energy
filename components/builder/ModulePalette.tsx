@@ -38,8 +38,10 @@ export default function ModulePalette() {
           return (
             <button
               key={m.id}
-              className={`border rounded p-2 text-sm text-left hover:bg-neutral-50 relative overflow-hidden ${
-                draggingModuleId === m.id ? "border-blue-600 bg-blue-50 text-black" : "border-neutral-300"
+              className={`border rounded p-2 text-sm text-left relative overflow-hidden transition-all ${
+                draggingModuleId === m.id 
+                  ? "border-blue-600 bg-blue-50 hover:bg-blue-100 text-neutral-900" 
+                  : "border-neutral-300 bg-white hover:bg-gray-100 hover:border-neutral-400 text-neutral-900"
               }`}
               onClick={() => startDrag(m.id)}
             >
@@ -59,8 +61,8 @@ export default function ModulePalette() {
                 </div>
                 <div className="text-xs text-neutral-600 flex items-center gap-2">
                   <span 
-                    className="px-1.5 py-0.5 rounded text-white font-medium"
-                    style={{ backgroundColor: slotColor }}
+                    className="px-1.5 py-0.5 rounded font-medium"
+                    style={{ backgroundColor: slotColor, color: '#ffffff' }}
                   >
                     {m.slot}
                   </span>

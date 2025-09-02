@@ -19,8 +19,8 @@ export default function BuilderPage() {
   }, [grid, router]);
   if (!grid) return null;
   return (
-    <div className="min-h-screen p-4 grid grid-cols-[280px_1fr_320px] gap-4">
-      <div className="space-y-2">
+    <div className="p-4 grid grid-cols-[360px_1fr_280px] gap-4">
+      <div className="space-y-2 p-12 sticky top-4 h-fit max-h-[calc(100vh-2rem)] overflow-y-auto">
         <div className="flex gap-2">
           <button className="px-3 py-1 border rounded" onClick={undo}>Undo</button>
           <button className="px-3 py-1 border rounded" onClick={redo}>Redo</button>
@@ -29,7 +29,9 @@ export default function BuilderPage() {
         <Toolbar />
       </div>
       <GridCanvas />
-      <StatsPanel />
+      <div className="sticky top-4 h-fit max-h-[calc(100vh-2rem)]">
+        <StatsPanel />
+      </div>
     </div>
   );
 }
