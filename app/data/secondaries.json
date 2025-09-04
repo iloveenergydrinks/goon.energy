@@ -1,181 +1,243 @@
 [
   {
-    "id": "Ram Spikes",
+    "id": "ram_spikes",
+    "name": "Ram Spikes",
     "category": "Offensive",
-    "delta": { "dP": -0.05, "dA": 0.10, "dU": -0.05 },
-    "reshape": { "ammo_bias": 1 },
-    "description": "Close-range armor breach by collision. Converts kinetic energy into penetration.",
+    "description": "Close-range armor breach by collision. Converts kinetic energy into penetration",
+    "deltaPowerSlots": -2,
+    "deltaAmmoSlots": 0,
+    "deltaUtilitySlots": 2,
+    "powerDraw": 5,
+    "heatGeneration": 3,
+    "tags": ["offensive", "close-combat", "kinetic", "collision"],
     "baseStats": {
-      "damage": 20,
-      "armor": 10,
-      "speed": -5
+      "damage": 40,
+      "penetration": 30,
+      "speed": 5
     }
   },
   {
-    "id": "Boarding Pod Launchers",
+    "id": "boarding_pods",
+    "name": "Boarding Pod Launchers",
     "category": "Offensive",
-    "delta": { "dP": -0.05, "dA": 0.10, "dU": -0.05 },
-    "reshape": { "ammo_bias": 1 },
-    "description": "Send sabotage units to disable enemy subsystems from within.",
+    "description": "Send sabotage units to disable enemy subsystems from within",
+    "deltaPowerSlots": -1,
+    "deltaAmmoSlots": 3,
+    "deltaUtilitySlots": -2,
+    "powerDraw": 12,
+    "heatGeneration": 8,
+    "tags": ["offensive", "sabotage", "boarding", "tactical"],
     "baseStats": {
-      "damage": 10,
-      "disruption": 20,
-      "speed": -3
+      "boardingStrength": 25,
+      "range": 40
     }
   },
   {
-    "id": "Hull Peeler Cannons",
+    "id": "hull_peeler",
+    "name": "Hull Peeler Cannons",
     "category": "Offensive",
-    "delta": { "dP": -0.05, "dA": 0.10, "dU": -0.05 },
-    "reshape": { "ammo_bias": 1 },
-    "description": "Strips armor plates to increase vulnerability to follow-up strikes.",
+    "description": "Strips armor plates to increase vulnerability to follow-up strikes",
+    "deltaPowerSlots": 2,
+    "deltaAmmoSlots": 2,
+    "deltaUtilitySlots": -4,
+    "powerDraw": 20,
+    "heatGeneration": 15,
+    "tags": ["offensive", "armor-stripping", "debuff"],
     "baseStats": {
-      "damage": 15,
-      "armorPenetration": 25,
-      "rateOfFire": 5
+      "armorShred": 35,
+      "damage": 20
     }
   },
   {
-    "id": "Molten Slag Projector",
+    "id": "molten_slag",
+    "name": "Molten Slag Projector",
     "category": "Offensive",
-    "delta": { "dP": -0.05, "dA": 0.10, "dU": -0.05 },
-    "reshape": { "ammo_bias": 1 },
-    "description": "Sustained damage over time on exposed hull sections.",
+    "description": "Sustained damage over time on exposed hull sections",
+    "deltaPowerSlots": 3,
+    "deltaAmmoSlots": -2,
+    "deltaUtilitySlots": -1,
+    "powerDraw": 25,
+    "heatGeneration": 30,
+    "tags": ["offensive", "dot", "sustained", "molten"],
     "baseStats": {
-      "damage": 25,
-      "heatGeneration": 15,
-      "range": -10
+      "dotDamage": 15,
+      "dotDuration": 8
     }
   },
   {
-    "id": "Magazine Disruptors",
+    "id": "magazine_disruptor",
+    "name": "Magazine Disruptors",
     "category": "Offensive",
-    "delta": { "dP": -0.05, "dA": 0.10, "dU": -0.05 },
-    "reshape": { "ammo_bias": 2 },
-    "description": "Attempts to detonate enemy ammo stores for catastrophic damage.",
+    "description": "Attempts to detonate enemy ammo stores for catastrophic damage",
+    "deltaPowerSlots": 1,
+    "deltaAmmoSlots": -3,
+    "deltaUtilitySlots": 2,
+    "powerDraw": 18,
+    "heatGeneration": 12,
+    "tags": ["offensive", "critical", "explosive", "high-risk"],
     "baseStats": {
-      "criticalChance": 15,
-      "damage": 10,
-      "tracking": 5
+      "critChance": 20,
+      "critDamage": 100
     }
   },
   {
-    "id": "Tow Harpoons",
+    "id": "tow_harpoons",
+    "name": "Tow Harpoons",
     "category": "Utility",
-    "delta": { "dP": -0.05, "dA": -0.10, "dU": 0.15 },
-    "reshape": { "edge_utility": 2 },
-    "description": "Tether and pull smaller ships into optimal firing arcs.",
+    "description": "Tether and pull smaller ships into optimal firing arcs",
+    "deltaPowerSlots": -1,
+    "deltaAmmoSlots": 1,
+    "deltaUtilitySlots": 0,
+    "powerDraw": 10,
+    "heatGeneration": 5,
+    "tags": ["utility", "control", "positioning", "tether"],
     "baseStats": {
-      "range": 10,
-      "tracking": 5,
-      "speed": -3
+      "pullStrength": 30,
+      "range": 60
     }
   },
   {
-    "id": "Grav Scalers",
+    "id": "grav_scalers",
+    "name": "Grav Scalers",
     "category": "Utility",
-    "delta": { "dP": -0.05, "dA": -0.10, "dU": 0.15 },
-    "reshape": { "edge_utility": 2 },
-    "description": "Force enemy pitch/roll to break their firing solutions.",
+    "description": "Force enemy pitch/roll to break their firing solutions",
+    "deltaPowerSlots": 2,
+    "deltaAmmoSlots": -4,
+    "deltaUtilitySlots": 2,
+    "powerDraw": 22,
+    "heatGeneration": 18,
+    "tags": ["utility", "disruption", "gravity", "control"],
+    "baseStats": {
+      "disruptionStrength": 40,
+      "accuracy": -15
+    }
+  },
+  {
+    "id": "lightwell_array",
+    "name": "Lightwell Array",
+    "category": "Utility",
+    "description": "Blinds optics and disrupts visual targeting systems",
+    "deltaPowerSlots": 3,
+    "deltaAmmoSlots": -3,
+    "deltaUtilitySlots": 0,
+    "powerDraw": 15,
+    "heatGeneration": 10,
+    "tags": ["utility", "blinding", "optical", "disruption"],
+    "baseStats": {
+      "blindDuration": 3,
+      "enemyAccuracy": -20
+    }
+  },
+  {
+    "id": "sensor_ghost",
+    "name": "Sensor Ghost Net",
+    "category": "Utility",
+    "description": "Creates flickering sensor returns to mask true position",
+    "deltaPowerSlots": 0,
+    "deltaAmmoSlots": -2,
+    "deltaUtilitySlots": 2,
+    "powerDraw": 12,
+    "heatGeneration": 8,
+    "tags": ["utility", "stealth", "decoy", "sensor"],
     "baseStats": {
       "evasion": 15,
-      "traverseSpeed": 10,
-      "powerDraw": 10
+      "decoyCount": 3
     }
   },
   {
-    "id": "Lightwell Array",
+    "id": "beacon_lashers",
+    "name": "Beacon Lashers",
     "category": "Utility",
-    "delta": { "dP": -0.05, "dA": -0.10, "dU": 0.15 },
-    "reshape": { "edge_utility": 1 },
-    "description": "Blinds optics and disrupts visual targeting systems.",
+    "description": "Tags enemies for ally tracking through terrain and stealth",
+    "deltaPowerSlots": -1,
+    "deltaAmmoSlots": 0,
+    "deltaUtilitySlots": 1,
+    "powerDraw": 8,
+    "heatGeneration": 4,
+    "tags": ["utility", "tracking", "support", "recon"],
     "baseStats": {
-      "disruption": 15,
-      "evasion": 10,
-      "range": 5
+      "trackingBonus": 25,
+      "lockRange": 30
     }
   },
   {
-    "id": "Sensor Ghost Net",
-    "category": "Utility",
-    "delta": { "dP": -0.05, "dA": -0.10, "dU": 0.15 },
-    "reshape": { "edge_utility": 2 },
-    "description": "Creates flickering sensor returns to mask true position.",
-    "baseStats": {
-      "evasion": 20,
-      "sensorStrength": -10,
-      "ecm": 15
-    }
-  },
-  {
-    "id": "Beacon Lashers",
-    "category": "Utility",
-    "delta": { "dP": -0.05, "dA": -0.10, "dU": 0.15 },
-    "reshape": { "edge_utility": 1 },
-    "description": "Tags enemies for ally tracking through terrain and stealth.",
-    "baseStats": {
-      "sensorStrength": 20,
-      "lockTime": -0.5,
-      "range": 15
-    }
-  },
-  {
-    "id": "Shrapnel Dispersers",
+    "id": "shrapnel_dispersers",
+    "name": "Shrapnel Dispersers",
     "category": "Defensive",
-    "delta": { "dP": 0.05, "dA": 0.05, "dU": -0.10 },
-    "reshape": { "inner_utility": 1 },
-    "description": "Shreds incoming missiles and light craft with area denial bursts.",
+    "description": "Shreds incoming missiles and light craft with area denial bursts",
+    "deltaPowerSlots": -2,
+    "deltaAmmoSlots": 4,
+    "deltaUtilitySlots": -2,
+    "powerDraw": 10,
+    "heatGeneration": 12,
+    "tags": ["defensive", "point-defense", "area-denial", "anti-missile"],
     "baseStats": {
       "pointDefense": 30,
-      "armor": 5,
-      "damage": 5
+      "rofBonus": 10
     }
   },
   {
-    "id": "Hull Cooling Arrays",
+    "id": "hull_cooling",
+    "name": "Hull Cooling Arrays",
     "category": "Defensive",
-    "delta": { "dP": 0.10, "dA": -0.05, "dU": -0.05 },
-    "reshape": { "inner_utility": 1 },
-    "description": "Reduces overheating to sustain higher rate of fire.",
+    "description": "Reduces overheating to sustain higher rate of fire",
+    "deltaPowerSlots": 2,
+    "deltaAmmoSlots": -3,
+    "deltaUtilitySlots": 1,
+    "powerDraw": 5,
+    "heatGeneration": -15,
+    "tags": ["defensive", "cooling", "sustained-fire", "heat-management"],
     "baseStats": {
-      "heatCapacity": 30,
-      "rateOfFire": 5
+      "heatSink": 25,
+      "rofBonus": 15
     }
   },
   {
-    "id": "Collision Mines",
+    "id": "collision_mines",
+    "name": "Collision Mines",
     "category": "Defensive",
-    "delta": { "dP": 0.05, "dA": 0.05, "dU": -0.10 },
-    "reshape": { "inner_utility": 1 },
-    "description": "Deploy dense spiked drones to punish pursuers.",
+    "description": "Deploy dense spiked drones to punish pursuers",
+    "deltaPowerSlots": -1,
+    "deltaAmmoSlots": 3,
+    "deltaUtilitySlots": -2,
+    "powerDraw": 12,
+    "heatGeneration": 8,
+    "tags": ["defensive", "mines", "area-denial", "pursuit-deterrent"],
     "baseStats": {
-      "damage": 8,
-      "armor": 10,
-      "speed": -5
+      "mineDamage": 60,
+      "mineCount": 5
     }
   },
   {
-    "id": "Armor Slough Charges",
+    "id": "armor_slough",
+    "name": "Armor Slough Charges",
     "category": "Defensive",
-    "delta": { "dP": 0.10, "dA": -0.05, "dU": -0.05 },
-    "reshape": { "inner_utility": 1 },
-    "description": "Ejects damaged plating to prevent deeper penetration.",
+    "description": "Ejects damaged plating to prevent deeper penetration",
+    "deltaPowerSlots": 0,
+    "deltaAmmoSlots": 0,
+    "deltaUtilitySlots": 0,
+    "powerDraw": 8,
+    "heatGeneration": 5,
+    "tags": ["defensive", "reactive-armor", "damage-mitigation"],
     "baseStats": {
-      "armor": -10,
-      "speed": 10,
-      "evasion": 8
+      "damageReduction": 20,
+      "armor": -10
     }
   },
   {
-    "id": "Kinetic Bump Jets",
+    "id": "kinetic_jets",
+    "name": "Kinetic Bump Jets",
     "category": "Defensive",
-    "delta": { "dP": 0.05, "dA": -0.10, "dU": 0.05 },
-    "reshape": { "edge_utility": 1 },
-    "description": "Short directional thrust bursts to dodge or misalign enemy turrets.",
+    "description": "Short directional thrust bursts to dodge or misalign enemy turrets",
+    "deltaPowerSlots": 1,
+    "deltaAmmoSlots": -2,
+    "deltaUtilitySlots": 1,
+    "powerDraw": 15,
+    "heatGeneration": 10,
+    "tags": ["defensive", "evasion", "mobility", "thrust"],
     "baseStats": {
-      "evasion": 12,
-      "speed": 8,
-      "traverseSpeed": 5
+      "evasion": 20,
+      "mobility": 15
     }
   }
 ]

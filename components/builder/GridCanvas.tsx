@@ -2,9 +2,7 @@
 import { useFittingStore } from "@/store/useFittingStore";
 import { SLOT_COLORS } from "@/lib/colors";
 import { useEffect } from "react";
-import { useMemo } from "react";
-import { getCoveredIndices, rotateOffsets } from "@/lib/shapes";
-import type { ModuleDef } from "@/types/fitting";
+import { rotateOffsets } from "@/lib/shapes";
 import { canPlace } from "@/lib/fit/canPlace";
 
 export default function GridCanvas() {
@@ -63,11 +61,28 @@ export default function GridCanvas() {
       }
     }
   }
+  
+  // Get ghost cells for hover preview
+  const ghostCells = new Set<number>();
+  if (draggingModule && hoverCell) {
+    const rotated = rotateOffsets(draggingModule.shape.cells, ghostRotation);
+    for (const { dr, dc } of rotated) {
+      const r = hoverCell.r + dr;
+      const c = hoverCell.c + dc;
+      if (r >= 0 && c >= 0 && r < grid.rows && c < grid.cols) {
+        ghostCells.add(r * grid.cols + c);
+      }
+    }
+  }
+  
   return (
-    <div className="flex flex-col items-center py-4">
-      <div className="relative" style={{ width: grid.cols * cellSize, height: grid.rows * cellSize }}>
+    <div className="flex flex-col items-center">
+      <div 
+        className="relative rounded-lg overflow-hidden" 
+        style={{ width: grid.cols * cellSize, height: grid.rows * cellSize }}
+      >
         <div
-          className="grid"
+          className="grid bg-neutral-950"
           style={{ gridTemplateColumns: `repeat(${grid.cols}, ${cellSize}px)` }}
           onWheel={(e) => {
             if (draggingModuleId) {
@@ -79,115 +94,122 @@ export default function GridCanvas() {
             e.preventDefault();
             rotateGhost();
           }}
-          onMouseUp={() => {
-            if (!draggingModuleId || !hoverCell) return;
-            const mod: ModuleDef | undefined = modulesById[draggingModuleId];
-            if (!mod) return;
-            commitPlacement({ type: "add", placement: { moduleId: draggingModuleId, anchor: hoverCell, rotation: ghostRotation } });
-          }}
+          onMouseLeave={() => setHoverCell(null)}
         >
           {grid.cells.map((cell, idx) => {
-            const isOccupied = occupiedCells.has(idx);
-            const moduleAtCell = cellModuleMap.get(idx);
+            const r = Math.floor(idx / grid.cols);
+            const c = idx % grid.cols;
+            const hasModule = occupiedCells.has(idx);
+            const moduleId = cellModuleMap.get(idx);
+            const mod = moduleId ? modulesById[moduleId] : null;
+            const isGhost = ghostCells.has(idx);
+            const slotType = cell.slot;
+            const slotColor = slotType ? SLOT_COLORS[slotType] : null;
+            const isHole = cell.hole;
+            
+            // Determine cell background
+            let cellBg = "bg-neutral-900";
+            let borderColor = "border-neutral-800";
+            
+            if (isHole) {
+              cellBg = "bg-black";
+              borderColor = "border-black";
+            } else if (hasModule && mod) {
+              cellBg = "";
+              borderColor = "";
+            } else if (isGhost) {
+              if (isValidPlacement) {
+                cellBg = "bg-green-500/30";
+                borderColor = "border-green-500";
+              } else {
+                cellBg = "bg-red-500/30";
+                borderColor = "border-red-500";
+              }
+            } else if (draggingModule && slotType === draggingModule.slot) {
+              // Highlight matching slots when dragging
+              cellBg = "bg-blue-500/10";
+              borderColor = "border-blue-500/30";
+            }
+            
             return (
               <div
                 key={idx}
-                className={`border ${isOccupied ? 'border-neutral-600' : 'border-neutral-300'} relative`}
+                className={`
+                  ${cellBg} 
+                  border ${borderColor}
+                  transition-all duration-75
+                  relative
+                  ${!isHole && !hasModule ? 'hover:border-neutral-600' : ''}
+                  ${draggingModuleId && !isHole ? 'cursor-pointer' : ''}
+                `}
                 style={{
                   width: cellSize,
                   height: cellSize,
-                  background: cell.hole
-                    ? "#111"
-                    : isOccupied && cell.slot
-                    ? `${SLOT_COLORS[cell.slot]}99`
-                    : cell.slot
-                    ? `${SLOT_COLORS[cell.slot]}22`
-                    : "white",
+                  backgroundColor: hasModule && mod 
+                    ? `${SLOT_COLORS[mod.slot]}30`
+                    : undefined,
+                  borderColor: hasModule && mod
+                    ? `${SLOT_COLORS[mod.slot]}60`
+                    : undefined
                 }}
-                title={`${moduleAtCell || cell.slot || ""} r${cell.r},c${cell.c}`}
-                data-slot={cell.slot || ""}
-                onMouseEnter={() => setHoverCell({ r: cell.r, c: cell.c })}
-                onMouseLeave={() => setHoverCell(null)}
+                onMouseEnter={() => {
+                  if (draggingModuleId && !isHole) {
+                    setHoverCell({ r, c });
+                  }
+                }}
+                onClick={() => {
+                  if (draggingModuleId && hoverCell && r === hoverCell.r && c === hoverCell.c && isValidPlacement) {
+                    commitPlacement({
+                      type: "add",
+                      placement: {
+                        moduleId: draggingModuleId,
+                        anchor: { r, c },
+                        rotation: ghostRotation,
+                      },
+                    });
+                  }
+                }}
               >
-                {isOccupied && moduleAtCell && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="text-[8px] font-bold text-white bg-black/80 px-0.5 rounded border border-white/20">
-                      {moduleAtCell.substring(0, 3).toUpperCase()}
-                    </div>
+                {/* Slot Type Indicator */}
+                {!hasModule && slotType && !isGhost && (
+                  <div
+                    className="absolute inset-0 m-1 rounded opacity-20"
+                    style={{ backgroundColor: slotColor || undefined }}
+                  />
+                )}
+                
+                {/* Module Label */}
+                {hasModule && moduleId && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xs font-medium text-white/60 truncate px-1">
+                      {moduleId.slice(0, 3).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                
+                {/* Ghost Preview */}
+                {isGhost && draggingModule && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className={`text-xs font-medium ${isValidPlacement ? 'text-green-400' : 'text-red-400'}`}>
+                      {draggingModule.id.slice(0, 3).toUpperCase()}
+                    </span>
                   </div>
                 )}
               </div>
             );
           })}
         </div>
-        {draggingModule && hoverCell && (
-          <GhostOverlay cellSize={cellSize} isValid={isValidPlacement} />
-        )}
-        {draggingModule && (
-          <CompatibleSlots cellSize={cellSize} moduleSlot={draggingModule.slot} />
-        )}
       </div>
-    </div>
-  );
-}
-
-function GhostOverlay({ cellSize, isValid }: { cellSize: number; isValid: boolean }) {
-  const grid = useFittingStore((s) => s.grid)!;
-  const hoverCell = useFittingStore((s) => s.hoverCell)!;
-  const rotation = useFittingStore((s) => s.ghostRotation);
-  const moduleId = useFittingStore((s) => s.draggingModuleId)!;
-  const modulesById = useFittingStore((s) => s.modulesById);
-  const mod = modulesById[moduleId];
-  const indices = useMemo(() => getCoveredIndices(mod, hoverCell, rotation, grid.cols), [mod, hoverCell, rotation, grid.cols]);
-  const sizeDefaultBW: Record<string, number> = { S: 7, M: 12, L: 21 };
-  const cells = useMemo(() => {
-    return indices
-      .map((idx) => ({ idx, r: Math.floor(idx / grid.cols), c: idx % grid.cols }))
-      .filter(({ r, c }) => r >= 0 && c >= 0 && r < grid.rows && c < grid.cols)
-      .map(({ idx, r, c }) => {
-        const cell = grid.cells[idx];
-        const mismatch = !!(cell?.slot && mod.slot !== cell.slot);
-        return { idx, r, c, mismatch };
-      });
-  }, [indices, grid, mod]);
-  const mismatchFraction = cells.length > 0 ? cells.filter((c) => c.mismatch).length / cells.length : 0;
-  const baseBW = (mod.baseBW ?? sizeDefaultBW[mod.shape.sizeClass] ?? 10);
-  const bwMult = 1 + mismatchFraction;
-  const bwModule = Math.round(baseBW * bwMult);
-  const badgeText = `Mismatch: ${Math.round(mismatchFraction * 100)}% → BW ×${bwMult.toFixed(2)} (${bwModule})`;
-  const colorFor = (mismatch: boolean) =>
-    isValid ? (mismatch ? "bg-amber-500/40 outline-amber-600/60" : "bg-green-500/40 outline-green-600/60") : "bg-red-500/40 outline-red-600/60";
-  return (
-    <div className="pointer-events-none absolute inset-0">
-      {cells.map(({ idx, r, c, mismatch }) => (
-        <div
-          key={`ghost-${idx}`}
-          className={`${colorFor(mismatch)} outline outline-2`}
-          style={{ position: "absolute", top: r * cellSize, left: c * cellSize, width: cellSize, height: cellSize }}
-        />
-      ))}
-      <div className="absolute -top-6 left-0">
-        <div className="inline-flex items-center gap-1 text-[10px] font-medium text-white bg-black/80 px-2 py-0.5 rounded border border-white/20">
-          <span>{badgeText}</span>
+      
+      {draggingModuleId && (
+        <div className="mt-3 text-sm text-neutral-400 text-center">
+          <span className="font-medium">{draggingModuleId}</span> selected • 
+          Press <kbd className="px-1.5 py-0.5 mx-1 bg-neutral-800 rounded text-xs">R</kbd> to rotate • 
+          <span className={isValidPlacement ? "text-green-400" : "text-red-400"}>
+            {isValidPlacement ? "Click to place" : "Invalid placement"}
+          </span>
         </div>
-      </div>
+      )}
     </div>
   );
 }
-
-function CompatibleSlots({ cellSize, moduleSlot }: { cellSize: number; moduleSlot: string }) {
-  const grid = useFittingStore((s) => s.grid)!;
-  return (
-    <div className="pointer-events-none absolute inset-0">
-      {grid.cells.map((cell, idx) => {
-        if (cell.hole) return null;
-        const r = Math.floor(idx / grid.cols);
-        const c = idx % grid.cols;
-        const match = cell.slot === moduleSlot;
-        const cls = match ? "bg-blue-400/10 outline outline-1 outline-blue-400/30" : "bg-amber-400/5 outline outline-1 outline-amber-300/30";
-        return <div key={`compat-${idx}`} className={cls} style={{ position: "absolute", top: r * cellSize, left: c * cellSize, width: cellSize, height: cellSize }} />;
-      })}
-    </div>
-  );
-}
-

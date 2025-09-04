@@ -14,24 +14,31 @@ export interface ShipSize {
 
 export interface PrimaryArchetype {
   id: string;
-  shape: "long_narrow" | "wide" | "square" | "irregular" | "central_pockets";
-  baseRatio: { P: number; A: number; U: number };
+  name: string;
   description?: string;
   icon?: string;
   baseStats?: Record<string, number | undefined>;
+  // Requirements for hull compatibility
+  minPowerSlots: number;
+  minAmmoSlots?: number;
+  powerDraw: number;
+  heatGeneration: number;
+  tags: string[];
 }
 
 export interface SecondaryDef {
   id: string;
+  name: string;
   category: SecondaryCategory;
-  delta: { dP: number; dA: number; dU: number };
-  reshape?: {
-    ammo_bias?: number;
-    edge_utility?: number;
-    inner_utility?: number;
-  };
   description?: string;
   baseStats?: Record<string, number | undefined>;
+  // Modifies hull requirements
+  deltaPowerSlots: number;
+  deltaAmmoSlots: number;
+  deltaUtilitySlots: number;
+  powerDraw: number;
+  heatGeneration: number;
+  tags: string[];
 }
 
 export interface GridCell {
@@ -41,15 +48,39 @@ export interface GridCell {
   hole?: boolean;
 }
 
+export interface Hull {
+  id: string;
+  name: string;
+  description?: string;
+  
+  // Grid definition with predefined slots
+  grid: {
+    rows: number;
+    cols: number;
+    slots: Array<{
+      r: number;
+      c: number;
+      type: SlotType;
+    }>;
+  };
+  
+  // Capabilities
+  powerCapacity: number;
+  heatDissipation: number;
+  bandwidthLimit: number;
+  baseStats?: Record<string, number | undefined>;
+  
+  // Compatibility
+  compatibleTags?: string[];
+  incompatibleTags?: string[];
+  preferredWeapons?: string[];
+}
+
 export interface Grid {
   rows: number;
   cols: number;
   cells: GridCell[];
-  meta: {
-    ratio: { P: number; A: number; U: number };
-    reshape: Record<string, number>;
-    seed: string;
-  };
+  hullId: string;
 }
 
 export interface ModuleShapeCellOffset {
@@ -101,8 +132,7 @@ export interface PlacedModule {
 export interface Fit {
   id?: string;
   name: string;
-  seed: string;
-  sizeId: ShipSize["id"];
+  hullId: string;
   primaryId: string;
   secondaryIds: string[];
   grid: Grid;
@@ -115,4 +145,5 @@ export type ModulesById = Record<string, ModuleDef>;
 export type PrimariesById = Record<string, PrimaryArchetype>;
 export type SecondariesById = Record<string, SecondaryDef>;
 export type ShipSizesById = Record<string, ShipSize>;
+export type HullsById = Record<string, Hull>;
 

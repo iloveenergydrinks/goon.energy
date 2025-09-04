@@ -1,177 +1,206 @@
 [
   {
-    "id": "Railgun Battery",
-    "shape": "long_narrow",
-    "baseRatio": { "P": 0.60, "A": 0.25, "U": 0.15 },
-    "description": "Long-range precision strikes with massive alpha damage. Requires sustained lock for progressive accuracy bonus.",
-    "icon": "railgun.svg",
+    "id": "railgun",
+    "name": "Railgun Battery",
+    "description": "Long-range precision strikes with high alpha damage and bright, piercing energy trails",
+    "minPowerSlots": 6,
+    "minAmmoSlots": 4,
+    "powerDraw": 30,
+    "heatGeneration": 25,
+    "tags": ["long-range", "precision", "frontal-combat", "high-alpha"],
     "baseStats": {
-      "damage": 150,
-      "range": 100,
-      "rateOfFire": 20,
-      "tracking": 30,
-      "traverseSpeed": 25,
-      "lockTime": 3.0,
-      "heatGeneration": 80,
-      "powerDraw": 100
+      "damage": 120,
+      "rateOfFire": 0.8,
+      "range": 180,
+      "tracking": 8,
+      "penetration": 25
     }
   },
   {
-    "id": "Plasma Cannons",
-    "shape": "square",
-    "baseRatio": { "P": 0.35, "A": 0.45, "U": 0.20 },
-    "description": "Close-mid range area damage with high heat generation. Melts armor on direct hits.",
-    "icon": "plasma.svg",
+    "id": "plasma",
+    "name": "Plasma Cannons",
+    "description": "Close-to-mid-range AoE with overheat risk, rewards reckless aggression with dark plasma visuals",
+    "minPowerSlots": 8,
+    "minAmmoSlots": 2,
+    "powerDraw": 35,
+    "heatGeneration": 45,
+    "tags": ["area-effect", "close-combat", "aggressive", "chaotic"],
+    "baseStats": {
+      "damage": 90,
+      "rateOfFire": 1.5,
+      "range": 70,
+      "tracking": 20,
+      "critChance": 15
+    }
+  },
+  {
+    "id": "missiles",
+    "name": "Guided Missiles",
+    "description": "Smart lock-on projectiles with curved trajectories for strategic strikes",
+    "minPowerSlots": 4,
+    "minAmmoSlots": 8,
+    "powerDraw": 20,
+    "heatGeneration": 15,
+    "tags": ["smart", "strategic", "long-range", "lock-on"],
     "baseStats": {
       "damage": 100,
-      "range": 50,
-      "rateOfFire": 40,
-      "tracking": 50,
-      "traverseSpeed": 40,
-      "lockTime": 2.0,
-      "heatGeneration": 120,
-      "powerDraw": 60
+      "rateOfFire": 1,
+      "range": 150,
+      "tracking": 30,
+      "lockTime": 2
     }
   },
   {
-    "id": "Guided Missiles",
-    "shape": "wide",
-    "baseRatio": { "P": 0.20, "A": 0.65, "U": 0.15 },
-    "description": "Smart munitions with flexible trajectories. Can track targets outside direct firing arcs.",
-    "icon": "missiles.svg",
+    "id": "repair",
+    "name": "Repair Drones",
+    "description": "Heals allies with deployable autonomous drones and soothing energy effects",
+    "minPowerSlots": 5,
+    "minAmmoSlots": 0,
+    "powerDraw": 25,
+    "heatGeneration": 10,
+    "tags": ["support", "healing", "defensive", "drone"],
+    "baseStats": {
+      "damage": 0,
+      "repairRate": 40,
+      "range": 80,
+      "droneControl": 4,
+      "droneRepair": 20
+    }
+  },
+  {
+    "id": "emp",
+    "name": "EMP Disruptors",
+    "description": "Close-range disruption that temporarily disables enemy systems with electric bursts",
+    "minPowerSlots": 7,
+    "minAmmoSlots": 0,
+    "powerDraw": 40,
+    "heatGeneration": 30,
+    "tags": ["disruption", "close-combat", "high-risk", "tactical"],
+    "baseStats": {
+      "damage": 50,
+      "rateOfFire": 1.2,
+      "range": 60,
+      "ecm": 25,
+      "lockStrength": -15
+    }
+  },
+  {
+    "id": "scanner",
+    "name": "Scanning Array",
+    "description": "Reveals hidden enemies and resources with radar-style pulses",
+    "minPowerSlots": 4,
+    "minAmmoSlots": 0,
+    "powerDraw": 15,
+    "heatGeneration": 5,
+    "tags": ["information", "utility", "passive", "support"],
+    "baseStats": {
+      "damage": 0,
+      "lockRange": 50,
+      "sensorStrength": 30,
+      "tracking": 15,
+      "range": 200
+    }
+  },
+  {
+    "id": "laser",
+    "name": "Laser Batteries",
+    "description": "Reliable mid-range DPS with continuous beam visuals and good accuracy",
+    "minPowerSlots": 10,
+    "minAmmoSlots": 0,
+    "powerDraw": 45,
+    "heatGeneration": 35,
+    "tags": ["energy", "sustained-fire", "stable", "accurate"],
     "baseStats": {
       "damage": 80,
-      "range": 80,
-      "rateOfFire": 30,
-      "tracking": 70,
-      "traverseSpeed": 60,
-      "lockTime": 2.5,
-      "heatGeneration": 40,
-      "powerDraw": 40
+      "rateOfFire": 2,
+      "range": 100,
+      "tracking": 18,
+      "accuracy": 20
     }
   },
   {
-    "id": "Laser Batteries",
-    "shape": "long_narrow",
-    "baseRatio": { "P": 0.55, "A": 0.20, "U": 0.25 },
-    "description": "Sustained beam weapons with instant hit registration. No ammo required but high power draw.",
-    "icon": "laser.svg",
-    "baseStats": {
-      "damage": 60,
-      "range": 70,
-      "rateOfFire": 60,
-      "tracking": 45,
-      "traverseSpeed": 35,
-      "lockTime": 2.0,
-      "heatGeneration": 90,
-      "powerDraw": 120
-    }
-  },
-  {
-    "id": "Flak Cannons",
-    "shape": "wide",
-    "baseRatio": { "P": 0.25, "A": 0.60, "U": 0.15 },
-    "description": "Rapid-fire area denial weapons. Excellent against swarms and missiles.",
-    "icon": "flak.svg",
-    "baseStats": {
-      "damage": 30,
-      "range": 40,
-      "rateOfFire": 80,
-      "tracking": 60,
-      "traverseSpeed": 50,
-      "lockTime": 1.5,
-      "heatGeneration": 60,
-      "powerDraw": 50
-    }
-  },
-  {
-    "id": "Heavy Siege Cannons",
-    "shape": "central_pockets",
-    "baseRatio": { "P": 0.70, "A": 0.20, "U": 0.10 },
-    "description": "Extreme range artillery with slow traverse. Devastating alpha but requires stable platform.",
-    "icon": "siege.svg",
-    "baseStats": {
-      "damage": 200,
-      "range": 120,
-      "rateOfFire": 10,
-      "tracking": 20,
-      "traverseSpeed": 15,
-      "lockTime": 4.0,
-      "heatGeneration": 100,
-      "powerDraw": 150
-    }
-  },
-  {
-    "id": "EMP Disruptors",
-    "shape": "irregular",
-    "baseRatio": { "P": 0.30, "A": 0.20, "U": 0.50 },
-    "description": "Close-range electronic warfare weapons. Disrupts targeting and disables subsystems.",
-    "icon": "emp.svg",
-    "baseStats": {
-      "damage": 20,
-      "range": 30,
-      "rateOfFire": 50,
-      "tracking": 55,
-      "traverseSpeed": 45,
-      "lockTime": 1.0,
-      "heatGeneration": 50,
-      "powerDraw": 80,
-      "disruption": 50
-    }
-  },
-  {
-    "id": "Deployable Turrets",
-    "shape": "irregular",
-    "baseRatio": { "P": 0.30, "A": 0.40, "U": 0.30 },
-    "description": "Autonomous weapon platforms for zone control. Requires drone control modules.",
-    "icon": "turrets.svg",
+    "id": "flak",
+    "name": "Flak Cannons",
+    "description": "Burst anti-missile/drone fire creating area denial with sparkling explosions",
+    "minPowerSlots": 3,
+    "minAmmoSlots": 6,
+    "powerDraw": 15,
+    "heatGeneration": 20,
+    "tags": ["defensive", "area-denial", "erratic", "anti-projectile"],
     "baseStats": {
       "damage": 40,
-      "range": 60,
-      "rateOfFire": 35,
-      "tracking": 40,
-      "traverseSpeed": 30,
-      "lockTime": 2.5,
-      "heatGeneration": 30,
-      "powerDraw": 60,
-      "droneCapacity": 3
-    }
-  },
-  {
-    "id": "Scanning Array",
-    "shape": "wide",
-    "baseRatio": { "P": 0.20, "A": 0.15, "U": 0.65 },
-    "description": "Enhanced sensors for recon and target acquisition. Reduces lock time and increases range.",
-    "icon": "scanner.svg",
-    "baseStats": {
-      "damage": 0,
-      "range": 150,
-      "rateOfFire": 0,
-      "tracking": 80,
-      "traverseSpeed": 70,
-      "lockTime": 0.5,
-      "heatGeneration": 20,
-      "powerDraw": 40,
-      "sensorStrength": 100
-    }
-  },
-  {
-    "id": "Repair Drones",
-    "shape": "square",
-    "baseRatio": { "P": 0.25, "A": 0.25, "U": 0.50 },
-    "description": "Fleet support system for hull and subsystem repair. Can target allies or self.",
-    "icon": "repair.svg",
-    "baseStats": {
-      "damage": 0,
+      "rateOfFire": 4,
       "range": 50,
-      "rateOfFire": 0,
-      "tracking": 50,
-      "traverseSpeed": 40,
-      "lockTime": 1.5,
-      "heatGeneration": 30,
-      "powerDraw": 50,
-      "repairRate": 20,
-      "droneCapacity": 4
+      "tracking": 35,
+      "pointDefense": 20
+    }
+  },
+  {
+    "id": "siege",
+    "name": "Siege Cannons",
+    "description": "Ultra-long-range siege weapon with massive alpha damage that shifts battlefield flow",
+    "minPowerSlots": 8,
+    "minAmmoSlots": 6,
+    "powerDraw": 50,
+    "heatGeneration": 40,
+    "tags": ["siege", "ultra-long-range", "heavy", "imposing"],
+    "baseStats": {
+      "damage": 200,
+      "rateOfFire": 0.3,
+      "range": 250,
+      "tracking": 5,
+      "penetration": 40
+    }
+  },
+  {
+    "id": "shield",
+    "name": "Shield Projectors",
+    "description": "Protects allies with energy bubbles and shimmering dome effects",
+    "minPowerSlots": 8,
+    "minAmmoSlots": 0,
+    "powerDraw": 35,
+    "heatGeneration": 15,
+    "tags": ["support", "defensive", "energy", "protective"],
+    "baseStats": {
+      "damage": 0,
+      "shieldStrength": 100,
+      "shieldRadius": 60,
+      "powerGen": -10,
+      "armor": 50
+    }
+  },
+  {
+    "id": "recharge",
+    "name": "Recharge Fields",
+    "description": "Passive regeneration aura that supports allies over time with gentle wave visuals",
+    "minPowerSlots": 6,
+    "minAmmoSlots": 0,
+    "powerDraw": 20,
+    "heatGeneration": 8,
+    "tags": ["support", "passive", "regeneration", "aura"],
+    "baseStats": {
+      "damage": 0,
+      "repairRate": 25,
+      "powerGen": 15,
+      "heatSink": 20,
+      "range": 80
+    }
+  },
+  {
+    "id": "turrets",
+    "name": "Deployable Turrets",
+    "description": "Build area-control setups with tactical zone control",
+    "minPowerSlots": 5,
+    "minAmmoSlots": 4,
+    "powerDraw": 25,
+    "heatGeneration": 18,
+    "tags": ["tactical", "zone-control", "deployable", "mechanical"],
+    "baseStats": {
+      "damage": 60,
+      "rateOfFire": 1.5,
+      "range": 90,
+      "droneCapacity": 6,
+      "droneControl": 3
     }
   }
 ]

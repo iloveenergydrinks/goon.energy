@@ -58,16 +58,16 @@ function getStatColor(key: string, value: number): string {
   const negativeStats = ["lockTime", "powerDraw", "heatGeneration"];
   
   if (negativeStats.includes(key)) {
-    if (value <= 50) return "text-green-600";
-    if (value <= 100) return "text-yellow-600";
-    return "text-red-600";
+    if (value <= 50) return "text-green-400";
+    if (value <= 100) return "text-yellow-400";
+    return "text-red-400";
   }
   
   // For positive stats, higher is better
-  if (value >= 100) return "text-green-600";
-  if (value >= 50) return "text-yellow-600";
-  if (value >= 0) return "text-neutral-600";
-  return "text-red-600";
+  if (value >= 100) return "text-green-400";
+  if (value >= 50) return "text-yellow-400";
+  if (value >= 0) return "text-neutral-400";
+  return "text-red-400";
 }
 
 // Format stat value
@@ -80,56 +80,38 @@ function formatStat(key: string, value: number): string {
 export default function StatsPanel() {
   const derived = useFittingStore((s) => s.derivedStats);
   const placed = useFittingStore((s) => s.placed);
-  const primaryId = useFittingStore((s) => s.primaryId);
-  const secondaryIds = useFittingStore((s) => s.secondaryIds);
-  const sizeId = useFittingStore((s) => s.sizeId);
   
   return (
-    <div className="space-y-4 h-full overflow-y-auto">
-      {/* Ship Configuration */}
-      <div>
-        <div className="font-semibold mb-2 text-lg">Ship Configuration</div>
-        <div className="space-y-1 text-sm bg-neutral-100 border border-neutral-200 p-3 rounded">
-          <div className="flex justify-between">
-            <span className="text-neutral-600">Class:</span>
-            <span className="font-medium text-neutral-900">{sizeId || "None"}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-neutral-600">Primary:</span>
-            <span className="font-medium text-xs text-neutral-900">{primaryId || "None"}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-neutral-600">Secondaries:</span>
-            <span className="font-medium text-xs text-neutral-900">{secondaryIds.length > 0 ? secondaryIds.join(", ") : "None"}</span>
-          </div>
-        </div>
-      </div>
-
+    <div className="space-y-4 h-full overflow-y-auto max-h-[calc(100vh-20rem)]">
       {/* Bandwidth */}
       <div>
-        <div className="font-semibold mb-2 text-lg">Bandwidth</div>
-        <div className="space-y-2 bg-neutral-100 border border-neutral-200 p-3 rounded text-sm">
+        <div className="font-medium text-sm mb-2 text-neutral-400">Bandwidth</div>
+        <div className="space-y-2">
           {(() => {
             const bwTotal = derived["BW_total"] || 0;
             const bwLimit = derived["BW_limit"] || 0;
             const over = Math.max(0, bwTotal - bwLimit);
             const resp = derived["responsivenessMult"] || 1;
             const pct = bwLimit > 0 ? Math.min(100, Math.round((bwTotal / bwLimit) * 100)) : 0;
-            const color = pct <= 90 ? "bg-green-600" : pct <= 100 ? "bg-amber-500" : "bg-red-600";
+            const color = pct <= 90 ? "bg-green-500" : pct <= 100 ? "bg-yellow-500" : "bg-red-500";
             return (
               <div>
-                <div className="flex justify-between mb-1">
-                  <span className="text-neutral-600">BW</span>
-                  <span className="font-medium text-neutral-900">{bwTotal} / {bwLimit}</span>
+                <div className="flex justify-between mb-1 text-sm">
+                  <span className="text-neutral-500">BW Usage</span>
+                  <span className={pct > 100 ? "text-red-400 font-medium" : "text-neutral-300"}>
+                    {bwTotal} / {bwLimit}
+                  </span>
                 </div>
-                <div className="h-2 bg-neutral-200 rounded">
-                  <div className={`h-2 ${color} rounded`} style={{ width: `${Math.min(100, pct)}%` }} />
+                <div className="w-full bg-neutral-800 rounded-full h-2 overflow-hidden">
+                  <div 
+                    className={`${color} h-2 transition-all`} 
+                    style={{ width: `${pct}%` }}
+                  />
                 </div>
                 {over > 0 && (
-                  <div className="text-xs text-red-700 mt-1">Systems saturated (−{Math.round((1 - resp) * 100)}% responsiveness)</div>
-                )}
-                {derived["BW_mismatchAvg"] !== undefined && (
-                  <div className="text-xs text-neutral-600 mt-1">Avg mismatch: {derived["BW_mismatchAvg"]}%</div>
+                  <div className="text-xs text-red-400 mt-1">
+                    Overloaded by {over} - Responsiveness: {Math.round(resp * 100)}%
+                  </div>
                 )}
               </div>
             );
@@ -137,89 +119,69 @@ export default function StatsPanel() {
         </div>
       </div>
 
-      {/* Global Ship Stats */}
+      {/* Module Count */}
       <div>
-        <div className="font-semibold mb-2 text-lg">Ship Stats</div>
-        {Object.keys(derived).length === 0 ? (
-          <div className="text-sm text-neutral-500">Configure ship to see stats</div>
-        ) : (
-          <div className="space-y-3">
-            {Object.entries(statCategories).map(([category, stats]) => {
-              const categoryStats = stats.filter(stat => stat in derived);
-              if (categoryStats.length === 0) return null;
-              
-              return (
-                <div key={category}>
-                  <div className="text-xs font-medium text-neutral-500 mb-1">{category}</div>
-                  <div className="space-y-1 bg-neutral-100 border border-neutral-200 p-2 rounded">
-                    {categoryStats.map(stat => {
-                      const value = derived[stat];
-                      const displayName = statNames[stat] || stat;
-                      return (
-                        <div key={stat} className="flex justify-between items-center">
-                          <span className="text-xs text-neutral-600">{displayName}:</span>
-                          <span className={`text-sm font-medium ${getStatColor(stat, value)}`}>
-                            {formatStat(stat, value)}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-            
-            {/* Any uncategorized stats */}
-            {(() => {
-              const allCategorized = Object.values(statCategories).flat();
-              const uncategorized = Object.keys(derived).filter(k => !allCategorized.includes(k));
-              if (uncategorized.length === 0) return null;
-              
-              return (
-                <div>
-                  <div className="text-xs font-medium text-neutral-500 mb-1">Other</div>
-                  <div className="space-y-1 bg-neutral-100 border border-neutral-200 p-2 rounded">
-                    {uncategorized.map(stat => {
-                      const value = derived[stat];
-                      const displayName = statNames[stat] || stat;
-                      return (
-                        <div key={stat} className="flex justify-between items-center">
-                          <span className="text-xs text-neutral-600">{displayName}:</span>
-                          <span className={`text-sm font-medium ${getStatColor(stat, value)}`}>
-                            {formatStat(stat, value)}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })()}
+        <div className="font-medium text-sm mb-2 text-neutral-400">Module Status</div>
+        <div className="flex justify-between text-sm">
+          <span className="text-neutral-500">Modules Placed</span>
+          <span className="font-medium">{placed.length}</span>
+        </div>
+        {derived["BW_mismatchAvg"] > 0 && (
+          <div className="flex justify-between text-sm mt-1">
+            <span className="text-neutral-500">Slot Mismatch</span>
+            <span className="text-yellow-400">{derived["BW_mismatchAvg"]}%</span>
           </div>
         )}
       </div>
 
-      {/* Placed Modules */}
-      <div>
-        <div className="font-semibold mb-2 text-lg">Fitted Modules ({placed.length})</div>
-        <div className="space-y-1 text-sm">
-          {placed.length === 0 ? (
-            <div className="text-neutral-500">No modules fitted</div>
-          ) : (
-            <div className="bg-neutral-100 border border-neutral-200 p-2 rounded space-y-1">
-              {placed.map((p, idx) => {
-                return (
-                  <div key={idx} className="flex items-center gap-2 text-xs">
-                    <span className="w-6 font-mono text-neutral-500">#{idx + 1}</span>
-                    <span className="flex-1 text-neutral-900">{p.moduleId}</span>
-                    <span className="text-neutral-500">@{p.anchor.r},{p.anchor.c}</span>
-                  </div>
-                );
-              })}
+      {/* Derived Stats */}
+      {Object.entries(statCategories).map(([category, statKeys]) => {
+        const relevantStats = statKeys.filter(key => derived[key] !== undefined && derived[key] !== 0);
+        if (relevantStats.length === 0) return null;
+        
+        return (
+          <div key={category}>
+            <div className="font-medium text-sm mb-2 text-neutral-400">{category}</div>
+            <div className="space-y-1">
+              {relevantStats.map(key => (
+                <div key={key} className="flex justify-between text-sm">
+                  <span className="text-neutral-500">{statNames[key] || key}</span>
+                  <span className={getStatColor(key, derived[key])}>
+                    {formatStat(key, derived[key])}
+                  </span>
+                </div>
+              ))}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+        );
+      })}
+      
+      {/* Raw Stats (for any unmatched keys) */}
+      {(() => {
+        const allCategoryKeys = Object.values(statCategories).flat();
+        const uncategorized = Object.keys(derived).filter(
+          key => !allCategoryKeys.includes(key) && 
+                 !key.startsWith("BW_") && 
+                 key !== "responsivenessMult" &&
+                 derived[key] !== 0
+        );
+        
+        if (uncategorized.length === 0) return null;
+        
+        return (
+          <div>
+            <div className="font-medium text-sm mb-2 text-neutral-400">Other</div>
+            <div className="space-y-1">
+              {uncategorized.map(key => (
+                <div key={key} className="flex justify-between text-sm">
+                  <span className="text-neutral-500">{statNames[key] || key}</span>
+                  <span className="text-neutral-300">{formatStat(key, derived[key])}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
