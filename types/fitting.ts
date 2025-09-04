@@ -22,7 +22,6 @@ export interface PrimaryArchetype {
   minPowerSlots: number;
   minAmmoSlots?: number;
   powerDraw: number;
-  heatGeneration: number;
   tags: string[];
 }
 
@@ -37,7 +36,6 @@ export interface SecondaryDef {
   deltaAmmoSlots: number;
   deltaUtilitySlots: number;
   powerDraw: number;
-  heatGeneration: number;
   tags: string[];
 }
 
@@ -66,7 +64,6 @@ export interface Hull {
   
   // Capabilities
   powerCapacity: number;
-  heatDissipation: number;
   bandwidthLimit: number;
   baseStats?: Record<string, number | undefined>;
   
@@ -100,7 +97,6 @@ export interface ModuleDef {
   slot: SlotType;
   shape: ModuleShape;
   stats: Partial<{
-    heatSink: number;
     powerGen: number;
     capBuffer: number;
     rofBonus: number;
@@ -120,7 +116,6 @@ export interface ModuleDef {
   }>;
   description?: string;
   baseBW?: number;
-  baseHeat?: number;
 }
 
 export interface PlacedModule {

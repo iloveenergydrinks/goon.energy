@@ -1,39 +1,35 @@
 [
   {
-    "id": "Heat Sink Banks",
+    "id": "Power Stabilizers",
     "slot": "Power",
-    "shape": { "id": "HeatSink_1x1", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
-    "stats": { "heatSink": 15 },
-    "description": "Passively lowers weapon heat buildup",
-    "baseBW": 6,
-    "baseHeat": 2
+    "shape": { "id": "PowerStab_1x1", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
+    "stats": { "powerGen": 10 },
+    "description": "Stabilizes power output fluctuations",
+    "baseBW": 6
   },
   {
-    "id": "Thermal Siphons",
+    "id": "Energy Redistributor",
     "slot": "Power",
-    "shape": { "id": "ThermalSiphon_1x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 } ], "rotations": [0,90], "sizeClass": "M" },
-    "stats": { "heatSink": 10, "powerGen": 5 },
-    "description": "Redirects waste heat to secondary systems",
-    "baseBW": 12,
-    "baseHeat": 3
+    "shape": { "id": "EnergyRedist_1x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 } ], "rotations": [0,90], "sizeClass": "M" },
+    "stats": { "powerGen": 15 },
+    "description": "Redirects power to critical systems",
+    "baseBW": 12
   },
   {
-    "id": "Phase Coolers",
+    "id": "Surge Protectors",
     "slot": "Power",
-    "shape": { "id": "PhaseCooler_2x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 }, { "dr": 1, "dc": 0 }, { "dr": 1, "dc": 1 } ], "rotations": [0], "sizeClass": "L" },
-    "stats": { "heatSink": 30 },
-    "description": "Emergency burst cooling system",
-    "baseBW": 20,
-    "baseHeat": 4
+    "shape": { "id": "SurgeProtect_2x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 }, { "dr": 1, "dc": 0 }, { "dr": 1, "dc": 1 } ], "rotations": [0], "sizeClass": "L" },
+    "stats": { "powerGen": 8 },
+    "description": "Protects systems from overload",
+    "baseBW": 20
   },
   {
     "id": "Auxiliary Reactor",
     "slot": "Power",
     "shape": { "id": "AuxReactor_2x1", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 1, "dc": 0 } ], "rotations": [0,90], "sizeClass": "M" },
-    "stats": { "powerGen": 20, "heatSink": -5 },
-    "description": "Boosts power output at cost of heat",
-    "baseBW": 12,
-    "baseHeat": 5
+    "stats": { "powerGen": 25 },
+    "description": "Boosts overall power output",
+    "baseBW": 12
   },
   {
     "id": "Flux Capacitors",

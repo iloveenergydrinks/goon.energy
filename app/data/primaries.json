@@ -6,7 +6,6 @@
     "minPowerSlots": 6,
     "minAmmoSlots": 4,
     "powerDraw": 30,
-    "heatGeneration": 25,
     "tags": ["long-range", "precision", "frontal-combat", "high-alpha"],
     "baseStats": {
       "damage": 120,
@@ -19,11 +18,10 @@
   {
     "id": "plasma",
     "name": "Plasma Cannons",
-    "description": "Close-to-mid-range AoE with overheat risk, rewards reckless aggression with dark plasma visuals",
+    "description": "Close-to-mid-range AoE, rewards reckless aggression with dark plasma visuals",
     "minPowerSlots": 8,
     "minAmmoSlots": 2,
     "powerDraw": 35,
-    "heatGeneration": 45,
     "tags": ["area-effect", "close-combat", "aggressive", "chaotic"],
     "baseStats": {
       "damage": 90,
@@ -40,7 +38,6 @@
     "minPowerSlots": 4,
     "minAmmoSlots": 8,
     "powerDraw": 20,
-    "heatGeneration": 15,
     "tags": ["smart", "strategic", "long-range", "lock-on"],
     "baseStats": {
       "damage": 100,
@@ -57,7 +54,6 @@
     "minPowerSlots": 5,
     "minAmmoSlots": 0,
     "powerDraw": 25,
-    "heatGeneration": 10,
     "tags": ["support", "healing", "defensive", "drone"],
     "baseStats": {
       "damage": 0,
@@ -74,7 +70,6 @@
     "minPowerSlots": 7,
     "minAmmoSlots": 0,
     "powerDraw": 40,
-    "heatGeneration": 30,
     "tags": ["disruption", "close-combat", "high-risk", "tactical"],
     "baseStats": {
       "damage": 50,
@@ -91,7 +86,6 @@
     "minPowerSlots": 4,
     "minAmmoSlots": 0,
     "powerDraw": 15,
-    "heatGeneration": 5,
     "tags": ["information", "utility", "passive", "support"],
     "baseStats": {
       "damage": 0,
@@ -108,7 +102,6 @@
     "minPowerSlots": 10,
     "minAmmoSlots": 0,
     "powerDraw": 45,
-    "heatGeneration": 35,
     "tags": ["energy", "sustained-fire", "stable", "accurate"],
     "baseStats": {
       "damage": 80,
@@ -125,7 +118,6 @@
     "minPowerSlots": 3,
     "minAmmoSlots": 6,
     "powerDraw": 15,
-    "heatGeneration": 20,
     "tags": ["defensive", "area-denial", "erratic", "anti-projectile"],
     "baseStats": {
       "damage": 40,
@@ -142,7 +134,6 @@
     "minPowerSlots": 8,
     "minAmmoSlots": 6,
     "powerDraw": 50,
-    "heatGeneration": 40,
     "tags": ["siege", "ultra-long-range", "heavy", "imposing"],
     "baseStats": {
       "damage": 200,
@@ -159,7 +150,6 @@
     "minPowerSlots": 8,
     "minAmmoSlots": 0,
     "powerDraw": 35,
-    "heatGeneration": 15,
     "tags": ["support", "defensive", "energy", "protective"],
     "baseStats": {
       "damage": 0,
@@ -176,13 +166,11 @@
     "minPowerSlots": 6,
     "minAmmoSlots": 0,
     "powerDraw": 20,
-    "heatGeneration": 8,
     "tags": ["support", "passive", "regeneration", "aura"],
     "baseStats": {
       "damage": 0,
       "repairRate": 25,
       "powerGen": 15,
-      "heatSink": 20,
       "range": 80
     }
   },
@@ -193,7 +181,6 @@
     "minPowerSlots": 5,
     "minAmmoSlots": 4,
     "powerDraw": 25,
-    "heatGeneration": 18,
     "tags": ["tactical", "zone-control", "deployable", "mechanical"],
     "baseStats": {
       "damage": 60,

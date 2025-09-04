@@ -33,9 +33,6 @@ export default function PrimaryStep() {
                 <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded">
                   Power: {primary.powerDraw}
                 </span>
-                <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded">
-                  Heat: {primary.heatGeneration}
-                </span>
               </div>
             </div>
             <p className="text-sm text-neutral-400 mb-3">{primary.description}</p>

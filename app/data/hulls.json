@@ -4,7 +4,6 @@
     "name": "CNS Kestrel",
     "description": "Swift interceptor-class vessel designed for rapid strike operations",
     "powerCapacity": 60,
-    "heatDissipation": 40,
     "bandwidthLimit": 60,
     "baseStats": {
       "hull": 800,
@@ -41,7 +40,6 @@
     "name": "TRS Vindicator",
     "description": "Versatile assault cruiser built for sustained frontline engagements",
     "powerCapacity": 85,
-    "heatDissipation": 60,
     "bandwidthLimit": 85,
     "baseStats": {
       "hull": 1200,
@@ -87,7 +85,6 @@
     "name": "INS Basilisk",
     "description": "Artillery destroyer configured for long-range fire support",
     "powerCapacity": 70,
-    "heatDissipation": 50,
     "bandwidthLimit": 75,
     "baseStats": {
       "hull": 900,
@@ -135,7 +132,6 @@
     "name": "HMS Aegis",
     "description": "Fortress-class dreadnought with unparalleled defensive capabilities",
     "powerCapacity": 110,
-    "heatDissipation": 80,
     "bandwidthLimit": 110,
     "baseStats": {
       "hull": 1800,
@@ -183,7 +179,6 @@
     "name": "UNS Harbinger", 
     "description": "Command carrier equipped for fleet coordination and fighter operations",
     "powerCapacity": 95,
-    "heatDissipation": 70,
     "bandwidthLimit": 120,
     "baseStats": {
       "hull": 1500,
@@ -242,7 +237,6 @@
     "name": "SFS Phantom",
     "description": "Stealth corvette optimized for electronic warfare and ambush tactics",
     "powerCapacity": 55,
-    "heatDissipation": 45,
     "bandwidthLimit": 70,
     "baseStats": {
       "hull": 700,
@@ -281,7 +275,6 @@
     "name": "RNS Tempest",
     "description": "Storm-class battlecruiser built for overwhelming firepower",
     "powerCapacity": 100,
-    "heatDissipation": 75,
     "bandwidthLimit": 95,
     "baseStats": {
       "hull": 1400,

@@ -88,11 +88,6 @@ function getCompatibleHulls(
       secondaries.reduce((sum, s) => sum + s.powerDraw, 0);
     if (totalPower > hull.powerCapacity) return false;
     
-    // Check heat
-    const totalHeat = primary.heatGeneration + 
-      secondaries.reduce((sum, s) => sum + s.heatGeneration, 0);
-    if (totalHeat > hull.heatDissipation) return false;
-    
     // Check slot requirements
     const powerSlotsInGrid = hull.grid.slots.filter(s => s.type === "Power").length;
     const ammoSlotsInGrid = hull.grid.slots.filter(s => s.type === "Ammo").length;
@@ -221,10 +216,9 @@ export const useFittingStore = create<FittingState>((set, get) => ({
     const initialStats = computeDerivedStats(
       [],
       catalog.modulesById,
-      hull.id, // Pass hull ID instead of size ID
+      hull,
       selectedPrimaryId || undefined,
       selectedSecondaryIds,
-      undefined, // No longer using ship sizes
       catalog.primariesById,
       catalog.secondariesById,
       grid
@@ -288,10 +282,9 @@ export const useFittingStore = create<FittingState>((set, get) => ({
     const newStats = computeDerivedStats(
       updated.placed, 
       modulesById,
-      hull?.id,
+      hull,
       get().selectedPrimaryId || undefined,
       get().selectedSecondaryIds,
-      undefined, // No longer using ship sizes
       catalog.primariesById,
       catalog.secondariesById,
       grid
@@ -327,10 +320,9 @@ export const useFittingStore = create<FittingState>((set, get) => ({
     const newStats = computeDerivedStats(
       prev.placed, 
       modulesById,
-      hull?.id,
+      hull,
       get().selectedPrimaryId || undefined,
       get().selectedSecondaryIds,
-      undefined, // No longer using ship sizes
       catalog.primariesById,
       catalog.secondariesById,
       get().grid ?? undefined
@@ -364,10 +356,9 @@ export const useFittingStore = create<FittingState>((set, get) => ({
     const newStats = computeDerivedStats(
       next.placed, 
       modulesById,
-      hull?.id,
+      hull,
       get().selectedPrimaryId || undefined,
       get().selectedSecondaryIds,
-      undefined, // No longer using ship sizes
       catalog.primariesById,
       catalog.secondariesById,
       get().grid ?? undefined

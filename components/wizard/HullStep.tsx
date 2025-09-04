@@ -28,8 +28,6 @@ export default function HullStep() {
   // Calculate totals for display
   const totalPower = (primary?.powerDraw || 0) + 
     selectedSecondaries.reduce((sum, s) => sum + s.powerDraw, 0);
-  const totalHeat = (primary?.heatGeneration || 0) + 
-    selectedSecondaries.reduce((sum, s) => sum + s.heatGeneration, 0);
 
   if (compatibleHulls.length === 0) {
     return (
@@ -43,7 +41,6 @@ export default function HullStep() {
             </p>
             <ul className="text-sm text-neutral-500 mt-2 list-disc list-inside">
               <li>Power Capacity: {totalPower}</li>
-              <li>Heat Dissipation: {totalHeat}</li>
             </ul>
             <p className="text-sm text-neutral-400 mt-3">
               Try selecting different secondary weapons or a different primary weapon.
@@ -71,8 +68,7 @@ export default function HullStep() {
           {selectedSecondaries.length > 0 && ` with ${selectedSecondaries.map(s => s.name).join(' and ')}`}.
         </p>
         <div className="flex gap-4 mt-2 text-sm">
-          <span className="text-neutral-400">Total Power: <span className="text-red-400">{totalPower}</span></span>
-          <span className="text-neutral-400">Total Heat: <span className="text-orange-400">{totalHeat}</span></span>
+          <span className="text-neutral-400">Total Power Required: <span className="text-red-400">{totalPower}</span></span>
         </div>
       </div>
 
@@ -110,12 +106,6 @@ export default function HullStep() {
                     <span className="text-neutral-500">Power Capacity:</span>
                     <span className={totalPower <= hull.powerCapacity ? 'text-green-400' : 'text-red-400'}>
                       {hull.powerCapacity}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-500">Heat Dissipation:</span>
-                    <span className={totalHeat <= hull.heatDissipation ? 'text-green-400' : 'text-red-400'}>
-                      {hull.heatDissipation}
                     </span>
                   </div>
                   <div className="flex justify-between">

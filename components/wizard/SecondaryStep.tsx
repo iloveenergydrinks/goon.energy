@@ -59,9 +59,6 @@ export default function SecondaryStep() {
                   <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded">
                     Power: {secondary.powerDraw}
                   </span>
-                  <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded">
-                    Heat: {secondary.heatGeneration}
-                  </span>
                 </div>
               </div>
               <p className="text-sm text-neutral-400 mb-3">{secondary.description}</p>

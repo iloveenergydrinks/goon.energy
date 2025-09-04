@@ -8,7 +8,6 @@
     "deltaAmmoSlots": 0,
     "deltaUtilitySlots": 2,
     "powerDraw": 5,
-    "heatGeneration": 3,
     "tags": ["offensive", "close-combat", "kinetic", "collision"],
     "baseStats": {
       "damage": 40,
@@ -25,7 +24,6 @@
     "deltaAmmoSlots": 3,
     "deltaUtilitySlots": -2,
     "powerDraw": 12,
-    "heatGeneration": 8,
     "tags": ["offensive", "sabotage", "boarding", "tactical"],
     "baseStats": {
       "boardingStrength": 25,
@@ -41,7 +39,6 @@
     "deltaAmmoSlots": 2,
     "deltaUtilitySlots": -4,
     "powerDraw": 20,
-    "heatGeneration": 15,
     "tags": ["offensive", "armor-stripping", "debuff"],
     "baseStats": {
       "armorShred": 35,
@@ -57,7 +54,6 @@
     "deltaAmmoSlots": -2,
     "deltaUtilitySlots": -1,
     "powerDraw": 25,
-    "heatGeneration": 30,
     "tags": ["offensive", "dot", "sustained", "molten"],
     "baseStats": {
       "dotDamage": 15,
@@ -73,7 +69,6 @@
     "deltaAmmoSlots": -3,
     "deltaUtilitySlots": 2,
     "powerDraw": 18,
-    "heatGeneration": 12,
     "tags": ["offensive", "critical", "explosive", "high-risk"],
     "baseStats": {
       "critChance": 20,
@@ -89,7 +84,6 @@
     "deltaAmmoSlots": 1,
     "deltaUtilitySlots": 0,
     "powerDraw": 10,
-    "heatGeneration": 5,
     "tags": ["utility", "control", "positioning", "tether"],
     "baseStats": {
       "pullStrength": 30,
@@ -105,7 +99,6 @@
     "deltaAmmoSlots": -4,
     "deltaUtilitySlots": 2,
     "powerDraw": 22,
-    "heatGeneration": 18,
     "tags": ["utility", "disruption", "gravity", "control"],
     "baseStats": {
       "disruptionStrength": 40,
@@ -121,7 +114,6 @@
     "deltaAmmoSlots": -3,
     "deltaUtilitySlots": 0,
     "powerDraw": 15,
-    "heatGeneration": 10,
     "tags": ["utility", "blinding", "optical", "disruption"],
     "baseStats": {
       "blindDuration": 3,
@@ -137,7 +129,6 @@
     "deltaAmmoSlots": -2,
     "deltaUtilitySlots": 2,
     "powerDraw": 12,
-    "heatGeneration": 8,
     "tags": ["utility", "stealth", "decoy", "sensor"],
     "baseStats": {
       "evasion": 15,
@@ -153,7 +144,6 @@
     "deltaAmmoSlots": 0,
     "deltaUtilitySlots": 1,
     "powerDraw": 8,
-    "heatGeneration": 4,
     "tags": ["utility", "tracking", "support", "recon"],
     "baseStats": {
       "trackingBonus": 25,
@@ -169,7 +159,6 @@
     "deltaAmmoSlots": 4,
     "deltaUtilitySlots": -2,
     "powerDraw": 10,
-    "heatGeneration": 12,
     "tags": ["defensive", "point-defense", "area-denial", "anti-missile"],
     "baseStats": {
       "pointDefense": 30,
@@ -180,16 +169,15 @@
     "id": "hull_cooling",
     "name": "Hull Cooling Arrays",
     "category": "Defensive",
-    "description": "Reduces overheating to sustain higher rate of fire",
+    "description": "Advanced power management systems to sustain higher rate of fire",
     "deltaPowerSlots": 2,
     "deltaAmmoSlots": -3,
     "deltaUtilitySlots": 1,
     "powerDraw": 5,
-    "heatGeneration": -15,
-    "tags": ["defensive", "cooling", "sustained-fire", "heat-management"],
+    "tags": ["defensive", "power-management", "sustained-fire"],
     "baseStats": {
-      "heatSink": 25,
-      "rofBonus": 15
+      "rofBonus": 15,
+      "powerGen": 10
     }
   },
   {
@@ -201,7 +189,6 @@
     "deltaAmmoSlots": 3,
     "deltaUtilitySlots": -2,
     "powerDraw": 12,
-    "heatGeneration": 8,
     "tags": ["defensive", "mines", "area-denial", "pursuit-deterrent"],
     "baseStats": {
       "mineDamage": 60,
@@ -217,7 +204,6 @@
     "deltaAmmoSlots": 0,
     "deltaUtilitySlots": 0,
     "powerDraw": 8,
-    "heatGeneration": 5,
     "tags": ["defensive", "reactive-armor", "damage-mitigation"],
     "baseStats": {
       "damageReduction": 20,
@@ -233,7 +219,6 @@
     "deltaAmmoSlots": -2,
     "deltaUtilitySlots": 1,
     "powerDraw": 15,
-    "heatGeneration": 10,
     "tags": ["defensive", "evasion", "mobility", "thrust"],
     "baseStats": {
       "evasion": 20,

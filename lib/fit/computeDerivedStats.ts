@@ -4,7 +4,7 @@ import type {
   PlacedModule,
   PrimariesById,
   SecondariesById,
-  ShipSizesById
+  Hull
 } from "@/types/fitting";
 
 function fmt(num: number, integer: boolean): number {
@@ -14,10 +14,9 @@ function fmt(num: number, integer: boolean): number {
 export function computeDerivedStats(
   placed: PlacedModule[],
   modulesById: ModulesById,
-  sizeId?: string,
+  hull?: Hull,
   primaryId?: string,
   secondaryIds?: string[],
-  shipSizesById?: ShipSizesById,
   primariesById?: PrimariesById,
   secondariesById?: SecondariesById,
   grid?: { rows: number; cols: number; cells: Array<{ r: number; c: number; slot?: string; hole?: boolean }> },
@@ -25,14 +24,11 @@ export function computeDerivedStats(
 ): Record<string, number> {
   const totals: Record<string, number> = Object.create(null);
   
-  // Start with ship size base stats
-  if (sizeId && shipSizesById) {
-    const shipSize = shipSizesById[sizeId];
-    if (shipSize?.baseStats) {
-      for (const [k, v] of Object.entries(shipSize.baseStats)) {
-        if (v !== undefined) {
-          totals[k] = (totals[k] || 0) + v;
-        }
+  // Start with hull base stats
+  if (hull?.baseStats) {
+    for (const [k, v] of Object.entries(hull.baseStats)) {
+      if (v !== undefined) {
+        totals[k] = (totals[k] || 0) + v;
       }
     }
   }
@@ -67,25 +63,8 @@ export function computeDerivedStats(
   // Defaults
   const baseBwBySize: Record<string, number> = { S: 7, M: 12, L: 21 };
   const k_bw = bwConfig?.k_bw ?? 0.01;
-  // Determine BW limit from size
-  let bwLimit = 0;
-  if (sizeId && shipSizesById) {
-    const shipSize = shipSizesById[sizeId];
-    bwLimit = shipSize?.bwLimit ?? ((): number => {
-      switch (sizeId) {
-        case "Frigate":
-          return 60;
-        case "Destroyer":
-          return 85;
-        case "Cruiser":
-          return 110;
-        case "Capital":
-          return 150;
-        default:
-          return 85;
-      }
-    })();
-  }
+  // Get BW limit from hull
+  const bwLimit = hull?.bandwidthLimit ?? 85;
 
   let bwTotal = 0;
   let mismatchAccumulator = 0;
@@ -175,7 +154,7 @@ export function computeDerivedStats(
   const defaultStats = [
     "hull", "armor", "speed", "evasion", "damage", "range", 
     "rateOfFire", "tracking", "traverseSpeed", "lockTime",
-    "heatGeneration", "heatCapacity", "powerDraw", "powerCapacity",
+    "powerDraw", "powerCapacity",
     "ammoCapacity", "sensorStrength"
   ];
   
@@ -188,7 +167,7 @@ export function computeDerivedStats(
   // Format the output
   const integerKeys = new Set([
     "hull", "armor", "damage", "range", "ammoCap", "powerGen", 
-    "capBuffer", "heatCapacity", "powerCapacity", "ammoCapacity",
+    "capBuffer", "powerCapacity", "ammoCapacity",
     "droneControl", "droneCapacity"
   ]);
   

@@ -5,7 +5,7 @@ import { useFittingStore } from "@/store/useFittingStore";
 const statCategories = {
   "Combat": ["damage", "range", "rateOfFire", "tracking", "traverseSpeed", "lockTime", "criticalChance", "armorPenetration"],
   "Defense": ["hull", "armor", "evasion", "pointDefense", "ecm"],
-  "Power & Heat": ["powerDraw", "powerCapacity", "powerGen", "heatGeneration", "heatCapacity", "heatSink"],
+  "Power": ["powerDraw", "powerCapacity", "powerGen"],
   "Ammo & Logistics": ["ammoCapacity", "ammoCap", "reloadBonus", "repairRate"],
   "Mobility": ["speed", "mobility", "arcBonus"],
   "Sensors & Control": ["sensorStrength", "lockRange", "lockStrength", "disruption", "droneCapacity", "droneControl", "droneAI", "droneRepair"]
@@ -29,9 +29,6 @@ const statNames: Record<string, string> = {
   powerDraw: "Power Draw",
   powerCapacity: "Power Capacity",
   powerGen: "Power Generation",
-  heatGeneration: "Heat Generation",
-  heatCapacity: "Heat Capacity",
-  heatSink: "Heat Dissipation",
   ammoCapacity: "Ammo Capacity",
   ammoCap: "Ammo Storage",
   reloadBonus: "Reload Bonus %",
@@ -55,7 +52,7 @@ const statNames: Record<string, string> = {
 // Get color for stat value (green = good, yellow = medium, red = bad)
 function getStatColor(key: string, value: number): string {
   // For negative stats, lower is worse
-  const negativeStats = ["lockTime", "powerDraw", "heatGeneration"];
+  const negativeStats = ["lockTime", "powerDraw"];
   
   if (negativeStats.includes(key)) {
     if (value <= 50) return "text-green-400";
