@@ -32,10 +32,13 @@ model PrimarySystem {
   id            String   @id
   name          String
   description   String?
-  stats         Json?
-  powerCost     Int      @default(30)
-  compatibleTags String[] @default([])
-  archetypeFocus String?
+  icon          String?
+  baseStats     Json?
+  minPowerSlots Int      @default(0)
+  minAmmoSlots  Int?
+  powerDraw     Int      @default(30)
+  tags          String[] @default([])
+  archetypeFocus String[] @default([])
   tagAffinities Json?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -46,10 +49,13 @@ model SecondarySystem {
   name             String
   category         String
   description      String?
-  powerCost        Int      @default(10)
-  slotAdjustments  Json?
-  compatibleTags   String[] @default([])
-  archetypeFocus   String?
+  baseStats        Json?
+  deltaPowerSlots  Int      @default(0)
+  deltaAmmoSlots   Int      @default(0)
+  deltaUtilitySlots Int      @default(0)
+  powerDraw        Int      @default(10)
+  tags             String[] @default([])
+  archetypeFocus   String[] @default([])
   tagAffinities    Json?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -57,7 +63,7 @@ model SecondarySystem {
 
 model Module {
   id             String   @id
-  name           String?
+  familyId       String?
   familyName     String?
   variantTier    String?
   minHullSize    String?

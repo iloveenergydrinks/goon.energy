@@ -65,6 +65,7 @@ export function ModuleForm({ module, mode }: ModuleFormProps) {
           </div>
         </div>
 
+        {/* TODO: Add name field when database is updated
         <label className="block">
           <span className="text-xs uppercase tracking-[0.3em] text-neutral-500">Module Name</span>
           <input
@@ -75,6 +76,7 @@ export function ModuleForm({ module, mode }: ModuleFormProps) {
             placeholder="e.g., Power Stabilizers"
           />
         </label>
+        */}
 
         <label className="block">
           <span className="text-xs uppercase tracking-[0.3em] text-neutral-500">Slot Type</span>

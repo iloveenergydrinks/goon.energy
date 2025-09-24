@@ -56,10 +56,12 @@ async function seedFromJson() {
     prisma.hull.deleteMany(),
   ]);
 
-  await prisma.hull.createMany({ data: hullSeed as unknown as Parameters<typeof prisma.hull.createMany>[0]["data"] });
-  await prisma.primarySystem.createMany({ data: primarySeed as unknown as Parameters<typeof prisma.primarySystem.createMany>[0]["data"] });
-  await prisma.secondarySystem.createMany({ data: secondarySeed as unknown as Parameters<typeof prisma.secondarySystem.createMany>[0]["data"] });
-  await prisma.module.createMany({ data: moduleSeed as unknown as Parameters<typeof prisma.module.createMany>[0]["data"] });
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  await prisma.hull.createMany({ data: hullSeed as any });
+  await prisma.primarySystem.createMany({ data: primarySeed as any });
+  await prisma.secondarySystem.createMany({ data: secondarySeed as any });
+  await prisma.module.createMany({ data: moduleSeed as any });
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
 async function fetchCatalogRows() {
@@ -87,25 +89,38 @@ export async function loadCatalog(): Promise<Catalog> {
     primFromDb.map((p) =>
       applyPrimaryOverrides({
         ...p,
-        baseStats: p.baseStats as PrimaryArchetype["baseStats"],
-      })
+        baseStats: p.stats as PrimaryArchetype["baseStats"],
+        stats: p.stats as PrimaryArchetype["stats"],
+        minPowerSlots: 0, // Default value
+        powerDraw: p.powerCost || 30, // Use powerCost as powerDraw
+        tags: p.compatibleTags || [], // Use compatibleTags as tags
+      } as unknown as PrimaryArchetype)
     )
   );
   const secs = uniqueBy(
     secFromDb.map((s) =>
       applySecondaryOverrides({
         ...s,
-        baseStats: s.baseStats as SecondaryDef["baseStats"],
-      })
+        baseStats: {} as SecondaryDef["baseStats"],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        deltaPowerSlots: (s.slotAdjustments as any)?.Power || 0,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        deltaAmmoSlots: (s.slotAdjustments as any)?.Ammo || 0,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        deltaUtilitySlots: (s.slotAdjustments as any)?.Utility || 0,
+        powerDraw: s.powerCost || 10,
+        tags: s.compatibleTags || [],
+      } as unknown as SecondaryDef)
     )
   );
   const hls = uniqueBy(
     hullFromDb.map((h) =>
       applyHullOverrides({
         ...h,
+        description: h.description || undefined,
         baseStats: h.baseStats as Hull["baseStats"],
         grid: h.grid as Hull["grid"],
-      })
+      } as unknown as Hull)
     )
   );
   const mods = uniqueBy(
@@ -113,9 +128,11 @@ export async function loadCatalog(): Promise<Catalog> {
       modFromDb.map((m) =>
         applyModuleOverrides({
           ...m,
+          // name: m.name || undefined, // TODO: Add name to database
+          description: m.description || undefined,
           stats: m.stats as ModuleDef["stats"],
-          shape: m.shape as ModuleDef["shape"],
-        })
+          shape: m.shape as unknown as ModuleDef["shape"],
+        } as unknown as ModuleDef)
       )
     )
   );

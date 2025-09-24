@@ -30,7 +30,7 @@ export default async function PrimaryAdminPage() {
             {primaries.map((primary) => {
               const hasPower = primary.powerCost != null && primary.powerCost > 0;
               const hasArchetype = !!primary.archetypeFocus;
-              const hasStats = primary.stats && Object.keys(primary.stats).length > 0;
+              const hasStats = primary.stats && typeof primary.stats === 'object' && primary.stats !== null && Object.keys(primary.stats).length > 0;
               const hasBadges = hasPower || hasArchetype || hasStats;
               
               return (
@@ -50,9 +50,9 @@ export default async function PrimaryAdminPage() {
                               {primary.archetypeFocus}
                             </span>
                           )}
-                          {hasStats && Object.entries(primary.stats).slice(0, 2).map(([key, value]) => (
+                          {hasStats && primary.stats && typeof primary.stats === 'object' && primary.stats !== null && Object.entries(primary.stats).slice(0, 2).map(([key, value]) => (
                             <span key={key} className="px-2 py-0.5 text-xs rounded bg-neutral-800 text-neutral-400">
-                              {key}: {value}
+                              {key}: {String(value)}
                             </span>
                           ))}
                         </div>

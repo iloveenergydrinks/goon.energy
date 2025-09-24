@@ -20,12 +20,12 @@ interface HullOverride {
 }
 
 interface PrimaryOverride {
-  archetypeFocus?: ArchetypeId[];
+  archetypeFocus?: ArchetypeId | string;
   tagAffinities?: TagModifier[];
 }
 
 interface SecondaryOverride {
-  archetypeFocus?: ArchetypeId[];
+  archetypeFocus?: ArchetypeId | string;
   tagAffinities?: TagModifier[];
 }
 
@@ -305,7 +305,7 @@ const HULL_OVERRIDES: Record<string, HullOverride> = {
 
 const PRIMARY_OVERRIDES: Record<string, PrimaryOverride> = {
   railgun: {
-    archetypeFocus: ["artillery", "recon"],
+    archetypeFocus: "artillery",
     tagAffinities: [
       {
         tag: "artillery",
@@ -324,7 +324,7 @@ const PRIMARY_OVERRIDES: Record<string, PrimaryOverride> = {
     ],
   },
   plasma: {
-    archetypeFocus: ["assault", "bulwark"],
+    archetypeFocus: "assault",
     tagAffinities: [
       {
         tag: "assault",
@@ -343,7 +343,7 @@ const PRIMARY_OVERRIDES: Record<string, PrimaryOverride> = {
     ],
   },
   missiles: {
-    archetypeFocus: ["recon", "support"],
+    archetypeFocus: "recon",
     tagAffinities: [
       {
         tag: "recon",
@@ -362,7 +362,7 @@ const PRIMARY_OVERRIDES: Record<string, PrimaryOverride> = {
     ],
   },
   repair: {
-    archetypeFocus: ["support", "carrier"],
+    archetypeFocus: "support",
     tagAffinities: [
       {
         tag: "support",
@@ -381,7 +381,7 @@ const PRIMARY_OVERRIDES: Record<string, PrimaryOverride> = {
     ],
   },
   emp: {
-    archetypeFocus: ["infiltrator", "assault"],
+    archetypeFocus: "infiltrator",
     tagAffinities: [
       {
         tag: "infiltrator",
@@ -400,7 +400,7 @@ const PRIMARY_OVERRIDES: Record<string, PrimaryOverride> = {
     ],
   },
   scanner: {
-    archetypeFocus: ["support", "recon"],
+    archetypeFocus: "support",
     tagAffinities: [
       {
         tag: "support",
@@ -419,7 +419,7 @@ const PRIMARY_OVERRIDES: Record<string, PrimaryOverride> = {
     ],
   },
   laser: {
-    archetypeFocus: ["assault", "defender"],
+    archetypeFocus: "assault",
     tagAffinities: [
       {
         tag: "assault",
@@ -438,7 +438,7 @@ const PRIMARY_OVERRIDES: Record<string, PrimaryOverride> = {
     ],
   },
   flak: {
-    archetypeFocus: ["defender", "support"],
+    archetypeFocus: "defender",
     tagAffinities: [
       {
         tag: "defender",
@@ -457,7 +457,7 @@ const PRIMARY_OVERRIDES: Record<string, PrimaryOverride> = {
     ],
   },
   siege: {
-    archetypeFocus: ["artillery", "bulwark"],
+    archetypeFocus: "artillery",
     tagAffinities: [
       {
         tag: "artillery",
@@ -477,7 +477,7 @@ const PRIMARY_OVERRIDES: Record<string, PrimaryOverride> = {
     ],
   },
   shield: {
-    archetypeFocus: ["defender", "support"],
+    archetypeFocus: "defender",
     tagAffinities: [
       {
         tag: "defender",
@@ -496,7 +496,7 @@ const PRIMARY_OVERRIDES: Record<string, PrimaryOverride> = {
     ],
   },
   recharge: {
-    archetypeFocus: ["support", "carrier"],
+    archetypeFocus: "support",
     tagAffinities: [
       {
         tag: "support",
@@ -515,7 +515,7 @@ const PRIMARY_OVERRIDES: Record<string, PrimaryOverride> = {
     ],
   },
   turrets: {
-    archetypeFocus: ["carrier", "bulwark"],
+    archetypeFocus: "carrier",
     tagAffinities: [
       {
         tag: "carrier",
@@ -537,7 +537,7 @@ const PRIMARY_OVERRIDES: Record<string, PrimaryOverride> = {
 
 const SECONDARY_OVERRIDES: Record<string, SecondaryOverride> = {
   ram_spikes: {
-    archetypeFocus: ["assault", "bulwark"],
+    archetypeFocus: "assault",
     tagAffinities: [
       {
         tag: "assault",
@@ -549,7 +549,7 @@ const SECONDARY_OVERRIDES: Record<string, SecondaryOverride> = {
     ],
   },
   boarding_pods: {
-    archetypeFocus: ["assault", "infiltrator"],
+    archetypeFocus: "assault",
     tagAffinities: [
       {
         tag: "infiltrator",
@@ -561,7 +561,7 @@ const SECONDARY_OVERRIDES: Record<string, SecondaryOverride> = {
     ],
   },
   hull_peeler: {
-    archetypeFocus: ["artillery", "assault"],
+    archetypeFocus: "artillery",
     tagAffinities: [
       {
         tag: "artillery",
@@ -573,7 +573,7 @@ const SECONDARY_OVERRIDES: Record<string, SecondaryOverride> = {
     ],
   },
   molten_slag: {
-    archetypeFocus: ["assault", "bulwark"],
+    archetypeFocus: "assault",
     tagAffinities: [
       {
         tag: "assault",
@@ -585,7 +585,7 @@ const SECONDARY_OVERRIDES: Record<string, SecondaryOverride> = {
     ],
   },
   magazine_disruptor: {
-    archetypeFocus: ["assault", "infiltrator"],
+    archetypeFocus: "assault",
     tagAffinities: [
       {
         tag: "infiltrator",
@@ -597,7 +597,7 @@ const SECONDARY_OVERRIDES: Record<string, SecondaryOverride> = {
     ],
   },
   tow_harpoons: {
-    archetypeFocus: ["defender", "support"],
+    archetypeFocus: "defender",
     tagAffinities: [
       {
         tag: "support",
@@ -609,7 +609,7 @@ const SECONDARY_OVERRIDES: Record<string, SecondaryOverride> = {
     ],
   },
   grav_scalers: {
-    archetypeFocus: ["defender", "infiltrator"],
+    archetypeFocus: "defender",
     tagAffinities: [
       {
         tag: "defender",
@@ -621,7 +621,7 @@ const SECONDARY_OVERRIDES: Record<string, SecondaryOverride> = {
     ],
   },
   lightwell_array: {
-    archetypeFocus: ["defender", "recon"],
+    archetypeFocus: "defender",
     tagAffinities: [
       {
         tag: "recon",
@@ -633,7 +633,7 @@ const SECONDARY_OVERRIDES: Record<string, SecondaryOverride> = {
     ],
   },
   sensor_ghost: {
-    archetypeFocus: ["infiltrator", "recon"],
+    archetypeFocus: "infiltrator",
     tagAffinities: [
       {
         tag: "infiltrator",
@@ -645,7 +645,7 @@ const SECONDARY_OVERRIDES: Record<string, SecondaryOverride> = {
     ],
   },
   beacon_lashers: {
-    archetypeFocus: ["recon", "support"],
+    archetypeFocus: "recon",
     tagAffinities: [
       {
         tag: "recon",
@@ -657,7 +657,7 @@ const SECONDARY_OVERRIDES: Record<string, SecondaryOverride> = {
     ],
   },
   shrapnel_dispersers: {
-    archetypeFocus: ["defender", "bulwark"],
+    archetypeFocus: "defender",
     tagAffinities: [
       {
         tag: "defender",
@@ -669,7 +669,7 @@ const SECONDARY_OVERRIDES: Record<string, SecondaryOverride> = {
     ],
   },
   hull_cooling: {
-    archetypeFocus: ["defender", "assault"],
+    archetypeFocus: "defender",
     tagAffinities: [
       {
         tag: "assault",
@@ -681,7 +681,7 @@ const SECONDARY_OVERRIDES: Record<string, SecondaryOverride> = {
     ],
   },
   collision_mines: {
-    archetypeFocus: ["bulwark", "defender"],
+    archetypeFocus: "bulwark",
     tagAffinities: [
       {
         tag: "bulwark",
@@ -693,7 +693,7 @@ const SECONDARY_OVERRIDES: Record<string, SecondaryOverride> = {
     ],
   },
   armor_slough: {
-    archetypeFocus: ["defender", "support"],
+    archetypeFocus: "defender",
     tagAffinities: [
       {
         tag: "defender",
@@ -705,7 +705,7 @@ const SECONDARY_OVERRIDES: Record<string, SecondaryOverride> = {
     ],
   },
   kinetic_jets: {
-    archetypeFocus: ["recon", "assault"],
+    archetypeFocus: "recon",
     tagAffinities: [
       {
         tag: "recon",

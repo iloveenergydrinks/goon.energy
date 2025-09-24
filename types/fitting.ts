@@ -41,12 +41,15 @@ export interface PrimaryArchetype {
   description?: string;
   icon?: string;
   baseStats?: Record<string, number | undefined>;
+  stats?: Record<string, number | undefined>;
   // Requirements for hull compatibility
   minPowerSlots: number;
   minAmmoSlots?: number;
   powerDraw: number;
+  powerCost?: number;
   tags: string[];
-  archetypeFocus?: ArchetypeId[];
+  compatibleTags?: string[];
+  archetypeFocus?: ArchetypeId | string;
   tagAffinities?: TagModifier[];
 }
 
@@ -61,8 +64,11 @@ export interface SecondaryDef {
   deltaAmmoSlots: number;
   deltaUtilitySlots: number;
   powerDraw: number;
+  powerCost?: number;
+  slotAdjustments?: { Power: number; Ammo: number; Utility: number };
   tags: string[];
-  archetypeFocus?: ArchetypeId[];
+  compatibleTags?: string[];
+  archetypeFocus?: ArchetypeId | string;
   tagAffinities?: TagModifier[];
 }
 
@@ -127,6 +133,7 @@ export interface ModuleShape {
 
 export interface ModuleDef {
   id: string;
+  name?: string;
   slot: SlotType;
   shape: ModuleShape;
   stats: Partial<{
@@ -146,6 +153,7 @@ export interface ModuleDef {
     droneControl: number;
     droneAI: number;
     droneRepair: number;
+    repairRate: number;
   }>;
   description?: string;
   baseBW?: number;

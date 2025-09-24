@@ -37,8 +37,8 @@ function parseShape(raw: string | null): Array<{ r: number; c: number }> {
 }
 
 export async function createModuleAction(formData: FormData) {
-  const name = formData.get("name")?.toString().trim();
-  if (!name) throw new Error("Name is required");
+  // const name = formData.get("name")?.toString().trim();
+  // if (!name) throw new Error("Name is required");
 
   const description = formData.get("description")?.toString().trim() || null;
   const slot = formData.get("slot")?.toString().trim() || "Power";
@@ -55,7 +55,7 @@ export async function createModuleAction(formData: FormData) {
   await prisma.module.create({
     data: {
       id: randomUUID(),
-      name: name, // Using name as the ID for now (we might want to change this)
+      // name, // TODO: Add name column to database
       slot,
       shape,
       stats,
@@ -76,7 +76,7 @@ export async function updateModuleAction(formData: FormData) {
   const id = formData.get("id")?.toString().trim();
   if (!id) throw new Error("Module ID missing");
 
-  const name = formData.get("name")?.toString().trim() || "";
+  // const name = formData.get("name")?.toString().trim() || "";
   const description = formData.get("description")?.toString().trim() || null;
   const slot = formData.get("slot")?.toString().trim() || "Power";
   const baseBW = Number(formData.get("baseBW")) || 10;
@@ -92,7 +92,7 @@ export async function updateModuleAction(formData: FormData) {
   await prisma.module.update({
     where: { id },
     data: {
-      name,
+      // name, // TODO: Add name column to database
       slot,
       shape,
       stats,

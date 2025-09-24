@@ -52,7 +52,7 @@ export default async function ModuleAdminPage() {
                       <summary className="cursor-pointer flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <h4 className="text-white font-semibold">
-                            {module.familyName || module.name}
+                            {module.familyName || module.id}
                             {module.variantTier && <span className="text-neutral-400 ml-2">— {module.variantTier}</span>}
                           </h4>
                           <div className="flex gap-2">
