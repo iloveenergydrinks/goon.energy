@@ -80,6 +80,7 @@ export default async function ModuleAdminPage() {
                         <span className="text-xs text-neutral-500">Click to edit</span>
                       </summary>
                       <div className="mt-6">
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         <ModuleForm module={module as any} mode="edit" />
                       </div>
                     </details>
