@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { HullForm } from "@/components/admin/HullForm";
-import type { Hull } from "@/types/fitting";
 
 export default async function HullAdminPage() {
   const hulls = await prisma.hull.findMany({ orderBy: { name: "asc" } });
@@ -53,7 +52,7 @@ export default async function HullAdminPage() {
                   <span className="text-xs text-neutral-500">Click to edit</span>
                 </summary>
                 <div className="mt-6">
-                  <HullForm hull={hull as Hull} mode="edit" />
+                  <HullForm hull={hull as any} mode="edit" />
                 </div>
               </details>
             ))}

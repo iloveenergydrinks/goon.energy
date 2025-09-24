@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ModuleForm } from "@/components/admin/ModuleForm";
-import type { ModuleDef } from "@/types/fitting";
 
 const SLOT_COLORS = {
   Power: "bg-blue-600/20 text-blue-400",
@@ -81,7 +80,7 @@ export default async function ModuleAdminPage() {
                         <span className="text-xs text-neutral-500">Click to edit</span>
                       </summary>
                       <div className="mt-6">
-                        <ModuleForm module={module as ModuleDef} mode="edit" />
+                        <ModuleForm module={module as any} mode="edit" />
                       </div>
                     </details>
                   );

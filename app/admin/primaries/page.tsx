@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { PrimaryForm } from "@/components/admin/PrimaryForm";
-import type { PrimaryArchetype } from "@/types/fitting";
 
 export default async function PrimaryAdminPage() {
   const primaries = await prisma.primarySystem.findMany({ orderBy: { name: "asc" } });
@@ -62,7 +61,7 @@ export default async function PrimaryAdminPage() {
                     <span className="text-xs text-neutral-500">Click to edit</span>
                   </summary>
                 <div className="mt-6">
-                  <PrimaryForm primary={primary as PrimaryArchetype} mode="edit" />
+                  <PrimaryForm primary={primary as any} mode="edit" />
                 </div>
                 </details>
               );

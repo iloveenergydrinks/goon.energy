@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { SecondaryForm } from "@/components/admin/SecondaryForm";
-import type { SecondaryDef } from "@/types/fitting";
 
 export default async function SecondaryAdminPage() {
   const secondaries = await prisma.secondarySystem.findMany({ orderBy: { name: "asc" } });
@@ -77,7 +76,7 @@ export default async function SecondaryAdminPage() {
                     <span className="text-xs text-neutral-500">Click to edit</span>
                   </summary>
                   <div className="mt-6">
-                    <SecondaryForm secondary={secondary as SecondaryDef} mode="edit" />
+                    <SecondaryForm secondary={secondary as any} mode="edit" />
                   </div>
                 </details>
               );
