@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Hull {
+  id              String   @id
+  name            String
+  description     String?
+  sizeId          String
+  archetype       String?
+  powerCapacity   Int
+  bandwidthLimit  Int
+  compatibleTags  String[] @default([])
+  incompatibleTags String[] @default([])
+  preferredWeapons String[] @default([])
+  baseStats       Json?
+  grid            Json
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model PrimarySystem {
+  id            String   @id
+  name          String
+  description   String?
+  icon          String?
+  baseStats     Json?
+  minPowerSlots Int
+  minAmmoSlots  Int?
+  powerDraw     Int
+  tags          String[] @default([])
+  archetypeFocus String[] @default([])
+  tagAffinities Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model SecondarySystem {
+  id               String   @id
+  name             String
+  category         String
+  description      String?
+  baseStats        Json?
+  deltaPowerSlots  Int
+  deltaAmmoSlots   Int
+  deltaUtilitySlots Int
+  powerDraw        Int
+  tags             String[] @default([])
+  archetypeFocus   String[] @default([])
+  tagAffinities    Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Module {
+  id             String   @id
+  familyId       String?
+  familyName     String?
+  variantTier    String?
+  minHullSize    String?
+  slot           String
+  shape          Json
+  stats          Json?
+  description    String?
+  baseBW         Int?
+  tags           String[] @default([])
+  archetypeBias  Json?
+  tagAffinities  Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+

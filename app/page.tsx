@@ -1,86 +1,53 @@
-"use client";
-import { useFittingStore } from "@/store/useFittingStore";
+import HullStep from "@/components/wizard/HullStep";
 import PrimaryStep from "@/components/wizard/PrimaryStep";
 import SecondaryStep from "@/components/wizard/SecondaryStep";
-import HullStep from "@/components/wizard/HullStep";
-import { useEffect } from "react";
+import SurfaceSummary from "@/components/wizard/SurfaceSummary";
+import { loadCatalog } from "@/lib/catalog";
 
-export default function Home() {
-  const wizardStep = useFittingStore((s) => s.wizardStep);
-  const resetWizard = useFittingStore((s) => s.resetWizard);
-
-  // Reset wizard when returning to home
-  useEffect(() => {
-    return () => {
-      // Optional: Reset wizard when leaving the page
-      // resetWizard();
-    };
-  }, []);
+export default async function Home() {
+  const catalog = await loadCatalog();
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Ship Configuration Wizard</h1>
-          <div className="flex items-center gap-4 mt-4">
-            <div className="flex items-center gap-2">
-              <div className={`
-                w-8 h-8 rounded-full flex items-center justify-center font-medium
-                ${wizardStep >= 1 ? 'bg-blue-600 text-white' : 'bg-neutral-700 text-neutral-400'}
-              `}>
-                1
-              </div>
-              <span className={wizardStep >= 1 ? 'text-white' : 'text-neutral-500'}>
-                Primary
-              </span>
+    <div className="min-h-screen p-10 bg-neutral-950">
+      <div className="max-w-[1400px] mx-auto">
+        <SurfaceSummary placement="top" catalog={catalog} />
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+          <h1 className="text-3xl font-bold tracking-[0.35em] uppercase text-[color:rgb(220,230,255)]">
+            Ship Builder
+          </h1>
+          <a
+            href="/admin"
+            className="text-xs px-3 py-2 rounded-md border border-neutral-700/70 text-neutral-400 hover:border-neutral-500 hover:text-white transition-colors"
+          >
+            Manage Ship Catalog →
+          </a>
+        </div>
+        <p className="text-sm text-neutral-500 mb-8">
+          Configure your hull, primary, and secondary systems here. Universal modules are now managed directly inside the fitting grid.
+        </p>
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[310px_1px_minmax(0,1fr)_1px_310px]">
+          <div className="bg-neutral-900/80 rounded-md p-4 h-[calc(100vh-8rem)]">
+            <h2 className="text-lg font-semibold mb-3 text-white/90">Hull Selection</h2>
+            <div className="h-[calc(100%-1.75rem)] overflow-y-auto pr-1 custom-scroll">
+              <HullStep />
             </div>
-            
-            <div className={`flex-1 h-0.5 ${wizardStep >= 2 ? 'bg-blue-600' : 'bg-neutral-700'}`} />
-            
-            <div className="flex items-center gap-2">
-              <div className={`
-                w-8 h-8 rounded-full flex items-center justify-center font-medium
-                ${wizardStep >= 2 ? 'bg-blue-600 text-white' : 'bg-neutral-700 text-neutral-400'}
-              `}>
-                2
-              </div>
-              <span className={wizardStep >= 2 ? 'text-white' : 'text-neutral-500'}>
-                Secondary
-              </span>
+          </div>
+          <div className="hidden xl:block w-px bg-neutral-800/80 rounded-full" />
+          <div className="bg-neutral-900/80 rounded-md p-4 h-[calc(100vh-8rem)]">
+            <h2 className="text-lg font-semibold mb-3 text-white/90">Primary Systems</h2>
+            <div className="h-[calc(100%-1.75rem)] overflow-y-auto pr-1 custom-scroll">
+              <PrimaryStep />
             </div>
-            
-            <div className={`flex-1 h-0.5 ${wizardStep >= 3 ? 'bg-blue-600' : 'bg-neutral-700'}`} />
-            
-            <div className="flex items-center gap-2">
-              <div className={`
-                w-8 h-8 rounded-full flex items-center justify-center font-medium
-                ${wizardStep >= 3 ? 'bg-blue-600 text-white' : 'bg-neutral-700 text-neutral-400'}
-              `}>
-                3
-              </div>
-              <span className={wizardStep >= 3 ? 'text-white' : 'text-neutral-500'}>
-                Hull
-              </span>
+          </div>
+          <div className="hidden xl:block w-px bg-neutral-800/80 rounded-full" />
+          <div className="bg-neutral-900/80 rounded-md p-4 h-[calc(100vh-8rem)]">
+            <h2 className="text-lg font-semibold mb-3 text-white/90">Secondary Systems</h2>
+            <div className="h-[calc(100%-1.75rem)] overflow-y-auto pr-1 custom-scroll">
+              <SecondaryStep />
             </div>
           </div>
         </div>
-
-        <div className="bg-neutral-900 rounded-lg p-6">
-          {wizardStep === 1 && <PrimaryStep />}
-          {wizardStep === 2 && <SecondaryStep />}
-          {wizardStep === 3 && <HullStep />}
-        </div>
-
-        {wizardStep > 1 && (
-          <div className="mt-4 flex justify-center">
-            <button
-              onClick={resetWizard}
-              className="text-sm text-neutral-500 hover:text-neutral-400 transition-colors"
-            >
-              Start Over
-            </button>
-          </div>
-        )}
+        <SurfaceSummary placement="bottom" />
       </div>
     </div>
   );

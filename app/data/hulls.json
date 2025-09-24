@@ -3,6 +3,7 @@
     "id": "kestrel",
     "name": "CNS Kestrel",
     "description": "Swift interceptor-class vessel designed for rapid strike operations",
+    "sizeId": "Frigate",
     "powerCapacity": 60,
     "bandwidthLimit": 60,
     "baseStats": {
@@ -39,6 +40,7 @@
     "id": "vindicator",
     "name": "TRS Vindicator",
     "description": "Versatile assault cruiser built for sustained frontline engagements",
+    "sizeId": "Destroyer",
     "powerCapacity": 85,
     "bandwidthLimit": 85,
     "baseStats": {
@@ -84,6 +86,7 @@
     "id": "basilisk",
     "name": "INS Basilisk",
     "description": "Artillery destroyer configured for long-range fire support",
+    "sizeId": "Destroyer",
     "powerCapacity": 70,
     "bandwidthLimit": 75,
     "baseStats": {
@@ -131,6 +134,7 @@
     "id": "aegis",
     "name": "HMS Aegis",
     "description": "Fortress-class dreadnought with unparalleled defensive capabilities",
+    "sizeId": "Capital",
     "powerCapacity": 110,
     "bandwidthLimit": 110,
     "baseStats": {
@@ -178,6 +182,7 @@
     "id": "harbinger",
     "name": "UNS Harbinger", 
     "description": "Command carrier equipped for fleet coordination and fighter operations",
+    "sizeId": "Capital",
     "powerCapacity": 95,
     "bandwidthLimit": 120,
     "baseStats": {
@@ -236,6 +241,7 @@
     "id": "phantom",
     "name": "SFS Phantom",
     "description": "Stealth corvette optimized for electronic warfare and ambush tactics",
+    "sizeId": "Frigate",
     "powerCapacity": 55,
     "bandwidthLimit": 70,
     "baseStats": {
@@ -274,6 +280,7 @@
     "id": "tempest",
     "name": "RNS Tempest",
     "description": "Storm-class battlecruiser built for overwhelming firepower",
+    "sizeId": "Cruiser",
     "powerCapacity": 100,
     "bandwidthLimit": 95,
     "baseStats": {

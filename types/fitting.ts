@@ -2,6 +2,29 @@ export type SlotType = "Power" | "Ammo" | "Utility";
 
 export type SecondaryCategory = "Offensive" | "Utility" | "Defensive";
 
+export type ArchetypeId =
+  | "support"
+  | "defender"
+  | "assault"
+  | "artillery"
+  | "recon"
+  | "infiltrator"
+  | "carrier"
+  | "bulwark";
+
+export interface TagModifier {
+  tag: string;
+  bwMultiplier?: number;
+  statBonuses?: Record<string, number | undefined>;
+  mismatchAdjustment?: number;
+}
+
+export interface ArchetypeBias {
+  archetype: ArchetypeId;
+  bwMultiplier?: number;
+  statBonuses?: Record<string, number | undefined>;
+}
+
 export interface ShipSize {
   id: "Frigate" | "Destroyer" | "Cruiser" | "Capital";
   rows: number;
@@ -23,6 +46,8 @@ export interface PrimaryArchetype {
   minAmmoSlots?: number;
   powerDraw: number;
   tags: string[];
+  archetypeFocus?: ArchetypeId[];
+  tagAffinities?: TagModifier[];
 }
 
 export interface SecondaryDef {
@@ -37,6 +62,8 @@ export interface SecondaryDef {
   deltaUtilitySlots: number;
   powerDraw: number;
   tags: string[];
+  archetypeFocus?: ArchetypeId[];
+  tagAffinities?: TagModifier[];
 }
 
 export interface GridCell {
@@ -50,6 +77,8 @@ export interface Hull {
   id: string;
   name: string;
   description?: string;
+  sizeId: ShipSize["id"];
+  archetype?: ArchetypeId;
   
   // Grid definition with predefined slots
   grid: {
@@ -66,6 +95,10 @@ export interface Hull {
   powerCapacity: number;
   bandwidthLimit: number;
   baseStats?: Record<string, number | undefined>;
+  mismatchTolerance?: number;
+  slotBias?: Partial<Record<SlotType, number>>;
+  tagAffinities?: TagModifier[];
+  tagPenalties?: TagModifier[];
   
   // Compatibility
   compatibleTags?: string[];
@@ -116,6 +149,13 @@ export interface ModuleDef {
   }>;
   description?: string;
   baseBW?: number;
+  tags?: string[];
+  archetypeBias?: ArchetypeBias[];
+  tagAffinities?: TagModifier[];
+  familyId?: string;
+  familyName?: string;
+  variantTier?: string;
+  minHullSize?: ShipSize["id"];
 }
 
 export interface PlacedModule {

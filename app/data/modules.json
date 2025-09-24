@@ -1,35 +1,43 @@
 [
   {
-    "id": "Power Stabilizers",
-    "slot": "Power",
-    "shape": { "id": "PowerStab_1x1", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
-    "stats": { "powerGen": 10 },
-    "description": "Stabilizes power output fluctuations",
-    "baseBW": 6
+    "id": "Flux Support Matrix",
+    "familyId": "flux_support",
+    "slot": "Utility",
+    "shape": { "id": "FluxSupport_S_Base", "cells": [ { "dr": 0, "dc": 0 } ], "rotations": [0,90,180,270], "sizeClass": "S" },
+    "stats": { "powerGen": 8, "capBuffer": 6 },
+    "description": "Adaptive power spine that scales with hull class to feed repair lattices and drone bays.",
+    "baseBW": 6,
+    "tags": ["support", "energy", "repair"]
   },
   {
     "id": "Energy Redistributor",
+    "familyId": "energy_redistributor",
     "slot": "Power",
-    "shape": { "id": "EnergyRedist_1x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 } ], "rotations": [0,90], "sizeClass": "M" },
-    "stats": { "powerGen": 15 },
-    "description": "Redirects power to critical systems",
-    "baseBW": 12
+    "shape": { "id": "EnergyRedist_Base", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 } ], "rotations": [0,90], "sizeClass": "M" },
+    "stats": { "powerGen": 12 },
+    "description": "Pushes surplus reactor power into turret trunks with tiered capacitance ladders.",
+    "baseBW": 10,
+    "tags": ["support", "defender", "energy"]
   },
   {
-    "id": "Surge Protectors",
+    "id": "Surge Protector Array",
+    "familyId": "surge_protector",
     "slot": "Power",
-    "shape": { "id": "SurgeProtect_2x2", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 }, { "dr": 1, "dc": 0 }, { "dr": 1, "dc": 1 } ], "rotations": [0], "sizeClass": "L" },
-    "stats": { "powerGen": 8 },
-    "description": "Protects systems from overload",
-    "baseBW": 20
+    "shape": { "id": "SurgeProtect_Base", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 0, "dc": 1 }, { "dr": 1, "dc": 0 }, { "dr": 1, "dc": 1 } ], "rotations": [0], "sizeClass": "L" },
+    "stats": { "capBuffer": 12, "repairRate": 2 },
+    "description": "Layered harmonic shielding that scales with hull architecture to damp spike loads.",
+    "baseBW": 15,
+    "tags": ["defender", "bulwark", "energy"]
   },
   {
-    "id": "Auxiliary Reactor",
+    "id": "Auxiliary Reactor Node",
+    "familyId": "aux_reactor",
     "slot": "Power",
-    "shape": { "id": "AuxReactor_2x1", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 1, "dc": 0 } ], "rotations": [0,90], "sizeClass": "M" },
-    "stats": { "powerGen": 25 },
-    "description": "Boosts overall power output",
-    "baseBW": 12
+    "shape": { "id": "AuxReactor_Base", "cells": [ { "dr": 0, "dc": 0 }, { "dr": 1, "dc": 0 } ], "rotations": [0,90], "sizeClass": "M" },
+    "stats": { "powerGen": 18 },
+    "description": "Snap-fit micro-reactors that upscale into spinal reactors for capital hulls.",
+    "baseBW": 11,
+    "tags": ["assault", "artillery", "energy"]
   },
   {
     "id": "Flux Capacitors",
