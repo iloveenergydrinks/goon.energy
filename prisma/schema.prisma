@@ -20,6 +20,10 @@ model Hull {
   preferredWeapons String[] @default([])
   baseStats       Json?
   grid            Json
+  mismatchTolerance Float?
+  slotBias        Json?
+  tagAffinities   Json?
+  tagPenalties    Json?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -28,13 +32,10 @@ model PrimarySystem {
   id            String   @id
   name          String
   description   String?
-  icon          String?
-  baseStats     Json?
-  minPowerSlots Int
-  minAmmoSlots  Int?
-  powerDraw     Int
-  tags          String[] @default([])
-  archetypeFocus String[] @default([])
+  stats         Json?
+  powerCost     Int      @default(30)
+  compatibleTags String[] @default([])
+  archetypeFocus String?
   tagAffinities Json?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -45,13 +46,10 @@ model SecondarySystem {
   name             String
   category         String
   description      String?
-  baseStats        Json?
-  deltaPowerSlots  Int
-  deltaAmmoSlots   Int
-  deltaUtilitySlots Int
-  powerDraw        Int
-  tags             String[] @default([])
-  archetypeFocus   String[] @default([])
+  powerCost        Int      @default(10)
+  slotAdjustments  Json?
+  compatibleTags   String[] @default([])
+  archetypeFocus   String?
   tagAffinities    Json?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -59,7 +57,7 @@ model SecondarySystem {
 
 model Module {
   id             String   @id
-  familyId       String?
+  name           String?
   familyName     String?
   variantTier    String?
   minHullSize    String?
