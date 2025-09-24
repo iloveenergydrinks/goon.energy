@@ -2,6 +2,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ModuleForm } from "@/components/admin/ModuleForm";
 
+// Force dynamic rendering - don't try to generate static pages at build time
+export const dynamic = 'force-dynamic';
+
 const SLOT_COLORS = {
   Power: "bg-blue-600/20 text-blue-400",
   Ammo: "bg-red-600/20 text-red-400",

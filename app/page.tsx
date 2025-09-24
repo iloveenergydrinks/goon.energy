@@ -4,6 +4,9 @@ import SecondaryStep from "@/components/wizard/SecondaryStep";
 import SurfaceSummary from "@/components/wizard/SurfaceSummary";
 import { loadCatalog } from "@/lib/catalog";
 
+// Force dynamic rendering - don't try to generate static pages at build time
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const catalog = await loadCatalog();
 

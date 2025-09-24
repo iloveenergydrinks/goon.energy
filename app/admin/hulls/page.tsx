@@ -2,6 +2,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { HullForm } from "@/components/admin/HullForm";
 
+// Force dynamic rendering - don't try to generate static pages at build time
+export const dynamic = 'force-dynamic';
+
 export default async function HullAdminPage() {
   const hulls = await prisma.hull.findMany({ orderBy: { name: "asc" } });
 

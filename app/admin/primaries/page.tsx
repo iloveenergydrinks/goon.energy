@@ -2,6 +2,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { PrimaryForm } from "@/components/admin/PrimaryForm";
 
+// Force dynamic rendering - don't try to generate static pages at build time
+export const dynamic = 'force-dynamic';
+
 export default async function PrimaryAdminPage() {
   const primaries = await prisma.primarySystem.findMany({ orderBy: { name: "asc" } });
 
