@@ -28,7 +28,11 @@ export default async function SecondaryAdminPage() {
           <h2 className="text-lg font-semibold text-white">Existing Secondary Systems ({secondaries.length})</h2>
           <div className="space-y-3">
             {secondaries.map((secondary) => {
-              const slotChanges = (secondary.slotAdjustments as Record<string, number>) || {};
+              const slotChanges = {
+                Power: secondary.deltaPowerSlots || 0,
+                Ammo: secondary.deltaAmmoSlots || 0,
+                Utility: secondary.deltaUtilitySlots || 0
+              };
               const hasSlotChanges = Object.values(slotChanges).some(v => v !== 0);
               
               return (
@@ -44,9 +48,9 @@ export default async function SecondaryAdminPage() {
                         }`}>
                           {secondary.category}
                         </span>
-                        <span className="px-2 py-0.5 text-xs rounded bg-neutral-800 text-neutral-400">
-                          Power: {secondary.powerCost}
-                        </span>
+                    <span className="px-2 py-0.5 text-xs rounded bg-neutral-800 text-neutral-400">
+                      Power: {secondary.powerDraw}
+                    </span>
                         {secondary.archetypeFocus && (
                           <span className="px-2 py-0.5 text-xs rounded bg-blue-600/20 text-blue-400">
                             {secondary.archetypeFocus}

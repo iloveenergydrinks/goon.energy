@@ -89,11 +89,11 @@ export async function loadCatalog(): Promise<Catalog> {
     primFromDb.map((p) =>
       applyPrimaryOverrides({
         ...p,
-        baseStats: p.stats as PrimaryArchetype["baseStats"],
-        stats: p.stats as PrimaryArchetype["stats"],
+        baseStats: p.baseStats as PrimaryArchetype["baseStats"],
+        stats: p.baseStats as PrimaryArchetype["stats"],
         minPowerSlots: 0, // Default value
-        powerDraw: p.powerCost || 30, // Use powerCost as powerDraw
-        tags: p.compatibleTags || [], // Use compatibleTags as tags
+        powerDraw: p.powerDraw || 30,
+        tags: p.tags || [],
       } as unknown as PrimaryArchetype)
     )
   );
@@ -102,14 +102,11 @@ export async function loadCatalog(): Promise<Catalog> {
       applySecondaryOverrides({
         ...s,
         baseStats: {} as SecondaryDef["baseStats"],
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        deltaPowerSlots: (s.slotAdjustments as any)?.Power || 0,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        deltaAmmoSlots: (s.slotAdjustments as any)?.Ammo || 0,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        deltaUtilitySlots: (s.slotAdjustments as any)?.Utility || 0,
-        powerDraw: s.powerCost || 10,
-        tags: s.compatibleTags || [],
+        deltaPowerSlots: s.deltaPowerSlots || 0,
+        deltaAmmoSlots: s.deltaAmmoSlots || 0,
+        deltaUtilitySlots: s.deltaUtilitySlots || 0,
+        powerDraw: s.powerDraw || 10,
+        tags: s.tags || [],
       } as unknown as SecondaryDef)
     )
   );

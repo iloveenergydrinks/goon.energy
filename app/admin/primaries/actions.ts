@@ -42,10 +42,10 @@ export async function createPrimaryAction(formData: FormData) {
       id: randomUUID(),
       name,
       description,
-      stats,
-      powerCost,
-      compatibleTags: parseStringArray(formData.get("compatibleTags")),
-      archetypeFocus,
+      baseStats: stats,
+      powerDraw: powerCost,
+      tags: parseStringArray(formData.get("compatibleTags")),
+      archetypeFocus: archetypeFocus ? [archetypeFocus] : [],
     },
   });
 
@@ -70,10 +70,10 @@ export async function updatePrimaryAction(formData: FormData) {
     data: {
       name,
       description,
-      stats,
-      powerCost,
-      compatibleTags: parseStringArray(formData.get("compatibleTags")),
-      archetypeFocus,
+      baseStats: stats,
+      powerDraw: powerCost,
+      tags: parseStringArray(formData.get("compatibleTags")),
+      archetypeFocus: archetypeFocus ? [archetypeFocus] : [],
     },
   });
 

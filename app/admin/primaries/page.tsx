@@ -28,9 +28,9 @@ export default async function PrimaryAdminPage() {
           <h2 className="text-lg font-semibold text-white">Existing Primary Systems ({primaries.length})</h2>
           <div className="space-y-3">
             {primaries.map((primary) => {
-              const hasPower = primary.powerCost != null && primary.powerCost > 0;
+              const hasPower = primary.powerDraw != null && primary.powerDraw > 0;
               const hasArchetype = !!primary.archetypeFocus;
-              const hasStats = primary.stats && typeof primary.stats === 'object' && primary.stats !== null && Object.keys(primary.stats).length > 0;
+              const hasStats = primary.baseStats && typeof primary.baseStats === 'object' && primary.baseStats !== null && Object.keys(primary.baseStats).length > 0;
               const hasBadges = hasPower || hasArchetype || hasStats;
               
               return (
@@ -40,17 +40,17 @@ export default async function PrimaryAdminPage() {
                       <h3 className="text-white font-semibold">{primary.name}</h3>
                       {hasBadges && (
                         <div className="flex gap-2">
-                          {hasPower && (
-                            <span className="px-2 py-0.5 text-xs rounded bg-neutral-800 text-neutral-400">
-                              Power: {primary.powerCost}
-                            </span>
-                          )}
+                        {hasPower && (
+                          <span className="px-2 py-0.5 text-xs rounded bg-neutral-800 text-neutral-400">
+                            Power: {primary.powerDraw}
+                          </span>
+                        )}
                           {hasArchetype && (
                             <span className="px-2 py-0.5 text-xs rounded bg-blue-600/20 text-blue-400">
                               {primary.archetypeFocus}
                             </span>
                           )}
-                          {hasStats && primary.stats && typeof primary.stats === 'object' && primary.stats !== null && Object.entries(primary.stats).slice(0, 2).map(([key, value]) => (
+                          {hasStats && primary.baseStats && typeof primary.baseStats === 'object' && primary.baseStats !== null && Object.entries(primary.baseStats).slice(0, 2).map(([key, value]) => (
                             <span key={key} className="px-2 py-0.5 text-xs rounded bg-neutral-800 text-neutral-400">
                               {key}: {String(value)}
                             </span>

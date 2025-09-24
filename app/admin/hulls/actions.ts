@@ -45,7 +45,7 @@ export async function createHullAction(formData: FormData) {
   const gridJson = formData.get("grid")?.toString() ?? null;
   const baseStatsRaw = formData.get("baseStats")?.toString() ?? null;
   const archetype = formData.get("archetype")?.toString().trim() || null;
-  // const mismatchTolerance = formData.get("mismatchTolerance") ? Number(formData.get("mismatchTolerance")) : null;
+  const mismatchTolerance = formData.get("mismatchTolerance") ? Number(formData.get("mismatchTolerance")) : null;
 
   const grid = parseGrid(gridJson) ?? { rows: 3, cols: 3, slots: [] };
   const baseStats = parseBaseStats(baseStatsRaw) ?? {};
@@ -64,7 +64,7 @@ export async function createHullAction(formData: FormData) {
       incompatibleTags: parseStringArray(formData.get("incompatibleTags")),
       preferredWeapons: parseStringArray(formData.get("preferredWeapons")),
       archetype,
-      // mismatchTolerance,
+      mismatchTolerance,
     },
   });
 
@@ -84,7 +84,7 @@ export async function updateHullAction(formData: FormData) {
   const gridJson = formData.get("grid")?.toString() ?? null;
   const baseStatsRaw = formData.get("baseStats")?.toString() ?? null;
   const archetype = formData.get("archetype")?.toString().trim() || null;
-  // const mismatchTolerance = formData.get("mismatchTolerance") ? Number(formData.get("mismatchTolerance")) : null;
+  const mismatchTolerance = formData.get("mismatchTolerance") ? Number(formData.get("mismatchTolerance")) : null;
 
   const grid = parseGrid(gridJson) ?? { rows: 3, cols: 3, slots: [] };
   const baseStats = parseBaseStats(baseStatsRaw) ?? {};
@@ -103,7 +103,7 @@ export async function updateHullAction(formData: FormData) {
       incompatibleTags: parseStringArray(formData.get("incompatibleTags")),
       preferredWeapons: parseStringArray(formData.get("preferredWeapons")),
       archetype,
-      // mismatchTolerance,
+      mismatchTolerance,
     },
   });
 

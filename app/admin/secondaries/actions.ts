@@ -47,10 +47,12 @@ export async function createSecondaryAction(formData: FormData) {
       name,
       description,
       category,
-      powerCost,
-      slotAdjustments,
-      compatibleTags: parseStringArray(formData.get("compatibleTags")),
-      archetypeFocus,
+      powerDraw: powerCost,
+      deltaPowerSlots: slotAdjustments.Power,
+      deltaAmmoSlots: slotAdjustments.Ammo,
+      deltaUtilitySlots: slotAdjustments.Utility,
+      tags: parseStringArray(formData.get("compatibleTags")),
+      archetypeFocus: archetypeFocus ? [archetypeFocus] : [],
     },
   });
 
@@ -77,10 +79,12 @@ export async function updateSecondaryAction(formData: FormData) {
       name,
       description,
       category,
-      powerCost,
-      slotAdjustments,
-      compatibleTags: parseStringArray(formData.get("compatibleTags")),
-      archetypeFocus,
+      powerDraw: powerCost,
+      deltaPowerSlots: slotAdjustments.Power,
+      deltaAmmoSlots: slotAdjustments.Ammo,
+      deltaUtilitySlots: slotAdjustments.Utility,
+      tags: parseStringArray(formData.get("compatibleTags")),
+      archetypeFocus: archetypeFocus ? [archetypeFocus] : [],
     },
   });
 

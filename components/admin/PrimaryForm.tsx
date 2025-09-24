@@ -27,8 +27,8 @@ interface PrimaryFormProps {
 
 export function PrimaryForm({ primary, mode }: PrimaryFormProps) {
   const [stats, setStats] = useState<StatField[]>(
-    primary?.stats
-      ? Object.entries(primary.stats).map(([key, value]) => ({ key, value: value as number }))
+    primary?.baseStats
+      ? Object.entries(primary.baseStats).map(([key, value]) => ({ key, value: value as number }))
       : [
           { key: "damage", value: 100 },
           { key: "rateOfFire", value: 1 },
@@ -38,7 +38,7 @@ export function PrimaryForm({ primary, mode }: PrimaryFormProps) {
   );
 
   const [compatibleTags, setCompatibleTags] = useState<string[]>(
-    primary?.compatibleTags || []
+    primary?.tags || []
   );
 
   const addStat = () => {
@@ -94,7 +94,7 @@ export function PrimaryForm({ primary, mode }: PrimaryFormProps) {
           <input
             type="number"
             name="powerCost"
-            defaultValue={primary?.powerCost || 30}
+            defaultValue={primary?.powerDraw || 30}
             className="mt-1 w-full rounded bg-neutral-800 border border-neutral-700 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
             required
           />

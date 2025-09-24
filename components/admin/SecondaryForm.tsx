@@ -23,13 +23,13 @@ interface SecondaryFormProps {
 
 export function SecondaryForm({ secondary, mode }: SecondaryFormProps) {
   const [slotAdjustments, setSlotAdjustments] = useState({
-    Power: secondary?.slotAdjustments?.Power || 0,
-    Ammo: secondary?.slotAdjustments?.Ammo || 0,
-    Utility: secondary?.slotAdjustments?.Utility || 0,
+    Power: secondary?.deltaPowerSlots || 0,
+    Ammo: secondary?.deltaAmmoSlots || 0,
+    Utility: secondary?.deltaUtilitySlots || 0,
   });
 
   const [compatibleTags, setCompatibleTags] = useState<string[]>(
-    secondary?.compatibleTags || []
+    secondary?.tags || []
   );
 
   const updateSlotAdjustment = (slot: keyof typeof slotAdjustments, value: number) => {
@@ -86,7 +86,7 @@ export function SecondaryForm({ secondary, mode }: SecondaryFormProps) {
           <input
             type="number"
             name="powerCost"
-            defaultValue={secondary?.powerCost || 10}
+            defaultValue={secondary?.powerDraw || 10}
             className="mt-1 w-full rounded bg-neutral-800 border border-neutral-700 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
             required
           />
