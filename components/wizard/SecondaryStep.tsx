@@ -22,7 +22,7 @@ export default function SecondaryStep() {
       .map((id) => secondaries.find((s) => s?.id === id))
       .filter((s): s is (typeof secondaries)[number] => Boolean(s));
 
-    return secondaries.filter((secondary) => {
+    const base = secondaries.filter((secondary) => {
       const isAlreadySelected = selectedSecondaryIds.includes(secondary.id);
 
       const totalPower =
@@ -51,25 +51,19 @@ export default function SecondaryStep() {
       if (ammoSlots < requiredAmmo) return false;
       if (utilitySlots < requiredUtility) return false;
 
-      const tags = new Set<string>([
-        ...primary.tags,
-        ...currentlySelected.flatMap((s) => s.tags),
-        ...secondary.tags,
-      ]);
-
-      if (selectedHull.incompatibleTags?.some((tag) => tags.has(tag))) {
-        return false;
-      }
-
-      if (selectedHull.compatibleTags?.length) {
-        const hasCompatibleTag = [...tags].some((tag) =>
-          selectedHull.compatibleTags?.includes(tag)
-        );
-        if (!hasCompatibleTag) return false;
-      }
-
       return true;
     });
+
+    if (selectedHull?.compatibleTags?.length) {
+      const comp = selectedHull.compatibleTags;
+      return [...base].sort((a, b) => {
+        const aMatch = a.tags.some((t) => comp.includes(t)) ? 1 : 0;
+        const bMatch = b.tags.some((t) => comp.includes(t)) ? 1 : 0;
+        return bMatch - aMatch;
+      });
+    }
+
+    return base;
   }, [primary, selectedHull, secondaries, selectedSecondaryIds]);
 
   const visibleSecondaryIds = useMemo(

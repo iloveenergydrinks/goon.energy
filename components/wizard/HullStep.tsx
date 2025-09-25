@@ -25,15 +25,6 @@ function hullSupportsPrimary(
   if (ammoSlots < requiredAmmo) return false;
   if (utilitySlots < requiredUtility) return false;
 
-  const combinedTags = [
-    ...primary.tags,
-    ...secondaries.flatMap((s) => s.tags),
-  ];
-
-  if (hull.incompatibleTags?.some((tag) => combinedTags.includes(tag))) {
-    return false;
-  }
-
   return true;
 }
 

@@ -105,10 +105,6 @@ function getCompatibleHulls(
     if (ammoSlotsInGrid < requiredAmmo) return false;
     if (utilitySlotsInGrid < requiredUtility) return false;
 
-    const weaponTags = [...primary.tags, ...secondaries.flatMap((s) => s.tags)];
-    if (hull.incompatibleTags?.some((tag) => weaponTags.includes(tag))) {
-      return false;
-    }
     return true;
   });
 }

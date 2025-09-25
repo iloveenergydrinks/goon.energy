@@ -32,10 +32,6 @@ export default function PrimaryStep() {
       if (powerSlots < requiredPower) return false;
       if (ammoSlots < requiredAmmo) return false;
 
-      if (selectedHull.incompatibleTags?.some((tag) => primary.tags.includes(tag))) {
-        return false;
-      }
-
       return true;
     });
 
