@@ -16,7 +16,8 @@ export default function PrimaryStep() {
   const selectedSecondaries = secondaries.filter((s) => selectedSecondaryIds.includes(s.id));
 
   const filteredPrimaries = useMemo(() => {
-    return primaries.filter((primary) => {
+    // First apply hard constraints (power, slots, incompatible tags). Do NOT hard-gate by compatible tags.
+    const base = primaries.filter((primary) => {
       if (!selectedHull) return true;
 
       const totalPower = primary.powerDraw + selectedSecondaries.reduce((sum, s) => sum + s.powerDraw, 0);
@@ -35,13 +36,20 @@ export default function PrimaryStep() {
         return false;
       }
 
-      if (selectedHull.compatibleTags?.length) {
-        const hasCompatibleTag = primary.tags.some((tag) => selectedHull.compatibleTags?.includes(tag));
-        if (!hasCompatibleTag) return false;
-      }
-
       return true;
     });
+
+    // If the hull advertises compatible tags, prefer those results first (soft class system)
+    if (selectedHull?.compatibleTags?.length) {
+      const comp = selectedHull.compatibleTags;
+      return [...base].sort((a, b) => {
+        const aMatch = a.tags.some((t) => comp.includes(t)) ? 1 : 0;
+        const bMatch = b.tags.some((t) => comp.includes(t)) ? 1 : 0;
+        return bMatch - aMatch;
+      });
+    }
+
+    return base;
   }, [primaries, selectedHull, selectedSecondaries]);
 
   useEffect(() => {
