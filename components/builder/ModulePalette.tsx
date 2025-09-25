@@ -52,13 +52,17 @@ export default function ModulePalette() {
   const modules = useFittingStore((s) => s.modules);
   const hulls = useFittingStore((s) => s.hulls);
   const selectedHullId = useFittingStore((s) => s.selectedHullId);
-  const [slotFilter, setSlotFilter] = useState<SlotType | "All">("All");
+  const [slotFilter, setSlotFilter] = useState<SlotType | "All" | "Universal">("All");
   const selectedHull = hulls.find((h) => h.id === selectedHullId);
   const resolvedModules = useMemo(() => {
     return modules.map((module) => selectVariantForHull(module, selectedHull));
   }, [modules, selectedHull]);
 
-  const filtered = resolvedModules.filter((m) => slotFilter === "All" || m.slot === slotFilter);
+  const filtered = resolvedModules.filter((m) => {
+    if (slotFilter === "All") return true;
+    if (slotFilter === "Universal") return Boolean(m.tags?.includes("white") || m.tags?.includes("universal"));
+    return m.slot === slotFilter;
+  });
   const groupedBySlot = useMemo(() => {
     const grouped: Record<string, ModuleDef[]> = {};
     for (const entry of filtered) {
@@ -76,8 +80,8 @@ export default function ModulePalette() {
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-2">
-        {(["All", "Power", "Ammo", "Utility"] as const).map((k: "All" | SlotType) => {
+      <div className="sticky top-10 z-10 flex gap-2 bg-neutral-900 pt-2 pb-2">
+        {(["All", "Universal", "Power", "Ammo", "Utility"] as const).map((k: "All" | "Universal" | SlotType) => {
           const isActive = slotFilter === k;
           return (
             <button
@@ -95,7 +99,7 @@ export default function ModulePalette() {
         })}
       </div>
 
-      <p className="text-xs text-neutral-500 leading-relaxed">
+      <p className="sticky top-20 z-10 bg-neutral-900 text-xs text-neutral-500 leading-relaxed">
         Modules auto-scale to the selected hull. Look for the size badge and mark (Mk.I–Mk.IV) to see which variant you’re fitting.
       </p>
 
@@ -125,6 +129,9 @@ export default function ModulePalette() {
                       >
                         {entry.slot}
                       </span>
+                      {entry.tags?.includes("white") && (
+                        <span className="px-2 py-0.5 rounded text-[10px] tracking-[0.3em] border border-white/60 text-white bg-white/5">UNIVERSAL</span>
+                      )}
                       <span className="text-[11px] px-2 py-0.5 rounded bg-neutral-800 text-neutral-300">{entry.shape.sizeClass}</span>
                       {entry.baseBW && (
                         <span className="text-[11px] px-2 py-0.5 rounded bg-neutral-800 text-neutral-300">BW {entry.baseBW}</span>

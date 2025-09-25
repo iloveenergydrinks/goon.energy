@@ -83,6 +83,32 @@ const utilityList = [
   ["Emergency Patch Mesh", "Utility", "S1", "Temporary hull patch that decays; buys time for repairs."],
 ];
 
+// Neutral storage/fluids (combat-neutral). Will generate P/A/U variants per item.
+// Format: [name, code, stats]
+const neutralStorageList = [
+  ["Cargo Hold Bay", "S2", { cargo_m3: 100 }],
+  ["Bulk Storage Frame", "M2", { cargo_m3: 200 }],
+  ["Micro Cargo Locker", "S1", { cargo_m3: 30 }],
+  ["Pallet Stow Rack", "S3", { cargo_m3: 80 }],
+  ["Container Clamp Node", "S1", { cargo_m3: 25 }],
+  ["Ore Hopper", "S2", { ore_m3: 120 }],
+  ["Core Sample Locker", "S1", { ore_m3: 40 }],
+  ["Slag Bin", "S1", { ore_m3: 60 }],
+  ["Aux Fuel Bladder", "S2", { fuel_m3: 60 }],
+  ["Drop Tank Couplers", "S3", { fuel_m3: 100 }],
+  ["Micro Fuel Cell Rack", "S1", { fuel_m3: 20 }],
+  ["Ballast Tank Module", "S2", { ballast_m3: 50 }],
+  ["Trim Ballast Pods", "S1", { ballast_m3: 20 }],
+  ["Variable Ballast Manifold", "S2", { ballast_m3: 40 }],
+  ["Coolant Reservoir", "S2", { coolant_m3: 50 }],
+  ["Coolant Header Tank", "S1", { coolant_m3: 25 }],
+  ["Heat Sump Baffle", "S1", { coolant_m3: 15 }],
+  ["Ammunition Locker", "S1", { ammoCap: 10 }],
+  ["Magazine Bay", "S2", { ammoCap: 20 }],
+  ["Blanking Plate", "S1", {}],
+  ["Spacer Frame", "S2", {}],
+];
+
 function slugify(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
 }
@@ -196,12 +222,62 @@ async function upsertModules(list) {
   }
 }
 
+async function upsertNeutralUniversal(list) {
+  const slotVariants = ["Power", "Ammo", "Utility"];
+  for (const [name, code, stats] of list) {
+    for (const slot of slotVariants) {
+      const id = `${name} (${slot})`;
+
+      // Prefer curated shapes/baseBW if present
+      const modulesJsonPath = path.resolve(process.cwd(), "app/data/modules.json");
+      let prior = null;
+      if (fs.existsSync(modulesJsonPath)) {
+        const raw = fs.readFileSync(modulesJsonPath, "utf8");
+        /** @type {Array<any>} */
+        const priorList = JSON.parse(raw);
+        prior = priorList.find((m) => m.id === id) || null;
+      }
+
+      let shape, baseBW;
+      if (prior?.shape) {
+        shape = prior.shape;
+        baseBW = typeof prior.baseBW === "number" ? prior.baseBW : computeBaseBW(prior.shape, slot, name);
+      } else {
+        ({ shape } = shapeFor(code, slot, name));
+        baseBW = computeBaseBW(shape, slot, name);
+      }
+
+      // Explicit neutral stats only (no derived combat stats)
+      const finalStats = prior?.stats ? { ...prior.stats, ...stats } : stats;
+      const tags = Array.from(new Set(["neutral", "white", "universal", "storage", slot.toLowerCase(), `code:${code}`]));
+
+      await prisma.module.upsert({
+        where: { id },
+        update: { slot, shape, stats: finalStats, description: "Neutral storage/fluids module", baseBW, tags },
+        create: { id, slot, shape, stats: finalStats, description: "Neutral storage/fluids module", baseBW, tags },
+      });
+      // eslint-disable-next-line no-console
+      console.log(`Upserted neutral universal ${id}`);
+    }
+  }
+}
+
 async function main() {
-  const keepIds = [...powerList, ...ammoList, ...utilityList].map(([name]) => name);
+  const keepIds = [
+    ...powerList.map(([name]) => name),
+    ...ammoList.map(([name]) => name),
+    ...utilityList.map(([name]) => name),
+    ...neutralStorageList.flatMap(([name]) => [
+      `${name} (Power)`,
+      `${name} (Ammo)`,
+      `${name} (Utility)`,
+    ]),
+  ];
   await prisma.module.deleteMany({ where: { id: { notIn: keepIds } } });
   await upsertModules(powerList);
   await upsertModules(ammoList);
   await upsertModules(utilityList);
+  await upsertNeutralUniversal(neutralStorageList);
 }
 
 main()

@@ -83,7 +83,7 @@ export default function BuilderPage() {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-[360px_1fr_360px] gap-6">
+        <div className="grid grid-cols-[420px_1fr_360px] gap-6">
           {/* Left Panel - Module Palette */}
           <div className="space-y-4">
             <div className="bg-neutral-900 rounded-lg p-4">
@@ -105,7 +105,9 @@ export default function BuilderPage() {
             </div>
             
             <div className="bg-neutral-900 rounded-lg p-4 h-fit max-h-[calc(100vh-12rem)] overflow-y-auto">
-              <h2 className="text-lg font-semibold mb-3">Available Modules</h2>
+              <div className="sticky top-0 z-20 -mx-4 px-4 pt-2 pb-2 bg-neutral-900 border-b border-neutral-800">
+                <h2 className="text-lg font-semibold">Available Modules</h2>
+              </div>
               <ModulePalette />
             </div>
             
