@@ -115,10 +115,6 @@ export default function ModulePalette() {
                     : "border-neutral-800 hover:border-neutral-600 hover:bg-neutral-900/40"
                 }`}>
                   <summary
-                    onClick={(e) => {
-                      startDrag(entry.id);
-                      e.preventDefault();
-                    }}
                     className="cursor-pointer list-none p-3 flex items-center justify-between gap-2"
                   >
                     <div className="flex flex-wrap items-center gap-2 min-w-0">
@@ -140,7 +136,15 @@ export default function ModulePalette() {
                         <span className="text-[11px] px-1.5 py-0.5 rounded bg-neutral-700">x{placedCount.get(entry.id)}</span>
                       ) : null}
                     </div>
-                    <span className="text-xs text-neutral-500 shrink-0">More</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        className="text-[11px] px-2 py-0.5 rounded border border-neutral-700 text-neutral-300 hover:border-neutral-500 hover:text-white transition-colors"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); startDrag(entry.id); }}
+                      >
+                        Pick up
+                      </button>
+                      <span className="text-xs text-neutral-500">More</span>
+                    </div>
                   </summary>
                   <div className="px-3 pb-3 text-xs space-y-2">
                     {entry.description && (
