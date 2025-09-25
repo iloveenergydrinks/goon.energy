@@ -83,7 +83,7 @@ export default function BuilderPage() {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-[320px_1fr_320px] gap-6">
+        <div className="grid grid-cols-[360px_1fr_360px] gap-6">
           {/* Left Panel - Module Palette */}
           <div className="space-y-4">
             <div className="bg-neutral-900 rounded-lg p-4">
@@ -104,7 +104,7 @@ export default function BuilderPage() {
               </div>
             </div>
             
-            <div className="bg-neutral-900 rounded-lg p-4 h-fit max-h-[calc(100vh-20rem)] overflow-y-auto">
+            <div className="bg-neutral-900 rounded-lg p-4 h-fit max-h-[calc(100vh-12rem)] overflow-y-auto">
               <h2 className="text-lg font-semibold mb-3">Available Modules</h2>
               <ModulePalette />
             </div>
@@ -124,7 +124,7 @@ export default function BuilderPage() {
           </div>
 
           {/* Right Panel - Stats */}
-          <div className="bg-neutral-900 rounded-lg p-4 h-fit sticky top-8">
+          <div className="bg-neutral-900 rounded-lg p-4 h-fit sticky top-8 max-h-[calc(100vh-10rem)] overflow-y-auto">
             <h2 className="text-lg font-semibold mb-3">Ship Statistics</h2>
             <StatsPanel />
           </div>

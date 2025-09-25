@@ -121,7 +121,7 @@ export default function ModulePalette() {
                     }}
                     className="cursor-pointer list-none p-3 flex items-center justify-between gap-2"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 min-w-0">
                       <span className="text-white font-medium truncate">{formatModuleTitle(entry)}</span>
                       <span
                         className="px-1.5 py-0.5 rounded text-[11px] font-medium"
@@ -134,7 +134,7 @@ export default function ModulePalette() {
                         <span className="text-[11px] px-2 py-0.5 rounded bg-neutral-800 text-neutral-300">BW {entry.baseBW}</span>
                       )}
                       {topStats.map(([k, v]) => (
-                        <span key={k} className="text-[11px] px-2 py-0.5 rounded bg-neutral-800 text-neutral-300 shrink-0">{k}: {String(v)}</span>
+                        <span key={k} className="text-[11px] px-2 py-0.5 rounded bg-neutral-800 text-neutral-300">{k}: {String(v)}</span>
                       ))}
                       {placedCount.get(entry.id) ? (
                         <span className="text-[11px] px-1.5 py-0.5 rounded bg-neutral-700">x{placedCount.get(entry.id)}</span>

@@ -16,7 +16,7 @@ export default function GridCanvas() {
   const commitPlacement = useFittingStore((s) => s.commitPlacement);
   const placed = useFittingStore((s) => s.placed);
   
-  const cellSize = 48;
+  const cellSize = 52;
   
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
