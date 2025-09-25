@@ -131,13 +131,7 @@ export default function SecondaryStep() {
 
           return (
             <details key={secondary.id} className={`rounded-md border transition-colors ${isSelected ? 'border-blue-500/80 bg-blue-500/5' : 'border-neutral-800 hover:border-neutral-600 hover:bg-neutral-900/40'}`}>
-              <summary
-                onClick={(e) => {
-                  if (!isDisabled) toggleSecondary(secondary.id);
-                  e.preventDefault();
-                }}
-                className={`cursor-pointer list-none p-3 flex items-center justify-between gap-2 ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
+              <summary className="cursor-pointer list-none p-3 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-3 min-w-0">
                   <span className="font-semibold text-sm text-white/90 truncate">{secondary.name}</span>
                   <span className={`text-[11px] px-2 py-0.5 rounded ${secondary.category === 'Offensive' ? 'bg-red-500/20 text-red-400' : secondary.category === 'Defensive' ? 'bg-green-500/20 text-green-400' : 'bg-blue-500/20 text-blue-400'}`}>{secondary.category}</span>
@@ -146,7 +140,16 @@ export default function SecondaryStep() {
                     <span className="text-[11px] px-2 py-0.5 rounded bg-neutral-800 text-neutral-300">ΔP/A/U {secondary.deltaPowerSlots}/{secondary.deltaAmmoSlots}/{secondary.deltaUtilitySlots}</span>
                   )}
                 </div>
-                <span className="text-xs text-neutral-500 shrink-0">More</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    className={`text-[11px] px-2 py-0.5 rounded border transition-colors ${isSelected ? 'border-blue-500 text-blue-400' : isDisabled ? 'border-neutral-800 text-neutral-600 cursor-not-allowed' : 'border-neutral-700 text-neutral-300 hover:border-neutral-500 hover:text-white'}`}
+                    disabled={isDisabled}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (!isDisabled) toggleSecondary(secondary.id); }}
+                  >
+                    {isSelected ? 'Selected' : 'Select'}
+                  </button>
+                  <span className="text-xs text-neutral-500">More</span>
+                </div>
               </summary>
               <div className="px-3 pb-3 space-y-3">
                 <p className="text-sm text-neutral-400">{secondary.description}</p>
