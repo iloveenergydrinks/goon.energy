@@ -99,7 +99,7 @@ export default function ModulePalette() {
         Modules auto-scale to the selected hull. Look for the size badge and mark (Mk.I–Mk.IV) to see which variant you’re fitting.
       </p>
 
-      <div className="grid gap-4">
+      <div className="grid gap-2">
         {Object.entries(groupedBySlot).map(([slotType, moduleList]) => (
           <div key={slotType} className="space-y-2">
             <div className="text-xs uppercase tracking-[0.35em] text-neutral-500 border-b border-neutral-800 pb-1">
@@ -107,60 +107,48 @@ export default function ModulePalette() {
             </div>
             {moduleList.map((entry) => {
               const slotColor = SLOT_COLORS[entry.slot as SlotType];
+              const topStats = entry.stats ? Object.entries(entry.stats).slice(0, 2) : [];
               return (
-                <button
-                  key={entry.id}
-                  className={`relative rounded-md p-3 text-sm text-left overflow-hidden transition-all ${
-                    draggingModuleId === entry.id
-                      ? "bg-blue-600/20 border-2 border-blue-600"
-                      : "bg-neutral-800 hover:bg-neutral-700 border-2 border-transparent"
-                  }`}
-                  onClick={() => startDrag(entry.id)}
-                >
-                  <div
-                    className="absolute left-0 top-0 bottom-0 w-1"
-                    style={{ backgroundColor: slotColor }}
-                  />
-                  <div className="pl-2">
-                    <div className="font-medium flex items-center justify-between gap-2">
-                      <span className="text-white">
-                        {formatModuleTitle(entry)}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        {placedCount.get(entry.id) ? (
-                          <span className="text-xs px-1.5 py-0.5 rounded bg-neutral-700">
-                            x{placedCount.get(entry.id)}
-                          </span>
-                        ) : null}
-                        {draggingModuleId === entry.id && (
-                          <span className="text-xs px-1.5 py-0.5 rounded bg-blue-600 text-white">
-                            Active
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-xs text-neutral-400 flex items-center gap-2 mt-1">
+                <details key={entry.id} className={`rounded-md border transition-colors ${
+                  draggingModuleId === entry.id
+                    ? "border-blue-600 bg-blue-600/5"
+                    : "border-neutral-800 hover:border-neutral-600 hover:bg-neutral-900/40"
+                }`}>
+                  <summary
+                    onClick={(e) => {
+                      startDrag(entry.id);
+                      e.preventDefault();
+                    }}
+                    className="cursor-pointer list-none p-3 flex items-center justify-between gap-2"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="text-white font-medium truncate">{formatModuleTitle(entry)}</span>
                       <span
-                        className="px-1.5 py-0.5 rounded font-medium"
-                        style={{
-                          backgroundColor: `${slotColor}30`,
-                          color: slotColor,
-                          border: `1px solid ${slotColor}40`,
-                        }}
+                        className="px-1.5 py-0.5 rounded text-[11px] font-medium"
+                        style={{ backgroundColor: `${slotColor}30`, color: slotColor, border: `1px solid ${slotColor}40` }}
                       >
                         {entry.slot}
                       </span>
-                      <span className="text-neutral-500">Size: {entry.shape.sizeClass}</span>
+                      <span className="text-[11px] px-2 py-0.5 rounded bg-neutral-800 text-neutral-300">{entry.shape.sizeClass}</span>
                       {entry.baseBW && (
-                        <span className="text-neutral-500">BW: {entry.baseBW}</span>
+                        <span className="text-[11px] px-2 py-0.5 rounded bg-neutral-800 text-neutral-300">BW {entry.baseBW}</span>
                       )}
+                      {topStats.map(([k, v]) => (
+                        <span key={k} className="text-[11px] px-2 py-0.5 rounded bg-neutral-800 text-neutral-300 shrink-0">{k}: {String(v)}</span>
+                      ))}
+                      {placedCount.get(entry.id) ? (
+                        <span className="text-[11px] px-1.5 py-0.5 rounded bg-neutral-700">x{placedCount.get(entry.id)}</span>
+                      ) : null}
                     </div>
+                    <span className="text-xs text-neutral-500 shrink-0">More</span>
+                  </summary>
+                  <div className="px-3 pb-3 text-xs space-y-2">
                     {entry.description && (
-                      <div className="text-xs text-neutral-500 mt-1 leading-relaxed">{entry.description}</div>
+                      <div className="text-neutral-400 leading-relaxed">{entry.description}</div>
                     )}
                     <ModuleMeta module={entry} />
                   </div>
-                </button>
+                </details>
               );
             })}
           </div>

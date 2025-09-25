@@ -1,0 +1,474 @@
+[
+  {
+    "id": "command_uplink_mast",
+    "name": "Command Uplink Mast",
+    "description": "Fleet-wide uplink array that boosts allied lock speed, sensor quality, and tracking while active.",
+    "archetypeFocus": ["support"],
+    "powerDraw": 26,
+    "tags": ["support", "range:area", "tempo:sustained", "emissions:high", "has_ammo"],
+    "baseStats": {
+      "ally_lock_speed_pct": 25,
+      "ally_snr_pct": 10,
+      "ally_tracking_pct": 8,
+      "grace_seconds": 1.5,
+      "bw": 24,
+      "heat": 14,
+      "radius": 120
+    },
+    "metadata": {
+      "sizeScaling": {"S": 0.8, "M": 1, "L": 1.25},
+      "range": {"type": "area", "radius": 120},
+      "tempo": {"type": "sustained"},
+      "emissions": "high",
+      "ammoVariants": [
+        {"id": "wideband", "name": "Wideband", "mods": {"radius_pct": 30, "ally_lock_speed_pct": -30, "ally_snr_pct": -30, "ally_tracking_pct": -30, "power_add": 4}},
+        {"id": "focused", "name": "Focused", "mods": {"radius_pct": -35, "ally_lock_speed_pct": 40, "ally_snr_pct": 40, "ally_tracking_pct": 40, "heat_add": 4}},
+        {"id": "low_sig", "name": "Low-Signature", "mods": {"ally_lock_speed_pct": -15, "ally_snr_pct": -15, "ally_tracking_pct": -15, "emissions_pct": -40}}
+      ]
+    }
+  },
+  {
+    "id": "signal_denial_emitter",
+    "name": "Signal Denial Emitter",
+    "description": "Emitter that sends out powerful ECM pulses, reducing enemy sensor quality and breaking fragile locks.",
+    "archetypeFocus": ["support"],
+    "powerDraw": 24,
+    "tags": ["support", "ecm", "range:area", "tempo:burst", "emissions:high_on_pulse", "has_ammo"],
+    "baseStats": {
+      "enemy_snr_pct": -25,
+      "effect_duration_seconds": 5,
+      "fragile_lock_q_break": 0.35,
+      "bw": 24,
+      "heat": 18,
+      "radius": 100,
+      "pulse_seconds": 2.5,
+      "cooldown_seconds": 7
+    },
+    "metadata": {
+      "sizeScaling": {"S": 0.8, "M": 1, "L": 1.25},
+      "range": {"type": "area", "radius": 100},
+      "tempo": {"type": "burst", "pulse_seconds": 2.5, "cooldown_seconds": 7},
+      "emissions": "high_on_pulse",
+      "ammoVariants": [
+        {"id": "narrowband", "name": "Narrowband", "mods": {"radius_pct": -40, "enemy_snr_pct": -15}},
+        {"id": "wideband", "name": "Wideband", "mods": {"radius_pct": 40, "enemy_snr_pct": 10}},
+        {"id": "staggered", "name": "Staggered Pulse", "mods": {"pulses": 3, "pulse_interval_seconds": 1, "enemy_snr_pct_each": -12}}
+      ]
+    }
+  },
+  {
+    "id": "triage_array",
+    "name": "Triage Array",
+    "description": "Projects a protective cone that reduces incoming kinetic damage for allies inside.",
+    "archetypeFocus": ["defender"],
+    "powerDraw": 28,
+    "tags": ["defender", "range:cone", "tempo:sustained", "emissions:medium" , "stacking:diminishing"],
+    "baseStats": {
+      "ally_kinetic_damage_taken_pct": -18,
+      "bw": 24,
+      "heat": 20,
+      "radius": 90,
+      "arc_deg": 70
+    },
+    "metadata": {
+      "sizeScaling": {"S": 0.8, "M": 1, "L": 1.25},
+      "range": {"type": "cone", "radius": 90, "arc_deg": 70},
+      "tempo": {"type": "sustained"},
+      "emissions": "medium",
+      "ammoVariants": [
+        {"id": "wide_cone", "name": "Wide Cone", "mods": {"arc_deg_add": 30, "ally_kinetic_damage_taken_pct_add": 5}},
+        {"id": "hard_focus", "name": "Hard Focus", "mods": {"arc_deg_add": -25, "ally_kinetic_damage_taken_pct_add": -6}},
+        {"id": "coolant_blend", "name": "Coolant Blend", "mods": {"ally_kinetic_damage_taken_pct_add": 3, "ally_heat_gen_pct": -25}}
+      ]
+    }
+  },
+  {
+    "id": "countermass_interceptor",
+    "name": "Countermass Interceptor",
+    "description": "Defensive array that bursts countermass fragments to intercept or degrade incoming projectiles.",
+    "archetypeFocus": ["defender"],
+    "powerDraw": 18,
+    "tags": ["defender", "range:area", "tempo:burst_dot", "emissions:medium", "has_ammo"],
+    "baseStats": {
+      "projectile_threshold_per_s": 60,
+      "heavy_hit_quality_penalty_pct": -15,
+      "bw": 24,
+      "heat": 16,
+      "radius": 45,
+      "burst_seconds": 3,
+      "cooldown_seconds": 10,
+      "ammo_mag": 12,
+      "reload_seconds": 6
+    },
+    "metadata": {
+      "sizeScaling": {"S": 0.8, "M": 1, "L": 1.25},
+      "range": {"type": "area", "radius": 45},
+      "tempo": {"type": "burst_dot", "burst_seconds": 3, "cooldown_seconds": 10},
+      "emissions": "medium",
+      "ammoVariants": [
+        {"id": "high_threshold", "name": "High Threshold", "mods": {"projectile_threshold_per_s_add": 25, "heat_add": 4}},
+        {"id": "wider_bubble", "name": "Wider Bubble", "mods": {"radius_add": 20, "projectile_threshold_per_s_add": -20}},
+        {"id": "k_scramble", "name": "K-Scramble", "mods": {"projectile_threshold_per_s_add": -10, "enemy_tracking_pct": -8}}
+      ]
+    }
+  },
+  {
+    "id": "reaper_autocannon",
+    "name": "Reaper Autocannon",
+    "description": "Rapid-fire autocannon for close-range sustained pressure, heavy ammo use.",
+    "archetypeFocus": ["assault"],
+    "powerDraw": 18,
+    "tags": ["assault", "range:weapon", "tempo:sustained", "emissions:medium", "has_ammo"],
+    "baseStats": {
+      "damage": 22,
+      "tracking": 28,
+      "bw": 24,
+      "heat": 10,
+      "optimal": 65,
+      "falloff": 20,
+      "rof_per_s": 3.2,
+      "ammo_mag": 90,
+      "reload_seconds": 5
+    },
+    "metadata": {
+      "sizeScaling": {"S": 0.8, "M": 1, "L": 1.25},
+      "range": {"type": "weapon", "optimal": 65, "falloff": 20},
+      "tempo": {"type": "sustained", "rof_per_s": 3.2},
+      "emissions": "medium",
+      "ammoVariants": [
+        {"id": "dense_core", "name": "Dense Core", "mods": {"damage_pct": 18, "optimal_pct": -10, "tracking_add": -4}},
+        {"id": "light_alloy", "name": "Light Alloy", "mods": {"optimal_pct": 15, "tracking_add": 6, "damage_pct": -12}},
+        {"id": "shrapnel", "name": "Shrapnel", "mods": {"dot_dps": 6, "dot_duration_s": 3, "max_stacks": 1, "damage_pct": -10}}
+      ]
+    }
+  },
+  {
+    "id": "shard_projector",
+    "name": "Shard Projector",
+    "description": "Launches swarms of high-velocity shards that embed and inflict ongoing hull damage.",
+    "archetypeFocus": ["assault"],
+    "powerDraw": 16,
+    "tags": ["assault", "range:weapon", "tempo:dot", "emissions:high", "has_ammo"],
+    "baseStats": {
+      "impact_damage": 12,
+      "dot_dps": 6,
+      "dot_duration_s": 3,
+      "max_stacks": 3,
+      "tracking": 24,
+      "bw": 24,
+      "heat": 16,
+      "optimal": 60,
+      "falloff": 15,
+      "impact_rof_per_s": 2,
+      "ammo_mag": 60,
+      "reload_seconds": 4
+    },
+    "metadata": {
+      "sizeScaling": {"S": 0.8, "M": 1, "L": 1.25},
+      "range": {"type": "weapon", "optimal": 60, "falloff": 15},
+      "tempo": {"type": "dot", "impact_rof_per_s": 2},
+      "emissions": "high",
+      "ammoVariants": [
+        {"id": "scatter", "name": "Scatter", "mods": {"optimal_pct": -10, "falloff_pct": 10, "max_stacks_add": 1, "impact_damage_pct": -10}},
+        {"id": "heavy_flechette", "name": "Heavy Flechette", "mods": {"impact_damage_pct": 25, "dot_dps_pct": -40}},
+        {"id": "tracer_resin", "name": "Tracer Resin", "mods": {"dot_dps": 5, "dot_duration_s": 5, "emissions_pct": 25}}
+      ]
+    }
+  },
+  {
+    "id": "thunderlance_driver",
+    "name": "Thunderlance Driver",
+    "description": "Heavy long-charge rail driver delivering massive alpha strikes at long range.",
+    "archetypeFocus": ["artillery"],
+    "powerDraw": 30,
+    "tags": ["artillery", "range:weapon", "tempo:alpha", "emissions:high", "has_ammo"],
+    "baseStats": {
+      "damage": 180,
+      "tracking": 6,
+      "bw": 24,
+      "heat": 24,
+      "optimal": 170,
+      "falloff": 30,
+      "shots_per_s": 0.5,
+      "charge_seconds": 1.2,
+      "ammo_mag": 3,
+      "reload_seconds": 6
+    },
+    "metadata": {
+      "sizeScaling": {"S": 0.8, "M": 1, "L": 1.25},
+      "range": {"type": "weapon", "optimal": 170, "falloff": 30},
+      "tempo": {"type": "alpha", "shots_per_s": 0.5, "charge_seconds": 1.2},
+      "emissions": "high",
+      "ammoVariants": [
+        {"id": "long_rod", "name": "Long-Rod", "mods": {"optimal_pct": 10, "damage_pct": -12}},
+        {"id": "dense_sabot", "name": "Dense Sabot", "mods": {"damage_pct": 18, "tracking_add": -2, "heat_add": 3}},
+        {"id": "hv_spike", "name": "HV Spike", "mods": {"charge_seconds_pct": -30, "damage_pct": -15, "tracking_add": 2}}
+      ]
+    }
+  },
+  {
+    "id": "tempest_barrager",
+    "name": "Tempest Barrager",
+    "description": "Belt-fed siege cannon for long-range sustained bombardment and suppression.",
+    "archetypeFocus": ["artillery"],
+    "powerDraw": 20,
+    "tags": ["artillery", "range:weapon", "tempo:sustained", "emissions:medium", "has_ammo"],
+    "baseStats": {
+      "damage": 60,
+      "tracking": 8,
+      "bw": 24,
+      "heat": 14,
+      "optimal": 160,
+      "falloff": 40,
+      "rof_per_s": 1.2,
+      "ammo_mag": 30,
+      "reload_seconds": 4
+    },
+    "metadata": {
+      "sizeScaling": {"S": 0.8, "M": 1, "L": 1.25},
+      "range": {"type": "weapon", "optimal": 160, "falloff": 40},
+      "tempo": {"type": "sustained", "rof_per_s": 1.2},
+      "emissions": "medium",
+      "ammoVariants": [
+        {"id": "light_belt", "name": "Light Belt", "mods": {"optimal_pct": 15, "damage_pct": -12}},
+        {"id": "dense_belt", "name": "Dense Belt", "mods": {"damage_pct": 15, "rof_per_s_pct": -10, "tracking_add": -3}},
+        {"id": "suppression", "name": "Suppression", "mods": {"damage_pct": -10, "enemy_tracking_pct": -6, "debuff_duration_s": 2}}
+      ]
+    }
+  },
+  {
+    "id": "needle_rail",
+    "name": "Needle Rail",
+    "description": "Precision micro-rail optimized for high tracking and anti-small targets.",
+    "archetypeFocus": ["recon"],
+    "powerDraw": 16,
+    "tags": ["recon", "range:weapon", "tempo:alpha", "emissions:low", "has_ammo"],
+    "baseStats": {
+      "damage": 105,
+      "tracking": 14,
+      "bw": 22,
+      "heat": 10,
+      "optimal": 120,
+      "falloff": 40,
+      "shots_per_s": 0.9,
+      "ammo_mag": 12,
+      "reload_seconds": 3
+    },
+    "metadata": {
+      "sizeScaling": {"S": 0.8, "M": 1, "L": 1.25},
+      "range": {"type": "weapon", "optimal": 120, "falloff": 40},
+      "tempo": {"type": "alpha", "shots_per_s": 0.9},
+      "emissions": "low",
+      "ammoVariants": [
+        {"id": "microrod", "name": "Microrod", "mods": {"tracking_add": 4, "damage_pct": -12}},
+        {"id": "mass_tipped", "name": "Mass-Tipped", "mods": {"damage_pct": 15, "tracking_add": -3}},
+        {"id": "marking_round", "name": "Marking Round", "mods": {"damage_pct": -20, "ally_hit_quality_pct": 8, "duration_s": 4}}
+      ]
+    }
+  },
+  {
+    "id": "scout_marker_array",
+    "name": "Scout Marker Array",
+    "description": "Fires marking rounds that make targets easier for allies to hit and deal more damage to.",
+    "archetypeFocus": ["recon"],
+    "powerDraw": 18,
+    "tags": ["recon", "range:lock", "tempo:burst", "emissions:high_on_mark", "has_ammo"],
+    "baseStats": {
+      "ally_tracking_pct": 12,
+      "ally_hit_quality_pct": 10,
+      "ally_damage_pct": 6,
+      "bw": 24,
+      "heat": 12,
+      "radius": 110,
+      "duration_s": 6,
+      "cooldown_s": 10,
+      "ammo_mag": 10,
+      "reload_seconds": 4
+    },
+    "metadata": {
+      "sizeScaling": {"S": 0.8, "M": 1, "L": 1.25},
+      "range": {"type": "lock", "radius": 110},
+      "tempo": {"type": "burst", "duration_s": 6, "cooldown_s": 10},
+      "emissions": "high_on_mark",
+      "ammoVariants": [
+        {"id": "wide_mark", "name": "Wide Mark", "mods": {"duration_s": 4, "radius_pct": 20, "ally_tracking_pct": -25, "ally_hit_quality_pct": -25, "ally_damage_pct": -25}},
+        {"id": "focused_mark", "name": "Focused Mark", "mods": {"duration_s": 8, "ally_tracking_pct": 25, "ally_hit_quality_pct": 25, "ally_damage_pct": 25, "radius_pct": -40}},
+        {"id": "persistent_trace", "name": "Persistent Trace", "mods": {"duration_s": 10, "ally_tracking_pct": -35, "ally_hit_quality_pct": -35, "ally_damage_pct": -35, "emissions_pct": -40}}
+      ]
+    }
+  },
+  {
+    "id": "signal_scrambler_array",
+    "name": "Signal Scrambler Array",
+    "description": "Wideband scrambler that continuously reduces enemy sensor quality and tracking.",
+    "archetypeFocus": ["infiltrator"],
+    "powerDraw": 24,
+    "tags": ["infiltrator", "range:area", "tempo:sustained", "emissions:high"],
+    "baseStats": {
+      "enemy_snr_pct": -18,
+      "enemy_tracking_add": -6,
+      "lock_break_threshold_q": 0.3,
+      "bw": 24,
+      "heat": 18,
+      "radius": 100
+    },
+    "metadata": {
+      "sizeScaling": {"S": 0.8, "M": 1, "L": 1.25},
+      "range": {"type": "area", "radius": 100},
+      "tempo": {"type": "sustained"},
+      "emissions": "high",
+      "ammoVariants": [
+        {"id": "low_profile", "name": "Low-Profile", "mods": {"enemy_snr_pct": -14, "enemy_tracking_add": 0, "emissions_pct": -50}},
+        {"id": "overdrive", "name": "Overdrive", "mods": {"enemy_snr_pct": -23, "enemy_tracking_add": -8, "heat_add": 5}},
+        {"id": "pulse_gate", "name": "Pulse-Gate", "mods": {"pulse_on_s": 2, "pulse_off_s": 3, "enemy_snr_pct": -20}}
+      ]
+    }
+  },
+  {
+    "id": "ghost_projector",
+    "name": "Ghost Projector",
+    "description": "Deploys decoys that mimic ship signatures, misleading enemy targeting systems.",
+    "archetypeFocus": ["infiltrator"],
+    "powerDraw": 16,
+    "tags": ["infiltrator", "range:spawn", "tempo:burst", "emissions:medium"],
+    "baseStats": {
+      "decoy_lock_quality_cap_q": 0.4,
+      "kinematic_fidelity_pct": 100,
+      "bw": 22,
+      "heat": 18,
+      "decoys": 2,
+      "radius": 90,
+      "duration_s": 8,
+      "cooldown_s": 14
+    },
+    "metadata": {
+      "sizeScaling": {"S": 0.8, "M": 1, "L": 1.25},
+      "range": {"type": "spawn", "radius": 90, "decoys": 2},
+      "tempo": {"type": "burst", "duration_s": 8, "cooldown_s": 14},
+      "emissions": "medium",
+      "ammoVariants": [
+        {"id": "tri_ghost", "name": "Tri-Ghost", "mods": {"decoys_add": 1, "duration_s_add": -2}},
+        {"id": "deep_ghost", "name": "Deep Ghost", "mods": {"duration_s_add": 4, "kinematic_fidelity_pct": 125}},
+        {"id": "flash_ghost", "name": "Flash Ghost", "mods": {"duration_s": 3, "instant_lock_break_radius": 25}}
+      ]
+    }
+  },
+  {
+    "id": "drone_control_array",
+    "name": "Drone Control Array",
+    "description": "Main rig for combat drone swarms, enabling sustained distributed fire.",
+    "archetypeFocus": ["carrier"],
+    "powerDraw": 22,
+    "tags": ["carrier", "range:leash", "tempo:sustained", "emissions:medium"],
+    "baseStats": {
+      "drones_controlled": 6,
+      "launch_rate_per_s": 1.2,
+      "replacement_seconds": 8,
+      "bw": 28,
+      "heat": 16,
+      "radius": 110
+    },
+    "metadata": {
+      "sizeScaling": {"S": 0.8, "M": 1, "L": 1.25},
+      "range": {"type": "leash", "radius": 110},
+      "tempo": {"type": "sustained"},
+      "emissions": "medium",
+      "ammoVariants": [
+        {"id": "skirmishers", "name": "Skirmishers", "mods": {"drone_speed_pct": 20, "drone_tracking_pct": 15, "drone_dps_pct": -15}},
+        {"id": "brawlers", "name": "Brawlers", "mods": {"drone_dps_pct": 20, "drone_speed_pct": -20}},
+        {"id": "siegelets", "name": "Siegelets", "mods": {"drone_range_pct": 20, "drone_rof_pct": -15, "drone_damage_pct": 10}}
+      ]
+    }
+  },
+  {
+    "id": "mining_drone_hive",
+    "name": "Mining Drone Hive",
+    "description": "Industrial drone hive optimized for sustained voxel extraction and resource hauling.",
+    "archetypeFocus": ["carrier"],
+    "powerDraw": 20,
+    "tags": ["carrier", "range:leash", "tempo:sustained", "emissions:high"],
+    "baseStats": {
+      "mining_drones": 6,
+      "throughput_per_drone": 1,
+      "bw": 28,
+      "heat": 14,
+      "radius": 80
+    },
+    "metadata": {
+      "sizeScaling": {"S": 0.8, "M": 1, "L": 1.25},
+      "range": {"type": "leash", "radius": 80},
+      "tempo": {"type": "sustained"},
+      "emissions": "high",
+      "ammoVariants": [
+        {"id": "high_flow", "name": "High-Flow", "mods": {"throughput_pct": 20, "heat_pct": 20}},
+        {"id": "refiner", "name": "Refiner", "mods": {"throughput_pct": -10, "purity_pct": 25}},
+        {"id": "quiet_ops", "name": "Quiet Ops", "mods": {"throughput_pct": -15, "emissions_pct": -40}}
+      ]
+    }
+  },
+  {
+    "id": "siege_bastion_projector",
+    "name": "Siege Bastion Projector",
+    "description": "Deploys a bastion stance increasing own durability while emitting saturation fire.",
+    "archetypeFocus": ["bulwark"],
+    "powerDraw": 32,
+    "tags": ["bulwark", "range:self_area", "tempo:stance", "emissions:high"],
+    "baseStats": {
+      "self_speed_pct": -25,
+      "self_turn_pct": -40,
+      "self_kinetic_incoming_pct": -20,
+      "saturation_dps": 45,
+      "saturation_interval_s": 2,
+      "bw": 28,
+      "heat": 26,
+      "radius": 60,
+      "spinup_s": 3,
+      "duration_s": 20,
+      "cooldown_s": 25
+    },
+    "metadata": {
+      "sizeScaling": {"S": 0.8, "M": 1, "L": 1.25},
+      "range": {"type": "self_area", "radius": 60},
+      "tempo": {"type": "stance", "spinup_s": 3, "duration_s": 20, "cooldown_s": 25},
+      "emissions": "high",
+      "ammoVariants": [
+        {"id": "hardened", "name": "Hardened", "mods": {"self_kinetic_incoming_pct": -26, "saturation_dps_pct": -15}},
+        {"id": "hot_grid", "name": "Hot Grid", "mods": {"saturation_dps_pct": 25, "heat_add": 6}},
+        {"id": "quick_bastion", "name": "Quick Bastion", "mods": {"spinup_s": 1.5, "duration_s": 12, "power_add": -4}}
+      ]
+    }
+  },
+  {
+    "id": "mine_dispersal_array",
+    "name": "Mine Dispersal Array",
+    "description": "Deploys mine clusters that create persistent denial zones around the ship.",
+    "archetypeFocus": ["bulwark"],
+    "powerDraw": 14,
+    "tags": ["bulwark", "range:deploy", "tempo:burst_persistent", "emissions:low", "has_ammo"],
+    "baseStats": {
+      "arm_s": 1,
+      "trigger_radius": 8,
+      "hit_damage": 140,
+      "bw": 24,
+      "heat": 10,
+      "min_range": 40,
+      "max_range": 70,
+      "salvo_mines": 6,
+      "salvos_per_mag": 3,
+      "reload_s": 8,
+      "mine_lifetime_s": 45
+    },
+    "metadata": {
+      "sizeScaling": {"S": 0.8, "M": 1, "L": 1.25},
+      "range": {"type": "deploy", "min_range": 40, "max_range": 70},
+      "tempo": {"type": "burst_persistent", "salvo_mines": 6, "salvos_per_mag": 3, "reload_s": 8, "mine_lifetime_s": 45},
+      "emissions": "low",
+      "ammoVariants": [
+        {"id": "proximity", "name": "Proximity", "mods": {"trigger_radius_pct": 50, "hit_damage_pct": -20}},
+        {"id": "heavy", "name": "Heavy", "mods": {"hit_damage_pct": 35, "mine_lifetime_s_add": -15, "drift_speed_pct": -30}},
+        {"id": "shrapnel", "name": "Shrapnel", "mods": {"hit_damage_pct": -25, "dot_field_dps": 20, "dot_field_duration_s": 4}}
+      ]
+    }
+  }
+]
+

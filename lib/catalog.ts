@@ -18,7 +18,9 @@ import { resolveModuleVariants } from "@/lib/catalog/variants/resolveModuleVaria
 import { prisma } from "@/lib/prisma";
 import hullSeed from "@/app/data/hulls.json";
 import primarySeed from "@/app/data/primaries.json";
+import newPrimaries from "@/app/data/primaries_new.json";
 import secondarySeed from "@/app/data/secondaries.json";
+import newSecondaries from "@/app/data/secondaries_new.json";
 import moduleSeed from "@/app/data/modules.json";
 
 function uniqueBy<T extends { id: string }>(list: T[]): T[] {
@@ -73,10 +75,151 @@ async function fetchCatalogRows() {
   ]);
 }
 
+type NewPrimarySpec = {
+  id: string;
+  name: string;
+  description?: string;
+  archetypeFocus?: string[];
+  powerDraw?: number;
+  tags?: string[];
+  baseStats?: Record<string, number>;
+  metadata?: unknown;
+};
+
+async function ensureNewPrimaries() {
+  const specs = (newPrimaries as unknown as Array<NewPrimarySpec>);
+  const keepIds = specs.map((x) => x.id);
+
+  // Remove any old primaries not in the new spec
+  await prisma.primarySystem.deleteMany({ where: { id: { notIn: keepIds } } });
+
+  for (const p of specs) {
+    // Attempt write with metadata; if client/schema mismatch, fallback to tagAffinities
+    try {
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      const updateData: any = {
+        name: p.name,
+        description: p.description,
+        baseStats: p.baseStats,
+        powerDraw: p.powerDraw ?? 30,
+        tags: p.tags ?? [],
+        archetypeFocus: (p.archetypeFocus ?? []) as string[],
+        metadata: p.metadata ?? {},
+      };
+      const createData: any = {
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        baseStats: p.baseStats,
+        minPowerSlots: 0,
+        minAmmoSlots: (p.baseStats as Record<string, number> | undefined)?.ammo_mag ? 4 : 0,
+        powerDraw: p.powerDraw ?? 30,
+        tags: p.tags ?? [],
+        archetypeFocus: (p.archetypeFocus ?? []) as string[],
+        metadata: p.metadata ?? {},
+      };
+      await prisma.primarySystem.upsert({
+        where: { id: p.id },
+        update: updateData,
+        create: createData,
+      });
+      /* eslint-enable @typescript-eslint/no-explicit-any */
+    } catch (err) {
+      const message = (err as Error)?.message ?? String(err);
+      if (!message.includes("Unknown argument `metadata`")) {
+        throw err;
+      }
+      // Fallback path: encode metadata under tagAffinities
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      const updateDataFallback: any = {
+        name: p.name,
+        description: p.description,
+        baseStats: p.baseStats,
+        powerDraw: p.powerDraw ?? 30,
+        tags: p.tags ?? [],
+        archetypeFocus: (p.archetypeFocus ?? []) as string[],
+        tagAffinities: { metadata: p.metadata ?? {} },
+      };
+      const createDataFallback: any = {
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        baseStats: p.baseStats,
+        minPowerSlots: 0,
+        minAmmoSlots: (p.baseStats as Record<string, number> | undefined)?.ammo_mag ? 4 : 0,
+        powerDraw: p.powerDraw ?? 30,
+        tags: p.tags ?? [],
+        archetypeFocus: (p.archetypeFocus ?? []) as string[],
+        tagAffinities: { metadata: p.metadata ?? {} },
+      };
+      await prisma.primarySystem.upsert({
+        where: { id: p.id },
+        update: updateDataFallback,
+        create: createDataFallback,
+      });
+      /* eslint-enable @typescript-eslint/no-explicit-any */
+    }
+  }
+}
+
+type NewSecondarySpec = {
+  id: string;
+  name: string;
+  description?: string;
+  archetypeFocus?: string[];
+  category: string;
+  powerDraw?: number;
+  tags?: string[];
+  baseStats?: Record<string, number>;
+  tagAffinities?: unknown;
+};
+
+async function ensureNewSecondaries() {
+  const specs = (newSecondaries as unknown as Array<NewSecondarySpec>);
+  const keepIds = specs.map((x) => x.id);
+  await prisma.secondarySystem.deleteMany({ where: { id: { notIn: keepIds } } });
+  for (const s of specs) {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const updateData: any = {
+      name: s.name,
+      description: s.description ?? null,
+      category: s.category,
+      baseStats: s.baseStats ?? {},
+      deltaPowerSlots: 0,
+      deltaAmmoSlots: 0,
+      deltaUtilitySlots: 0,
+      powerDraw: s.powerDraw ?? 10,
+      tags: s.tags ?? [],
+      archetypeFocus: (s.archetypeFocus ?? []) as string[],
+      tagAffinities: s.tagAffinities ?? null,
+    };
+    const createData: any = {
+      id: s.id,
+      name: s.name,
+      description: s.description ?? null,
+      category: s.category,
+      baseStats: s.baseStats ?? {},
+      deltaPowerSlots: 0,
+      deltaAmmoSlots: 0,
+      deltaUtilitySlots: 0,
+      powerDraw: s.powerDraw ?? 10,
+      tags: s.tags ?? [],
+      archetypeFocus: (s.archetypeFocus ?? []) as string[],
+      tagAffinities: s.tagAffinities ?? null,
+    };
+    await prisma.secondarySystem.upsert({ where: { id: s.id }, update: updateData, create: createData });
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+  }
+}
+
 export async function loadCatalog(): Promise<Catalog> {
   if (typeof window !== "undefined") {
     throw new Error("loadCatalog must be invoked on the server");
   }
+
+  // First, ensure the new primaries/secondaries exist
+  await ensureNewPrimaries();
+  await ensureNewSecondaries();
 
   let [primFromDb, secFromDb, hullFromDb, modFromDb] = await fetchCatalogRows();
 

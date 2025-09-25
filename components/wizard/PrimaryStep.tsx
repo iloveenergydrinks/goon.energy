@@ -75,54 +75,64 @@ export default function PrimaryStep() {
             </span>
           </p>
         )}
+        {!selectedHull && (
+          <p className="text-sm text-neutral-500 mt-2">Tip: You can pick a primary first; compatible hulls will filter automatically.</p>
+        )}
       </div>
 
-      <div className="grid gap-3">
-        {filteredPrimaries.map((primary) => (
-          <button
-            key={primary.id}
-            onClick={() => selectPrimary(primary.id)}
-            className={`
-              p-4 rounded-md border border-neutral-800 text-left transition-colors
-              ${selectedPrimaryId === primary.id
-                ? 'border-blue-500/80 bg-blue-500/10 text-white'
-                : 'hover:border-neutral-600 hover:bg-neutral-900'
-              }
-            `}
-          >
-            <div className="flex justify-between items-start mb-2">
-              <h3 className="font-semibold text-lg">{primary.name}</h3>
-              <div className="flex gap-2 text-xs">
-                <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded">
-                  Power: {primary.powerDraw}
-                </span>
-              </div>
-            </div>
-            <p className="text-sm text-neutral-400 mb-3">{primary.description}</p>
-            
-            <div className="grid grid-cols-4 gap-2 text-xs">
-              {primary.baseStats && Object.entries(primary.baseStats).map(([key, value]) => (
-                <div key={key} className="flex flex-col">
-                  <span className="text-neutral-500 capitalize">{key}:</span>
-                  <span className="font-medium">{value}</span>
+      <div className="grid gap-2">
+        {filteredPrimaries.map((primary) => {
+          const topStats = primary.baseStats ? Object.entries(primary.baseStats).slice(0, 2) : [];
+          const isSelected = selectedPrimaryId === primary.id;
+          return (
+            <details key={primary.id} className={`rounded-md border transition-colors ${isSelected ? 'border-blue-500/80 bg-blue-500/5' : 'border-neutral-800 hover:border-neutral-600 hover:bg-neutral-900/40'}`}>
+              <summary className="cursor-pointer list-none p-3 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="font-semibold text-sm text-white/90 truncate">{primary.name}</span>
+                  <span className="text-[11px] px-2 py-0.5 rounded bg-red-500/20 text-red-400 shrink-0">Pwr {primary.powerDraw}</span>
+                  {primary.archetypeFocus && (
+                    <span className="text-[11px] px-2 py-0.5 rounded bg-blue-600/20 text-blue-400 uppercase tracking-[0.25em] shrink-0">{String(primary.archetypeFocus)}</span>
+                  )}
+                  {topStats.map(([k, v]) => (
+                    <span key={k} className="text-[11px] px-2 py-0.5 rounded bg-neutral-800 text-neutral-300 shrink-0">
+                      {k}: {String(v)}
+                    </span>
+                  ))}
                 </div>
-              ))}
-            </div>
-
-            <div className="flex gap-1 mt-3">
-              {primary.tags.map((tag) => (
-                <span key={tag} className="text-xs px-2 py-1 bg-neutral-800 rounded">
-                  {tag}
-                </span>
-              ))}
-              {selectedHull?.sizeId && (
-                <span className="text-xs px-2 py-1 border border-neutral-700/70 rounded-sm text-neutral-300 uppercase tracking-[0.35em]">
-                  Scales to {selectedHull.sizeId}
-                </span>
-              )}
-            </div>
-          </button>
-        ))}
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    className={`text-[11px] px-2 py-0.5 rounded border transition-colors ${isSelected ? 'border-blue-500 text-blue-400' : 'border-neutral-700 text-neutral-300 hover:border-neutral-500 hover:text-white'}`}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectPrimary(isSelected ? null : primary.id); }}
+                  >
+                    {isSelected ? 'Selected' : 'Select'}
+                  </button>
+                  <span className="text-xs text-neutral-500">More</span>
+                </div>
+              </summary>
+              <div className="px-3 pb-3 space-y-3">
+                <p className="text-sm text-neutral-400">{primary.description}</p>
+                {primary.baseStats && (
+                  <div className="grid grid-cols-4 gap-2 text-xs">
+                    {Object.entries(primary.baseStats).map(([key, value]) => (
+                      <div key={key} className="flex items-center gap-1">
+                        <span className="text-neutral-500 capitalize">{key}:</span>
+                        <span className="font-medium">{String(value)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="flex gap-1 flex-wrap">
+                  {primary.tags.map((tag) => (
+                    <span key={tag} className="text-xs px-2 py-1 bg-neutral-800 rounded">{tag}</span>
+                  ))}
+                  {selectedHull?.sizeId && (
+                    <span className="text-xs px-2 py-1 border border-neutral-700/70 rounded-sm text-neutral-300 uppercase tracking-[0.35em]">Scales to {selectedHull.sizeId}</span>
+                  )}
+                </div>
+              </div>
+            </details>
+          );
+        })}
       </div>
 
       <div className="text-xs text-neutral-500 border-t border-neutral-800 pt-3">

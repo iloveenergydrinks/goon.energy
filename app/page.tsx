@@ -3,6 +3,7 @@ import PrimaryStep from "@/components/wizard/PrimaryStep";
 import SecondaryStep from "@/components/wizard/SecondaryStep";
 import SurfaceSummary from "@/components/wizard/SurfaceSummary";
 import { loadCatalog } from "@/lib/catalog";
+import BuilderColumns from "@/components/builder/BuilderColumns";
 
 // Force dynamic rendering - don't try to generate static pages at build time
 export const dynamic = 'force-dynamic';
@@ -28,28 +29,32 @@ export default async function Home() {
         <p className="text-sm text-neutral-500 mb-8">
           Configure your hull, primary, and secondary systems here. Universal modules are now managed directly inside the fitting grid.
         </p>
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[310px_1px_minmax(0,1fr)_1px_310px]">
-          <div className="bg-neutral-900/80 rounded-md p-4 h-[calc(100vh-8rem)]">
-            <h2 className="text-lg font-semibold mb-3 text-white/90">Hull Selection</h2>
-            <div className="h-[calc(100%-1.75rem)] overflow-y-auto pr-1 custom-scroll">
-              <HullStep />
+        <BuilderColumns
+          left={
+            <div className="bg-neutral-900/80 rounded-md p-4 h-[calc(100vh-8rem)]">
+              <h2 className="text-lg font-semibold mb-3 text-white/90">Hull Selection</h2>
+              <div className="h-[calc(100%-1.75rem)] overflow-y-auto pr-1 custom-scroll">
+                <HullStep />
+              </div>
             </div>
-          </div>
-          <div className="hidden xl:block w-px bg-neutral-800/80 rounded-full" />
-          <div className="bg-neutral-900/80 rounded-md p-4 h-[calc(100vh-8rem)]">
-            <h2 className="text-lg font-semibold mb-3 text-white/90">Primary Systems</h2>
-            <div className="h-[calc(100%-1.75rem)] overflow-y-auto pr-1 custom-scroll">
-              <PrimaryStep />
+          }
+          center={
+            <div className="bg-neutral-900/80 rounded-md p-4 h-[calc(100vh-8rem)]">
+              <h2 className="text-lg font-semibold mb-3 text-white/90">Primary Systems</h2>
+              <div className="h-[calc(100%-1.75rem)] overflow-y-auto pr-1 custom-scroll">
+                <PrimaryStep />
+              </div>
             </div>
-          </div>
-          <div className="hidden xl:block w-px bg-neutral-800/80 rounded-full" />
-          <div className="bg-neutral-900/80 rounded-md p-4 h-[calc(100vh-8rem)]">
-            <h2 className="text-lg font-semibold mb-3 text-white/90">Secondary Systems</h2>
-            <div className="h-[calc(100%-1.75rem)] overflow-y-auto pr-1 custom-scroll">
-              <SecondaryStep />
+          }
+          right={
+            <div className="bg-neutral-900/80 rounded-md p-4 h-[calc(100vh-8rem)]">
+              <h2 className="text-lg font-semibold mb-3 text-white/90">Secondary Systems</h2>
+              <div className="h-[calc(100%-1.75rem)] overflow-y-auto pr-1 custom-scroll">
+                <SecondaryStep />
+              </div>
             </div>
-          </div>
-        </div>
+          }
+        />
         <SurfaceSummary placement="bottom" />
       </div>
     </div>

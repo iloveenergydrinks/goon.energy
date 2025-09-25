@@ -59,7 +59,7 @@ interface FittingState extends CatalogSlice {
   hydrateCatalog: (payload: CatalogSlice) => void;
   selectPrimary: (id: string | null) => void;
   toggleSecondary: (id: string) => void;
-  selectHull: (id: string) => void;
+  selectHull: (id: string | null) => void;
   nextStep: () => void;
   prevStep: () => void;
   resetWizard: () => void;

@@ -155,10 +155,22 @@ export function ModuleForm({ module, mode }: ModuleFormProps) {
       {/* Module Shape Builder */}
       <div className="space-y-2">
         <h3 className="text-xs uppercase tracking-[0.3em] text-neutral-500">Module Shape</h3>
-        <ShapeBuilder 
-          fieldName="shape" 
-          initialShape={Array.isArray(module?.shape) ? module.shape : [{ r: 0, c: 0 }]}
-        />
+        {(() => {
+          type Offset = { dr: number; dc: number };
+          type CellRC = { r: number; c: number };
+          type ShapeObject = { cells?: Array<Offset | CellRC> } | undefined;
+          const raw: ShapeObject = (module as unknown as { shape?: ShapeObject })?.shape;
+          let init: CellRC[] = [{ r: 0, c: 0 }];
+          if (raw && Array.isArray(raw.cells)) {
+            const anyCells = raw.cells as Array<Offset | CellRC>;
+            if (anyCells.length > 0 && (anyCells[0] as Offset).dr !== undefined) {
+              init = (anyCells as Offset[]).map(({ dr, dc }) => ({ r: dr, c: dc }));
+            } else {
+              init = (anyCells as CellRC[]).map(({ r, c }) => ({ r, c }));
+            }
+          }
+          return <ShapeBuilder fieldName="shape" initialShape={init} />;
+        })()}
       </div>
 
       {/* Stats with better UX */}

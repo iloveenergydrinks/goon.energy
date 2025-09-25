@@ -102,7 +102,7 @@ export default function SecondaryStep() {
   if (!selectedHull || !primary) {
     return (
       <div className="text-sm text-neutral-500">
-        Select a hull and primary system to view compatible secondary systems.
+        Select a hull or a primary first to view compatible secondary systems.
       </div>
     );
   }
@@ -124,7 +124,7 @@ export default function SecondaryStep() {
         </p>
       </div>
 
-      <div className="grid gap-3">
+      <div className="grid gap-2">
         {filteredSecondaries.length === 0 && (
           <div className="text-sm text-neutral-500">
             No compatible secondary systems available with the current configuration.
@@ -136,56 +136,34 @@ export default function SecondaryStep() {
           const isDisabled = !isSelected && sanitizedSelected.length >= 2;
 
           return (
-            <button
-              key={secondary.id}
-              onClick={() => toggleSecondary(secondary.id)}
-              disabled={isDisabled}
-              className={`
-                p-4 rounded-md border border-neutral-800 text-left transition-colors
-                ${isSelected
-                  ? 'border-blue-500/80 bg-blue-500/10 text-white'
-                  : isDisabled
-                  ? 'border-neutral-800 opacity-50 cursor-not-allowed'
-                  : 'hover:border-neutral-600 hover:bg-neutral-900'}
-              `}
-            >
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <h3 className="font-semibold text-lg">{secondary.name}</h3>
-                  <span
-                    className={`text-xs px-2 py-1 rounded inline-block mt-1
-                      ${secondary.category === 'Offensive'
-                        ? 'bg-red-500/20 text-red-400'
-                        : secondary.category === 'Defensive'
-                        ? 'bg-green-500/20 text-green-400'
-                        : 'bg-blue-500/20 text-blue-400'}`}
-                  >
-                    {secondary.category}
-                  </span>
+            <details key={secondary.id} className={`rounded-md border transition-colors ${isSelected ? 'border-blue-500/80 bg-blue-500/5' : 'border-neutral-800 hover:border-neutral-600 hover:bg-neutral-900/40'}`}>
+              <summary
+                onClick={(e) => {
+                  if (!isDisabled) toggleSecondary(secondary.id);
+                  e.preventDefault();
+                }}
+                className={`cursor-pointer list-none p-3 flex items-center justify-between gap-2 ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="font-semibold text-sm text-white/90 truncate">{secondary.name}</span>
+                  <span className={`text-[11px] px-2 py-0.5 rounded ${secondary.category === 'Offensive' ? 'bg-red-500/20 text-red-400' : secondary.category === 'Defensive' ? 'bg-green-500/20 text-green-400' : 'bg-blue-500/20 text-blue-400'}`}>{secondary.category}</span>
+                  <span className="text-[11px] px-2 py-0.5 rounded bg-red-500/20 text-red-400">Pwr {secondary.powerDraw}</span>
+                  {(secondary.deltaPowerSlots !== 0 || secondary.deltaAmmoSlots !== 0 || secondary.deltaUtilitySlots !== 0) && (
+                    <span className="text-[11px] px-2 py-0.5 rounded bg-neutral-800 text-neutral-300">ΔP/A/U {secondary.deltaPowerSlots}/{secondary.deltaAmmoSlots}/{secondary.deltaUtilitySlots}</span>
+                  )}
                 </div>
-                <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs">
-                  Power: {secondary.powerDraw}
-                </span>
+                <span className="text-xs text-neutral-500 shrink-0">More</span>
+              </summary>
+              <div className="px-3 pb-3 space-y-3">
+                <p className="text-sm text-neutral-400">{secondary.description}</p>
+                <div className="flex gap-1 flex-wrap">
+                  {secondary.tags.map((tag) => (
+                    <span key={tag} className="text-xs px-2 py-1 bg-neutral-800 rounded">{tag}</span>
+                  ))}
+                  <span className="text-xs px-2 py-1 border border-neutral-700/70 rounded-sm text-neutral-300 uppercase tracking-[0.35em]">Scales to {selectedHull.sizeId}</span>
+                </div>
               </div>
-              <p className="text-sm text-neutral-400 mb-3">{secondary.description}</p>
-
-              <div className="flex gap-4 text-xs mb-3">
-                <StatBadge label="Power Slots" value={secondary.deltaPowerSlots} />
-                <StatBadge label="Ammo Slots" value={secondary.deltaAmmoSlots} />
-                <StatBadge label="Utility Slots" value={secondary.deltaUtilitySlots} />
-              </div>
-
-              <div className="flex gap-1 flex-wrap">
-                {secondary.tags.map((tag) => (
-                  <span key={tag} className="text-xs px-2 py-1 bg-neutral-800 rounded">
-                    {tag}
-                  </span>
-                ))}
-                <span className="text-xs px-2 py-1 border border-neutral-700/70 rounded-sm text-neutral-300 uppercase tracking-[0.35em]">
-                  Scales to {selectedHull.sizeId}
-                </span>
-              </div>
-            </button>
+            </details>
           );
         })}
       </div>

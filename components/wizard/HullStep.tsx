@@ -50,11 +50,7 @@ export default function HullStep() {
   const primary = primaries.find(p => p.id === selectedPrimaryId);
   const selectedSecondaries = secondaries.filter(s => selectedSecondaryIds.includes(s.id));
 
-  useEffect(() => {
-    if (!selectedHullId && compatibleHulls.length > 0) {
-      selectHull(compatibleHulls[0].id);
-    }
-  }, [selectedHullId, compatibleHulls, selectHull]);
+  // Do not auto-select a hull; allow user to choose hull or primary first.
 
   const selectedHullCompatible = selectedHullId
     ? compatibleHulls.some((hull) => hull.id === selectedHullId)
@@ -132,7 +128,7 @@ export default function HullStep() {
           return (
             <button
               key={hull.id}
-              onClick={() => selectHull(hull.id)}
+              onClick={() => selectHull(isSelected ? null : hull.id)}
               className={`
                 w-full text-left border border-neutral-800 rounded-md px-4 py-3 transition-colors
                 ${isSelected
