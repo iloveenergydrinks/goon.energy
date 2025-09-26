@@ -87,6 +87,7 @@ export default function StatsPanel() {
           {(() => {
             const bwTotal = derived["BW_total"] || 0;
             const bwLimit = derived["BW_limit"] || 0;
+            const bwBonus = derived["BW_limitBonus"] || 0;
             const over = Math.max(0, bwTotal - bwLimit);
             const resp = derived["responsivenessMult"] || 1;
             const pct = bwLimit > 0 ? Math.min(100, Math.round((bwTotal / bwLimit) * 100)) : 0;
@@ -105,6 +106,11 @@ export default function StatsPanel() {
                     style={{ width: `${pct}%` }}
                   />
                 </div>
+                {bwBonus !== 0 && (
+                  <div className="text-xs text-neutral-400 mt-1">
+                    BW Limit Bonus: +{bwBonus}
+                  </div>
+                )}
                 {over > 0 && (
                   <div className="text-xs text-red-400 mt-1">
                     Overloaded by {over} - Responsiveness: {Math.round(resp * 100)}%

@@ -63,8 +63,8 @@ export function computeDerivedStats(
   // Defaults
   const baseBwBySize: Record<string, number> = { S: 7, M: 12, L: 21 };
   const k_bw = bwConfig?.k_bw ?? 0.01;
-  // Get BW limit from hull
-  const bwLimit = hull?.bandwidthLimit ?? 85;
+  // Get BW limit from hull (will be adjusted by module bonuses below)
+  let bwLimit = hull?.bandwidthLimit ?? 85;
 
   let bwTotal = 0;
   let mismatchAccumulator = 0;
@@ -100,12 +100,23 @@ export function computeDerivedStats(
       bwTotal += baseBW * (1 + m);
     }
   }
+  // Apply BW limit bonuses from placed modules BEFORE computing overage
+  let bwLimitBonusSum = 0;
+  for (const pm of placed) {
+    const mod = modulesById[pm.moduleId];
+    if (!mod?.stats) continue;
+    const bonus = (mod.stats as Record<string, number | undefined>)["bwLimitBonus"];
+    if (typeof bonus === "number") bwLimitBonusSum += bonus;
+  }
+  if (bwLimitBonusSum !== 0) bwLimit += bwLimitBonusSum;
+
   const bwOver = Math.max(0, bwTotal - bwLimit);
   const responsivenessMult = 1 / (1 + k_bw * bwOver);
   const avgMismatch = mismatchCount > 0 ? mismatchAccumulator / mismatchCount : 0;
 
   totals["BW_total"] = Math.round(bwTotal);
   totals["BW_limit"] = bwLimit;
+  if (bwLimitBonusSum) totals["BW_limitBonus"] = bwLimitBonusSum;
   totals["BW_over"] = Math.round(bwOver);
   totals["BW_mismatchAvg"] = Math.round(avgMismatch * 100);
   totals["responsivenessMult"] = Math.round(responsivenessMult * 100) / 100;

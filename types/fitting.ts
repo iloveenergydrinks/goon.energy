@@ -154,6 +154,7 @@ export interface ModuleDef {
     droneAI: number;
     droneRepair: number;
     repairRate: number;
+    bwLimitBonus: number;
   }>;
   description?: string;
   baseBW?: number;
