@@ -1,0 +1,75 @@
+Category,Description,Name,Slot,Type,BW,PowerDraw,PowerGen,CapBuffer,bwLimitPct,bwLimitBonus,rofBonus,reloadBonus,trackingBonus,arcBonus,mobility,speed,sensorStrength,lockRange,lockStrength,ecm,droneCapacity,droneControl,droneAI,droneRepair,ammoCap,repairRate,Cooldown,Duration,Notes
+Ammo,Improves fuze timing for shells, increasing tracking.,Impact Fuze Modulators,Ammo,S2,2,2,0,0,0,0,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+Ammo,Expands magazine storage but slows reload speed slightly.,Expanded Ammo Bunker,Ammo,M2,4,3,0,0,0,0,-4,0,0,0,0,0,0,0,0,0,0,0,0,36,0,0,0,
+Ammo,Improves reload speed by enhancing loader efficiency.,Quick-Feed Loader,Ammo,S2,2,2,0,0,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+Ammo,Allows mixed calibers, improving ammo capacity with slower reloads.,Multi-Caliber Racks,Ammo,S3,3,3,0,0,0,0,-3,0,0,0,0,0,0,0,0,0,0,0,28,0,0,0,
+Ammo,Adds fins to shells, improving flight stability and tracking.,Stabilizer Fins,Ammo,S1,1,1,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+Ammo,Adds auto-gyros for better gun barrel alignment and tracking.,Auto-Aim Gyros,Ammo,S1,1,1,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+Ammo,Overfills magazines for more capacity, slower reload.,Overpacked Magazines,Ammo,M2,4,3,0,0,0,0,-4,0,0,0,0,0,0,0,0,0,0,0,36,0,0,0,
+Ammo,Programmable fuzes that improve hit consistency, boosting tracking.,Smart Fuze Kits,Ammo,S1,1,1,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+Ammo,Rebalances ammunition for improved accuracy and tracking.,Counterweight Casings,Ammo,S2,2,2,0,0,0,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+Ammo,Lightweight sabots for faster rate of fire.,Polymer Sabots,Ammo,S1,1,1,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+Ammo,Shaped inserts improve blast focus, adding tracking but slowing reload.,Blast Shaping Inserts,Ammo,S2,2,2,0,0,0,0,-2,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+Ammo,Machined shells with higher quality, boosting accuracy.,Precision Cartridges,Ammo,S1,2,2,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+Ammo,Sleeves that absorb recoil, improving tracking.,Kinetic Dampener Sleeves,Ammo,S1,2,2,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+Ammo,Coolant liners reduce heat, improving sustained reload speed.,Mag Coolant Liners,Ammo,S2,2,2,0,0,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+Ammo,Rotary feed systems allow bursts of higher RoF at risk of jams.,Rotary Feed Adapters,Ammo,S3,3,4,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,25,6,+jam chance (metadata)
+Ammo,Cluster frames enable rapid bursts of fire, followed by longer reloads.,Cluster Loading Frames,Ammo,M2,4,6,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,30,5,−15% reload after (metadata)
+Ammo,Reload instantly but lock out the next cycle.,Reactive Ammunition Rails,Ammo,M2,4,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,40,0,Instant reload; lockout next cycle (metadata)
+Ammo,Couplers chain multiple rounds for burst fire, increasing RoF.,Multi-Round Couplers,Ammo,S3,3,5,0,0,0,30,0,0,0,0,0,0,0,0,0,0,0,0,0,35,0,3-shot burst behaviour (metadata)
+Ammo,Casings optimized for sabots, boosting RoF at cost of tracking.,Sabot Casings,Ammo,S2,3,5,0,0,0,20,-6,0,0,0,0,0,0,0,0,0,0,0,0,30,8,
+Mobility,Improves turret traverse and ship roll response.,Gyro Stabilizers,Utility,Passive,3,2,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+Mobility,Auxiliary thrusters that improve ship agility and strafing.,Micro-Thruster Banks,Utility,Passive,2,2,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,
+Mobility,Magnetic dampers that reduce drift after turning.,Vector Dampers,Utility,Passive,3,2,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,
+Mobility,Trim jets that stabilize large ships during turns and broadsides.,Grav Trim Jets,Utility,Passive,4,3,0,0,0,0,0,0,0,18,0,0,0,0,0,0,0,0,0,0,0,0,0,
+Mobility,Cold-gas rudders for tighter yaw and bank damping.,Reaction Rudder Packs,Utility,Passive,2,2,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,
+Mobility,Re-profiled exhausts for temporary acceleration bursts.,Overthrust Nozzles,Utility,Active,3,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,8,+25% acceleration (metadata)
+Mobility,Cancels drift instantly, restoring full maneuver control.,Momentum Reclaimer,Utility,Active,4,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,0,Instant drift cancel (metadata)
+Mobility,Applies reverse thrust to slow or stop the ship quickly.,Emergency Reverse Thrusters,Utility,Active,3,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,40,3,Reduce forward speed ~70% (metadata)
+Mobility,Stabilizing jets that lock the ship as a gun platform temporarily.,Anchor Jets,Utility,Active,4,6,0,0,0,0,20,0,30,0,0,0,0,0,0,0,0,0,0,45,12,Disables top speed (metadata)
+Mobility,Short burst improving turn rate and turret traverse.,Course-Correction Burst,Utility,Active,2,5,0,0,0,0,15,0,15,0,0,0,0,0,0,0,0,0,0,25,6,
+Sensors/ECM,Boosts sensor strength and lock range.,Signal Amplifiers,Utility,Passive,2,2,0,0,0,0,0,0,0,10,18,0,0,0,0,0,0,0,0,0,0,0,
+Sensors/ECM,Improves lock range and stability at higher power cost.,Long-Range Optics,Utility,Passive,3,3,0,0,0,0,0,0,0,0,18,14,0,0,0,0,0,0,0,0,0,0,
+Sensors/ECM,Hardens sensors against jamming, boosting lock strength.,ECCM Mesh,Utility,Passive,3,2,0,0,0,0,0,0,0,8,0,10,0,0,0,0,0,0,0,0,0,0,
+Sensors/ECM,Filters emissions, reducing spikes but slowing lock time.,Noise Filters,Utility,Passive,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,+lockDelay tradeoff (metadata)
+Sensors/ECM,Generates false returns, reducing signature size but raising emissions.,Spoof Emitters,Utility,Passive,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,Reduce sig size (not modeled in v1)
+Sensors/ECM,Cone emitter that disrupts enemy locks with jamming strength.,ECM Suite,Utility,Active,4,6,0,0,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,30,8,Cone effect (metadata)
+Sensors/ECM,Fleet comms booster, increasing lock range temporarily.,Wideband Antenna,Utility,Active,3,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,45,12,+25% fleet lockRange (metadata)
+Sensors/ECM,Increases lock speed temporarily with a power spike.,Ping Booster,Utility,Active,2,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,25,6,+50% lockSpeed (metadata)
+Sensors/ECM,Disrupts enemy targeting, reducing their tracking temporarily.,Disruption Burst,Utility,Active,3,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,35,8,Enemies −20% tracking quality (metadata)
+Sensors/ECM,Generates false pings to confuse enemy sensors.,Ghost Noise Generator,Utility,Active,3,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,40,10,Spawn 1–2 false pings (metadata)
+Drone/Aux,Expands control links for commanding more drones.,Drone Command Processor,Utility,Passive,4,3,0,0,0,0,0,0,0,0,0,0,0,18,0,0,0,0,0,0,0,0,
+Drone/Aux,Improves drone AI quality and independent decision making.,Autonomy Firmware,Utility,Passive,2,2,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,
+Drone/Aux,Speeds up drone launch and replacement cycles.,Drone Bay Scheduler,Utility,Passive,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,+launchRate, −replacementTime (metadata)
+Drone/Aux,Reinforces drones with armor skins, improving durability.,Drone Armor Skins,Utility,Passive,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,+droneHP, +droneResist (metadata)
+Drone/Aux,Improves drone point-defense reaction speed.,Escort AI Node,Utility,Passive,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,+PD reaction vs missiles (metadata)
+Drone/Aux,Temporarily improves drone accuracy.,Swarm Coordination Beacon,Utility,Active,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,10,+20% drone accuracy (metadata)
+Drone/Aux,Temporarily increases drone rate of fire.,Drone Overclock Uplink,Utility,Active,4,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,35,8,+20% drone RoF (metadata)
+Drone/Aux,Boosts repair drone output for a short burst.,Repair Drone Burst Mode,Utility,Active,4,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,40,6,+50% repairRate for repair drones
+Drone/Aux,Recalls drones and heals them slightly.,Drone Rally Ping,Utility,Active,3,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,45,0,Recall & heal drones by 25% (metadata)
+Drone/Aux,Temporarily boosts mining drone yield.,Mining Drone Efficiency Node,Utility,Active,4,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,12,+25% yield (metadata)
+Structural,Industrial armor weave, adding hull HP and resistances.,Armor Weave Kit,Utility,Passive,3,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,+hullHP, +resist (metadata)
+Structural,Protects against internal spall, reducing crit damage.,Spall Liner Inserts,Utility,Passive,3,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,−20% crit damage (metadata)
+Structural,Expanding foam sealant providing slow hull regen.,Compartment Sealant,Utility,Passive,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,0,0,
+Structural,Absorbs kinetic shocks, reducing ram damage.,Kinetic Gel Packs,Utility,Passive,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,−ramDamageTaken% (metadata)
+Structural,Strengthens keel structure, reducing arc-specific damage.,Reinforced Keel Struts,Utility,Passive,4,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,+front/rear arc mitigation (metadata)
+Structural,Provides a quick burst of hull repair.,Emergency Patch Mesh,Utility,Active,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,40,6,
+Structural,Purges DoTs by ejecting compromised armor plates.,Armor Slough Charges,Utility,Active,4,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,Purge DoTs, -5% hull (metadata)
+Structural,Locks bulkheads to reduce incoming damage at cost of mobility.,Bulkhead Bracers,Utility,Active,4,5,0,0,0,0,0,0,-10,0,0,0,0,0,0,0,0,0,0,35,8,+20% dmg reduction (metadata)
+Structural,Slows down DoT damage, disabling weapons on affected arc.,Flood Control Nodes,Utility,Active,4,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,45,15,Halve DoT tick, disable arc weapons (metadata)
+Structural,Absorbs stress from glancing hits, reducing damage.,Hull Stress Dampeners,Utility,Active,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,12,Reduce glancing hit damage (metadata)
+Industrial,Improves mining drill stability and bite efficiency.,Drill Stabilizers,Utility,Passive,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,+miningStability (metadata)
+Industrial,Improves mining throughput at cost of purity.,Bit Optimizers,Utility,Passive,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,+throughput, -purity (metadata)
+Industrial,Improves resource purity at cost of throughput.,Siphon Filters,Utility,Passive,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,+purity, -throughput (metadata)
+Industrial,Suppresses mining noise and emission spikes.,Noise Baffles,Utility,Passive,3,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,−miningNoise% (metadata)
+Industrial,Expands cargo/ammo capacity for raw materials.,Expanded Holds,Ammo,Passive,4,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,0,0,0,
+Industrial,Temporarily improves mining purity.,Refiner Loop,Utility,Active,4,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,12,+25% purity (metadata)
+Industrial,Temporarily boosts mining throughput at higher cost.,Overcut Drill Array,Utility,Active,4,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,40,8,+30% throughput (metadata)
+Industrial,Instantly resets drill cycles for mining rigs.,Coolant Injector,Utility,Active,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,0,Reset drill cycle (metadata)
+Industrial,Temporarily doubles siphon speed for mining.,Extraction Burst Pack,Utility,Active,4,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,35,6,2x siphon speed (metadata)
+Industrial,Highlights nearby voxel nodes for extraction.,Survey Scanner,Utility,Active,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,45,15,Reveal voxel nodes (metadata)
+BW Expansion,Parallel coupler slightly increasing available bandwidth.,Bandwidth Coupler,Power,Passive,4,3,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+BW Expansion,Auxiliary node array greatly increasing bandwidth limit.,Auxiliary Node Array,Power,Passive,5,4,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+BW Expansion,Splits grid into stable subgrid, boosting bw limit and buffer.,Isolated Subgrid,Utility,Passive,3,3,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+BW Expansion,Large processing lattice boosting bandwidth capacity.,Distributed Processing Lattice,Power,Passive,6,5,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+

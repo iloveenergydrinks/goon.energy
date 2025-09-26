@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "import:universals:csv": "node scripts/import-universals-csv.mjs --file app/data/universals.csv"
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
