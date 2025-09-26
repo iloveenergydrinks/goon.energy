@@ -515,17 +515,15 @@ export async function loadCatalog(): Promise<Catalog> {
       } as unknown as Hull)
     )
   );
+  // Do NOT pre-clone into variants here; keep a single base record per module
   const mods = uniqueBy(
-    resolveModuleVariants(
-      modFromDb.map((m) =>
-        applyModuleOverrides({
-          ...m,
-          // name: m.name || undefined, // TODO: Add name to database
-          description: m.description || undefined,
-          stats: m.stats as ModuleDef["stats"],
-          shape: m.shape as unknown as ModuleDef["shape"],
-        } as unknown as ModuleDef)
-      )
+    modFromDb.map((m) =>
+      applyModuleOverrides({
+        ...m,
+        description: m.description || undefined,
+        stats: m.stats as ModuleDef["stats"],
+        shape: m.shape as unknown as ModuleDef["shape"],
+      } as unknown as ModuleDef)
     )
   );
 
