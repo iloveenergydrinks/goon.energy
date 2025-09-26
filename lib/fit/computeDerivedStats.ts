@@ -102,11 +102,23 @@ export function computeDerivedStats(
   }
   // Apply BW limit bonuses from placed modules BEFORE computing overage
   let bwLimitBonusSum = 0;
+  const bwLimitPctValues: number[] = [];
   for (const pm of placed) {
     const mod = modulesById[pm.moduleId];
     if (!mod?.stats) continue;
     const bonus = (mod.stats as Record<string, number | undefined>)["bwLimitBonus"];
     if (typeof bonus === "number") bwLimitBonusSum += bonus;
+    const pct = (mod.stats as Record<string, number | undefined>)["bwLimitPct"];
+    if (typeof pct === "number" && pct !== 0) bwLimitPctValues.push(pct);
+  }
+  // Diminishing returns for percent bonuses: effectivePct = 100 * (1 - Π(1 - p_i/100))
+  let bwLimitPctEffective = 0;
+  if (bwLimitPctValues.length > 0) {
+    const product = bwLimitPctValues.reduce((prod, p) => prod * (1 - p / 100), 1);
+    bwLimitPctEffective = Math.max(0, 100 * (1 - product));
+  }
+  if (bwLimitPctEffective !== 0) {
+    bwLimit = Math.round(bwLimit * (1 + bwLimitPctEffective / 100));
   }
   if (bwLimitBonusSum !== 0) bwLimit += bwLimitBonusSum;
 
@@ -117,6 +129,7 @@ export function computeDerivedStats(
   totals["BW_total"] = Math.round(bwTotal);
   totals["BW_limit"] = bwLimit;
   if (bwLimitBonusSum) totals["BW_limitBonus"] = bwLimitBonusSum;
+  if (bwLimitPctEffective) totals["BW_limitPct"] = Math.round(bwLimitPctEffective);
   totals["BW_over"] = Math.round(bwOver);
   totals["BW_mismatchAvg"] = Math.round(avgMismatch * 100);
   totals["responsivenessMult"] = Math.round(responsivenessMult * 100) / 100;
