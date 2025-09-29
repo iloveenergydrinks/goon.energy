@@ -80,3 +80,152 @@ model Module {
   updatedAt      DateTime @updatedAt
 }
 
+// Industrial System Tables
+
+model Player {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  isk             BigInt   @default(1000000)  // Using isk as column but calling it ORE in UI
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  materials       PlayerMaterial[]
+  resourceNodes   ResourceNode[]
+  miningOps       MiningOperation[]
+  blueprints      Blueprint[]
+}
+
+model ResourceNode {
+  id              String   @id @default(cuid())
+  name            String
+  type            String   // asteroid, gas_cloud, planetary, salvage
+  tier            Int      // 1-5
+  
+  // Resource properties
+  resourceType    String   // titanium, plasma, quantum, etc.
+  totalAmount     BigInt   // Total mineable amount
+  currentAmount   BigInt   // Current remaining amount
+  baseYield       Int      @default(100) // Base units per click
+  purity          Float    @default(0.3) // Base purity 0-1
+  
+  // Location
+  sector          String
+  coordinates     Json     // [x, y, z]
+  
+  // Status
+  active          Boolean  @default(true)
+  depleted        Boolean  @default(false)
+  respawnAt       DateTime?
+  
+  // Ownership
+  discoveredBy    String?
+  discoveredAt    DateTime?
+  player          Player?  @relation(fields: [discoveredBy], references: [id])
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  miningOps       MiningOperation[]
+  
+  @@index([active, depleted])
+  @@index([sector])
+}
+
+model Material {
+  id              String   @id @default(cuid())
+  name            String
+  category        String   // metal, gas, crystal, composite, exotic
+  baseValue       Int      @default(100)
+  
+  // Base attributes (for newly mined materials)
+  baseAttributes  Json     // { strength, conductivity, density, reactivity, stability, elasticity }
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  playerMaterials PlayerMaterial[]
+}
+
+model PlayerMaterial {
+  id              String   @id @default(cuid())
+  playerId        String
+  materialId      String
+  
+  // Instance properties
+  quantity        BigInt
+  tier            Int      // 1-5
+  purity          Float    // 0-1
+  attributes      Json     // Actual attributes for this stack
+  
+  // Relations
+  player          Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  material        Material @relation(fields: [materialId], references: [id])
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([playerId, materialId, tier, purity])
+  @@index([playerId])
+}
+
+model MiningOperation {
+  id              String   @id @default(cuid())
+  playerId        String
+  nodeId          String
+  
+  // Mining details
+  materialGained  String   // Material type
+  quantityMined   BigInt
+  purityGained    Float
+  tierGained      Int
+  
+  // Timestamp
+  minedAt         DateTime @default(now())
+  
+  // Relations
+  player          Player       @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  node            ResourceNode @relation(fields: [nodeId], references: [id])
+  
+  @@index([playerId])
+  @@index([nodeId])
+}
+
+model Blueprint {
+  id                  String   @id @default(cuid())
+  playerId           String
+  name               String
+  type               String   // hull, module, primary, secondary
+  baseItemId         String   // Reference to base item
+  
+  // Research progress
+  researchLevel      Int      @default(0)
+  researchPoints     Float    @default(0)
+  statImprovements   Json     @default("{}")
+  materialEfficiency Float    @default(1.0)
+  productionTime     Float    @default(1.0)
+  
+  // Research state
+  inResearch         Boolean  @default(false)
+  researchStarted    DateTime?
+  lastResearchSuccess Boolean @default(true)
+  consecutiveFailures Int     @default(0)
+  
+  // Sharing
+  isOriginal         Boolean  @default(true)
+  isShared           Boolean  @default(false)
+  sharedWith         String[] @default([])
+  securityLevel      Int      @default(100)
+  
+  // Relations
+  player             Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  
+  @@unique([playerId, baseItemId])
+  @@index([playerId])
+}
+

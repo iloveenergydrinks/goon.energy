@@ -170,8 +170,8 @@ const ARCH_WEIGHTS: Record<string, ArchetypeWeights> = {
   assault: { P: 0.6, A: 0.25, U: 0.15 },
   artillery: { P: 0.4, A: 0.45, U: 0.15 },
   defender: { P: 0.35, A: 0.15, U: 0.5 },
-  bulwark: { P: 0.3, A: 0.15, U: 0.55 },
-  support: { P: 0.3, A: 0.15, U: 0.55 },
+  bulwark: { P: 0.4, A: 0.1, U: 0.5 },  // Revised to differentiate from support
+  support: { P: 0.25, A: 0.1, U: 0.65 }, // Revised for more utility
   recon: { P: 0.25, A: 0.2, U: 0.55 },
   infiltrator: { P: 0.25, A: 0.35, U: 0.4 },
   carrier: { P: 0.35, A: 0.2, U: 0.45 },
@@ -352,23 +352,110 @@ type HullArchetypeSpec = { id: string; name: string; sizeId: string; archetype: 
 
 function plannedHulls(): HullArchetypeSpec[] {
   return [
-    { id: "assault_frigate", name: "Assault Frigate", sizeId: "Frigate", archetype: "assault" },
-    { id: "assault_cruiser", name: "Assault Cruiser", sizeId: "Cruiser", archetype: "assault" },
-    { id: "artillery_destroyer", name: "Artillery Destroyer", sizeId: "Destroyer", archetype: "artillery" },
-    { id: "artillery_capital", name: "Artillery Dreadnought", sizeId: "Capital", archetype: "artillery" },
-    { id: "defender_frigate", name: "Defender Frigate", sizeId: "Frigate", archetype: "defender" },
-    { id: "defender_cruiser", name: "Defender Cruiser", sizeId: "Cruiser", archetype: "defender" },
-    { id: "bulwark_cruiser", name: "Bulwark Cruiser", sizeId: "Cruiser", archetype: "bulwark" },
-    { id: "bulwark_capital", name: "Bulwark Bastion", sizeId: "Capital", archetype: "bulwark" },
-    { id: "support_frigate", name: "Support Frigate", sizeId: "Frigate", archetype: "support" },
-    { id: "support_cruiser", name: "Support Cruiser", sizeId: "Cruiser", archetype: "support" },
-    { id: "recon_frigate", name: "Recon Frigate", sizeId: "Frigate", archetype: "recon" },
-    { id: "recon_destroyer", name: "Recon Destroyer", sizeId: "Destroyer", archetype: "recon" },
-    { id: "infiltrator_frigate", name: "Infiltrator Corvette", sizeId: "Frigate", archetype: "infiltrator" },
-    { id: "infiltrator_destroyer", name: "Infiltrator Destroyer", sizeId: "Destroyer", archetype: "infiltrator" },
-    { id: "carrier_cruiser", name: "Light Carrier", sizeId: "Cruiser", archetype: "carrier" },
-    { id: "carrier_capital", name: "Fleet Carrier", sizeId: "Capital", archetype: "carrier" },
+    // SUPPORT
+    { id: "swift_medic_frigate", name: "Swift Medic", sizeId: "Frigate", archetype: "support" },
+    { id: "field_station_frigate", name: "Field Station", sizeId: "Frigate", archetype: "support" },
+    { id: "combat_medic_destroyer", name: "Combat Medic", sizeId: "Destroyer", archetype: "support" },
+    { id: "sanctuary_destroyer", name: "Sanctuary", sizeId: "Destroyer", archetype: "support" },
+    { id: "angel_wing_cruiser", name: "Angel Wing", sizeId: "Cruiser", archetype: "support" },
+    { id: "haven_cruiser", name: "Haven", sizeId: "Cruiser", archetype: "support" },
+    
+    // DEFENDER  
+    { id: "sentinel_frigate", name: "Sentinel", sizeId: "Frigate", archetype: "defender" },
+    { id: "ironclad_frigate", name: "Ironclad", sizeId: "Frigate", archetype: "defender" },
+    { id: "guardian_destroyer", name: "Guardian", sizeId: "Destroyer", archetype: "defender" },
+    { id: "fortress_destroyer", name: "Fortress", sizeId: "Destroyer", archetype: "defender" },
+    { id: "aegis_cruiser", name: "Aegis", sizeId: "Cruiser", archetype: "defender" },
+    { id: "citadel_cruiser", name: "Citadel", sizeId: "Cruiser", archetype: "defender" },
+    
+    // ASSAULT
+    { id: "striker_frigate", name: "Striker", sizeId: "Frigate", archetype: "assault" },
+    { id: "brawler_frigate", name: "Brawler", sizeId: "Frigate", archetype: "assault" },
+    { id: "ravager_destroyer", name: "Ravager", sizeId: "Destroyer", archetype: "assault" },
+    { id: "marauder_destroyer", name: "Marauder", sizeId: "Destroyer", archetype: "assault" },
+    { id: "devastator_cruiser", name: "Devastator", sizeId: "Cruiser", archetype: "assault" },
+    { id: "berserker_cruiser", name: "Berserker", sizeId: "Cruiser", archetype: "assault" },
+    
+    // ARTILLERY
+    { id: "longbow_frigate", name: "Longbow", sizeId: "Frigate", archetype: "artillery" },
+    { id: "trebuchet_frigate", name: "Trebuchet", sizeId: "Frigate", archetype: "artillery" },
+    { id: "ballista_destroyer", name: "Ballista", sizeId: "Destroyer", archetype: "artillery" },
+    { id: "howitzer_destroyer", name: "Howitzer", sizeId: "Destroyer", archetype: "artillery" },
+    { id: "raildriver_cruiser", name: "Raildriver", sizeId: "Cruiser", archetype: "artillery" },
+    { id: "siege_engine_cruiser", name: "Siege Engine", sizeId: "Cruiser", archetype: "artillery" },
+    
+    // RECON
+    { id: "scout_frigate", name: "Scout", sizeId: "Frigate", archetype: "recon" },
+    { id: "watcher_frigate", name: "Watcher", sizeId: "Frigate", archetype: "recon" },
+    { id: "pathfinder_destroyer", name: "Pathfinder", sizeId: "Destroyer", archetype: "recon" },
+    { id: "sentinel_destroyer", name: "Sentinel", sizeId: "Destroyer", archetype: "recon" },
+    { id: "oracle_cruiser", name: "Oracle", sizeId: "Cruiser", archetype: "recon" },
+    { id: "overseer_cruiser", name: "Overseer", sizeId: "Cruiser", archetype: "recon" },
+    
+    // INFILTRATOR
+    { id: "ghost_frigate", name: "Ghost", sizeId: "Frigate", archetype: "infiltrator" },
+    { id: "phantom_frigate", name: "Phantom", sizeId: "Frigate", archetype: "infiltrator" },
+    { id: "specter_destroyer", name: "Specter", sizeId: "Destroyer", archetype: "infiltrator" },
+    { id: "wraith_destroyer", name: "Wraith", sizeId: "Destroyer", archetype: "infiltrator" },
+    { id: "shadow_cruiser", name: "Shadow", sizeId: "Cruiser", archetype: "infiltrator" },
+    { id: "nightfall_cruiser", name: "Nightfall", sizeId: "Cruiser", archetype: "infiltrator" },
+    
+    // CARRIER
+    { id: "hive_frigate", name: "Hive", sizeId: "Frigate", archetype: "carrier" },
+    { id: "nest_frigate", name: "Nest", sizeId: "Frigate", archetype: "carrier" },
+    { id: "swarm_lord_destroyer", name: "Swarm Lord", sizeId: "Destroyer", archetype: "carrier" },
+    { id: "colony_destroyer", name: "Colony", sizeId: "Destroyer", archetype: "carrier" },
+    { id: "mothership_cruiser", name: "Mothership", sizeId: "Cruiser", archetype: "carrier" },
+    { id: "ark_cruiser", name: "Ark", sizeId: "Cruiser", archetype: "carrier" },
+    
+    // BULWARK
+    { id: "bastion_frigate", name: "Bastion", sizeId: "Frigate", archetype: "bulwark" },
+    { id: "rampart_frigate", name: "Rampart", sizeId: "Frigate", archetype: "bulwark" },
+    { id: "stronghold_destroyer", name: "Stronghold", sizeId: "Destroyer", archetype: "bulwark" },
+    { id: "citadel_destroyer", name: "Citadel", sizeId: "Destroyer", archetype: "bulwark" },
+    { id: "fortress_cruiser", name: "Fortress", sizeId: "Cruiser", archetype: "bulwark" },
+    { id: "redoubt_cruiser", name: "Redoubt", sizeId: "Cruiser", archetype: "bulwark" },
   ];
+}
+
+function getBaseStatsForHull(spec: HullArchetypeSpec): Record<string, number> {
+  // Base stats by size
+  const sizeBase: Record<string, Record<string, number>> = {
+    Frigate: { hull: 700, armor: 150, speed: 110, evasion: 25 },
+    Destroyer: { hull: 1100, armor: 300, speed: 85, evasion: 15 },
+    Cruiser: { hull: 1500, armor: 400, speed: 70, evasion: 12 },
+    Capital: { hull: 2000, armor: 550, speed: 50, evasion: 8 }
+  };
+  
+  // Archetype modifiers
+  const archMods: Record<string, Record<string, number>> = {
+    support: { hull: -0.1, armor: -0.2, speed: 0.1, evasion: 0.2 },
+    defender: { hull: 0.2, armor: 0.4, speed: -0.2, evasion: -0.2 },
+    assault: { hull: -0.1, armor: -0.2, speed: 0.2, evasion: 0.2 },
+    artillery: { hull: 0, armor: 0, speed: -0.2, evasion: -0.3 },
+    recon: { hull: -0.2, armor: -0.3, speed: 0.3, evasion: 0.4 },
+    infiltrator: { hull: -0.2, armor: -0.4, speed: 0.2, evasion: 0.3 },
+    carrier: { hull: 0, armor: 0, speed: 0, evasion: 0 },
+    bulwark: { hull: 0.2, armor: 0.3, speed: -0.3, evasion: -0.4 }
+  };
+  
+  const base = sizeBase[spec.sizeId] || sizeBase.Frigate;
+  const mods = archMods[spec.archetype] || {};
+  
+  // Apply variant modifier based on name patterns
+  let variantMod = 0;
+  if (spec.name.includes("Swift") || spec.name.includes("Scout") || spec.name.includes("Ghost")) {
+    variantMod = -0.15; // Fast variant: less hull/armor, more speed
+  } else if (spec.name.includes("Fortress") || spec.name.includes("Citadel") || spec.name.includes("Haven")) {
+    variantMod = 0.15; // Tanky variant: more hull/armor, less speed
+  }
+  
+  return {
+    hull: Math.round(base.hull * (1 + (mods.hull || 0) + (mods.hull ? variantMod : 0))),
+    armor: Math.round(base.armor * (1 + (mods.armor || 0) + (mods.armor ? variantMod : 0))),
+    speed: Math.round(base.speed * (1 + (mods.speed || 0) - (mods.speed ? variantMod : 0))),
+    evasion: Math.round(base.evasion * (1 + (mods.evasion || 0) - (mods.evasion ? variantMod : 0)))
+  };
 }
 
 async function ensureNewHulls() {
@@ -395,16 +482,31 @@ async function ensureNewHulls() {
     const { CP, CA, CU } = largestRemainderCounts(T, weights, spec.archetype);
     const slots = buildSlotsForArchetype(spec.archetype, dims.rows, dims.cols, CP, CA, CU);
     const { powerCapacity, bandwidthLimit } = computeBudgets(dims.rows, dims.cols, CP, CA, CU);
+    const baseStats = getBaseStatsForHull(spec);
+    
+    // Generate description if not provided
+    const description = spec.description || 
+      `${spec.archetype.charAt(0).toUpperCase() + spec.archetype.slice(1)}-class ${spec.sizeId.toLowerCase()} optimized for ${
+        spec.archetype === 'support' ? 'fleet support and healing' :
+        spec.archetype === 'defender' ? 'damage mitigation and protection' :
+        spec.archetype === 'assault' ? 'close-range combat' :
+        spec.archetype === 'artillery' ? 'long-range bombardment' :
+        spec.archetype === 'recon' ? 'information warfare' :
+        spec.archetype === 'infiltrator' ? 'stealth and disruption' :
+        spec.archetype === 'carrier' ? 'drone operations' :
+        spec.archetype === 'bulwark' ? 'area denial and fortification' : 'combat'
+      }`;
 
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const data: any = {
       id: spec.id,
       name: spec.name,
-      description: spec.description ?? null,
+      description,
       sizeId: spec.sizeId,
       archetype: spec.archetype,
       powerCapacity,
       bandwidthLimit,
+      baseStats,
       grid: { rows: dims.rows, cols: dims.cols, slots },
       compatibleTags: [spec.archetype],
     };

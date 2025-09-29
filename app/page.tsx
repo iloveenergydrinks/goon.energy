@@ -19,12 +19,14 @@ export default async function Home() {
           <h1 className="text-3xl font-bold tracking-[0.35em] uppercase text-[color:rgb(220,230,255)]">
             Ship Builder
           </h1>
-          <a
-            href="/admin"
-            className="text-xs px-3 py-2 rounded-md border border-neutral-700/70 text-neutral-400 hover:border-neutral-500 hover:text-white transition-colors"
-          >
-            Manage Ship Catalog →
-          </a>
+          <div className="flex gap-2">
+            <a
+              href="/admin"
+              className="text-xs px-3 py-2 rounded-md border border-neutral-700/70 text-neutral-400 hover:border-neutral-500 hover:text-white transition-colors"
+            >
+              Manage Ship Catalog →
+            </a>
+          </div>
         </div>
         <p className="text-sm text-neutral-500 mb-8">
           Configure your hull, primary, and secondary systems here. Universal modules are now managed directly inside the fitting grid.
