@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useFittingStore } from "@/store/useFittingStore";
-import type { Hull } from "@/types/fitting";
 
 export default function HullStep() {
   const catalogReady = useFittingStore((s) => s.catalogReady);
