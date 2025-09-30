@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { AdminNav } from "@/components/admin/AdminNav";
 
 const adminLinks = [
   { href: "/admin/hulls", label: "Manage Hulls" },
   { href: "/admin/primaries", label: "Manage Primary Systems" },
   { href: "/admin/secondaries", label: "Manage Secondary Systems" },
   { href: "/admin/modules", label: "Manage Modules" },
+  { href: "/admin/module-types", label: "Manage Module Types" },
+  { href: "/admin/slots", label: "Manage Custom Slots" },
   { href: "/admin/instructions", label: "System Instructions" },
 ];
 
@@ -40,12 +43,7 @@ export default function AdminLanding() {
         </section>
 
         <footer>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-xs px-3 py-2 rounded-md border border-neutral-700/70 text-neutral-400 hover:border-neutral-500 hover:text-white transition-colors"
-          >
-            ← Return to Builder
-          </Link>
+          <AdminNav />
         </footer>
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 import { useFittingStore } from "@/store/useFittingStore";
-import { SLOT_COLORS } from "@/lib/colors";
+import { getSlotColor } from "@/lib/colors";
+import { getSlotDisplayName, getSlotAcceptedTypes, canModuleFitInSlot } from "@/lib/slots";
 import { useEffect } from "react";
 import { rotateOffsets } from "@/lib/shapes";
 import { canPlace } from "@/lib/fit/canPlace";
@@ -104,8 +105,13 @@ export default function GridCanvas() {
             const mod = moduleId ? modulesById[moduleId] : null;
             const isGhost = ghostCells.has(idx);
             const slotType = cell.slot;
-            const slotColor = slotType ? SLOT_COLORS[slotType] : null;
+            const slotColor = slotType ? getSlotColor(slotType) : null;
             const isHole = cell.hole;
+            
+            // Check if this slot can accept the dragging module
+            const canAcceptModule = draggingModule && slotType 
+              ? canModuleFitInSlot(draggingModule.slot, slotType, cell.slotCompatibility)
+              : false;
             
             // Determine cell background
             let cellBg = "bg-neutral-900";
@@ -146,10 +152,10 @@ export default function GridCanvas() {
                   width: cellSize,
                   height: cellSize,
                   backgroundColor: hasModule && mod 
-                    ? `${SLOT_COLORS[mod.slot]}30`
+                    ? `${getSlotColor(mod.slot)}30`
                     : undefined,
                   borderColor: hasModule && mod
-                    ? `${SLOT_COLORS[mod.slot]}60`
+                    ? `${getSlotColor(mod.slot)}60`
                     : undefined
                 }}
                 onMouseEnter={() => {
@@ -173,8 +179,19 @@ export default function GridCanvas() {
                 {/* Slot Type Indicator */}
                 {!hasModule && slotType && !isGhost && (
                   <div
-                    className="absolute inset-0 m-1 rounded opacity-20"
+                    className={`absolute inset-0 m-1 rounded transition-opacity ${
+                      draggingModule 
+                        ? canAcceptModule 
+                          ? 'opacity-40 animate-pulse' 
+                          : 'opacity-10'
+                        : 'opacity-20'
+                    }`}
                     style={{ backgroundColor: slotColor || undefined }}
+                    title={`${getSlotDisplayName(slotType)} slot${
+                      cell.slotCompatibility 
+                        ? ` - Accepts: ${getSlotAcceptedTypes(slotType, cell.slotCompatibility).join(", ")}`
+                        : ""
+                    }`}
                   />
                 )}
                 

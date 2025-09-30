@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createModuleAction, updateModuleAction, deleteModuleAction } from "@/app/admin/modules/actions";
+import { getModuleTypes } from "@/app/admin/module-types/actions";
 import { ShapeBuilder } from "./ShapeBuilder";
 import type { ModuleDef } from "@/types/fitting";
+import type { ModuleType } from "@prisma/client";
 
-const SLOT_OPTIONS = ["Power", "Ammo", "Utility"] as const;
 const SIZE_OPTIONS = ["Frigate", "Destroyer", "Cruiser", "Capital"] as const;
 
 interface StatField {
@@ -19,6 +20,8 @@ interface ModuleFormProps {
 }
 
 export function ModuleForm({ module, mode }: ModuleFormProps) {
+  const [moduleTypes, setModuleTypes] = useState<ModuleType[]>([]);
+  const [loadingTypes, setLoadingTypes] = useState(true);
   const [stats, setStats] = useState<StatField[]>(
     module?.stats
       ? Object.entries(module.stats).map(([key, value]) => ({ key, value: value as number }))
@@ -26,6 +29,20 @@ export function ModuleForm({ module, mode }: ModuleFormProps) {
   );
 
   const [tags, setTags] = useState<string[]>(module?.tags || []);
+
+  useEffect(() => {
+    async function loadModuleTypes() {
+      try {
+        const types = await getModuleTypes();
+        setModuleTypes(types.filter(t => t.isActive));
+      } catch (error) {
+        console.error("Failed to load module types:", error);
+      } finally {
+        setLoadingTypes(false);
+      }
+    }
+    loadModuleTypes();
+  }, []);
 
   const addStat = () => {
     setStats([...stats, { key: "", value: 0 }]);
@@ -79,18 +96,42 @@ export function ModuleForm({ module, mode }: ModuleFormProps) {
         */}
 
         <label className="block">
-          <span className="text-xs uppercase tracking-[0.3em] text-neutral-500">Slot Type</span>
-          <select
-            name="slot"
-            defaultValue={module?.slot || "Power"}
-            className="mt-1 w-full rounded bg-neutral-800 border border-neutral-700 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
-          >
-            {SLOT_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+          <span className="text-xs uppercase tracking-[0.3em] text-neutral-500">Module Type</span>
+          {loadingTypes ? (
+            <div className="mt-1 w-full rounded bg-neutral-800 border border-neutral-700 px-3 py-2 text-sm text-neutral-500">
+              Loading types...
+            </div>
+          ) : (
+            <select
+              name="slot"
+              defaultValue={module?.slot || "Power"}
+              className="mt-1 w-full rounded bg-neutral-800 border border-neutral-700 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+              required
+            >
+              {moduleTypes.length === 0 ? (
+                <option value="">No module types available</option>
+              ) : (
+                <>
+                  <optgroup label="System Types">
+                    {moduleTypes.filter(t => t.isSystemType).map((type) => (
+                      <option key={type.id} value={type.id}>
+                        {type.displayName}
+                      </option>
+                    ))}
+                  </optgroup>
+                  {moduleTypes.filter(t => !t.isSystemType).length > 0 && (
+                    <optgroup label="Custom Types">
+                      {moduleTypes.filter(t => !t.isSystemType).map((type) => (
+                        <option key={type.id} value={type.id}>
+                          {type.displayName} ({type.category})
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                </>
+              )}
+            </select>
+          )}
         </label>
 
         <label className="block">

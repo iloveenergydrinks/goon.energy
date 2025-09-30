@@ -13,6 +13,9 @@ import type {
   PrimariesById,
   SecondariesById,
   HullsById,
+  SlotType,
+  BaseSlotType,
+  SlotCompatibility,
 } from "@/types/fitting";
 import { resolveModuleVariants } from "@/lib/catalog/variants/resolveModuleVariants";
 import { prisma } from "@/lib/prisma";
@@ -272,8 +275,9 @@ function buildSlotsForArchetype(
   cols: number,
   CP: number,
   CA: number,
-  CU: number
-): Array<{ r: number; c: number; type: "Power" | "Ammo" | "Utility" }> {
+  CU: number,
+  hybridRatio: number = 0.15 // Percentage of slots to convert to hybrids
+): Array<{ r: number; c: number; type: SlotType; compatibility?: SlotCompatibility }> {
   const all = coordList(rows, cols);
   function scoreP(rc: { r: number; c: number }): number {
     switch (archetype) {
@@ -329,15 +333,79 @@ function buildSlotsForArchetype(
   const rem2 = rem1.filter((rc) => !Acells.has(`${rc.r},${rc.c}`));
   const Ucells = new Set(pickTop(rem2, scoreU, CU).map((x) => `${x.r},${x.c}`));
 
-  const slots: Array<{ r: number; c: number; type: "Power" | "Ammo" | "Utility" }> = [];
+  const slots: Array<{ r: number; c: number; type: SlotType; compatibility?: SlotCompatibility }> = [];
+  
+  // First assign base types
+  const baseSlots: Array<{ r: number; c: number; type: BaseSlotType }> = [];
   for (const { r, c } of all) {
     const key = `${r},${c}`;
-    let type: "Power" | "Ammo" | "Utility" = "Utility";
+    let type: BaseSlotType = "Utility";
     if (Pcells.has(key)) type = "Power";
     else if (Acells.has(key)) type = "Ammo";
     else type = "Utility";
-    slots.push({ r, c, type });
+    baseSlots.push({ r, c, type });
   }
+  
+  // Convert some slots to hybrids based on archetype
+  const hybridCount = Math.floor(all.length * hybridRatio);
+  const hybridIndices = new Set<number>();
+  
+  // Select slots to convert to hybrids (prefer edge/corner slots)
+  const edgeSlots = baseSlots
+    .map((s, idx) => ({ ...s, idx, edgeScore: Math.min(s.r, rows - 1 - s.r, s.c, cols - 1 - s.c) }))
+    .sort((a, b) => a.edgeScore - b.edgeScore)
+    .slice(0, hybridCount);
+  
+  for (const slot of edgeSlots) {
+    hybridIndices.add(slot.idx);
+  }
+  
+  // Build final slots with hybrids
+  baseSlots.forEach((slot, idx) => {
+    if (hybridIndices.has(idx)) {
+      // Determine hybrid type based on archetype and position
+      let hybridType: SlotType;
+      let compatibility: SlotCompatibility;
+      
+      if (archetype === "carrier" || archetype === "support") {
+        // More universal slots for versatile archetypes
+        if (Math.random() < 0.3) {
+          hybridType = "Hybrid-PAU";
+          compatibility = { accepts: ["Power", "Ammo", "Utility"], bwMultiplier: 1.3 };
+        } else {
+          hybridType = "Hybrid-PU";
+          compatibility = { accepts: ["Power", "Utility"], preferredType: "Utility", bwMultiplier: 1.2 };
+        }
+      } else if (archetype === "assault" || archetype === "artillery") {
+        // Weapon-focused hybrids
+        hybridType = "Hybrid-PA";
+        compatibility = { accepts: ["Power", "Ammo"], preferredType: "Power", bwMultiplier: 1.2 };
+      } else if (archetype === "defender" || archetype === "bulwark") {
+        // Defense-focused hybrids
+        hybridType = "Hybrid-PU";
+        compatibility = { accepts: ["Power", "Utility"], preferredType: "Utility", bwMultiplier: 1.2 };
+      } else {
+        // Balanced hybrids for other archetypes
+        const rand = Math.random();
+        if (rand < 0.33) {
+          hybridType = "Hybrid-PA";
+          compatibility = { accepts: ["Power", "Ammo"], preferredType: slot.type === "Power" ? "Power" : "Ammo", bwMultiplier: 1.2 };
+        } else if (rand < 0.66) {
+          hybridType = "Hybrid-PU";
+          compatibility = { accepts: ["Power", "Utility"], preferredType: slot.type === "Power" ? "Power" : "Utility", bwMultiplier: 1.2 };
+        } else {
+          hybridType = "Hybrid-AU";
+          compatibility = { accepts: ["Ammo", "Utility"], preferredType: slot.type === "Ammo" ? "Ammo" : "Utility", bwMultiplier: 1.2 };
+        }
+      }
+      
+      slots.push({ r: slot.r, c: slot.c, type: hybridType, compatibility });
+    } else {
+      // Regular slot
+      slots.push({ r: slot.r, c: slot.c, type: slot.type });
+    }
+  });
+  
   return slots;
 }
 

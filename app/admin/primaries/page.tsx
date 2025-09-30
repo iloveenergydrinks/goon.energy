@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { PrimaryForm } from "@/components/admin/PrimaryForm";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 
 // Force dynamic rendering - don't try to generate static pages at build time
 export const dynamic = 'force-dynamic';
@@ -11,14 +12,10 @@ export default async function PrimaryAdminPage() {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-200 p-10">
       <div className="max-w-6xl mx-auto space-y-8">
-        <header className="space-y-3">
-          <h1 className="text-2xl font-bold tracking-[0.35em] uppercase text-[color:rgb(220,230,255)]">
-            Primary Systems Catalog
-          </h1>
-          <p className="text-sm text-neutral-500">
-            Main weapon systems that define your ship&apos;s combat role
-          </p>
-        </header>
+        <AdminHeader
+          title="Primary Systems Catalog"
+          description="Main weapon systems that define your ship's combat role"
+        />
 
         {/* Create New Primary */}
         <section className="border border-neutral-800 rounded-md bg-neutral-900/70 px-6 py-6">

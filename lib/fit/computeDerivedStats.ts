@@ -6,6 +6,7 @@ import type {
   SecondariesById,
   Hull
 } from "@/types/fitting";
+import { getSlotBandwidthMultiplier } from "@/lib/slots";
 
 function fmt(num: number, integer: boolean): number {
   return integer ? Math.round(num) : Math.round(num * 10) / 10;
@@ -92,12 +93,31 @@ export function computeDerivedStats(
         .map(({ r, c }) => grid.cells[r * grid.cols + c]);
       const totalCells = covered.length;
       if (totalCells === 0) continue;
-      const mismatched = covered.filter((cell) => cell.slot && mod.slot !== cell.slot).length;
+      
+      // Calculate bandwidth multiplier based on slot compatibility
+      let totalMultiplier = 0;
+      for (const cell of covered) {
+        if (cell.slot) {
+          const multiplier = getSlotBandwidthMultiplier(mod.slot, cell.slot, cell.slotCompatibility);
+          totalMultiplier += multiplier;
+        } else {
+          totalMultiplier += 1; // No slot = no penalty
+        }
+      }
+      const avgMultiplier = totalCells > 0 ? totalMultiplier / totalCells : 1;
+      
+      // Track mismatch for stats (now considers hybrid slots)
+      const mismatched = covered.filter((cell) => {
+        if (!cell.slot) return false;
+        const mult = getSlotBandwidthMultiplier(mod.slot, cell.slot, cell.slotCompatibility);
+        return mult > 1; // Any penalty counts as mismatch
+      }).length;
       const m = totalCells > 0 ? mismatched / totalCells : 0;
       mismatchAccumulator += m;
       mismatchCount += 1;
+      
       const baseBW = (mod.baseBW ?? baseBwBySize[mod.shape.sizeClass] ?? 10);
-      bwTotal += baseBW * (1 + m);
+      bwTotal += baseBW * avgMultiplier;
     }
   }
   // Apply BW limit bonuses from placed modules BEFORE computing overage

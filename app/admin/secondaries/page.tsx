@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { SecondaryForm } from "@/components/admin/SecondaryForm";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 
 // Force dynamic rendering - don't try to generate static pages at build time
 export const dynamic = 'force-dynamic';
@@ -11,14 +12,10 @@ export default async function SecondaryAdminPage() {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-200 p-10">
       <div className="max-w-6xl mx-auto space-y-8">
-        <header className="space-y-3">
-          <h1 className="text-2xl font-bold tracking-[0.35em] uppercase text-[color:rgb(220,230,255)]">
-            Secondary Systems Catalog
-          </h1>
-          <p className="text-sm text-neutral-500">
-            Support systems that modify your ship&apos;s slot configuration and capabilities
-          </p>
-        </header>
+        <AdminHeader
+          title="Secondary Systems Catalog"
+          description="Support systems that modify your ship's slot configuration and capabilities"
+        />
 
         {/* Create New Secondary */}
         <section className="border border-neutral-800 rounded-md bg-neutral-900/70 px-6 py-6">

@@ -1,4 +1,5 @@
 import type { Grid, ModuleDef, ModulesById, PlacedModule } from "@/types/fitting";
+import { canModuleFitInSlot } from "@/lib/slots";
 
 function rotateOffsets(
   cells: Array<{ dr: number; dc: number }>,
@@ -60,3 +61,31 @@ export function canPlace(
   return { ok: true };
 }
 
+/**
+ * Check if a module placement is optimal (all cells match or are compatible)
+ */
+export function isPlacementOptimal(
+  grid: Grid,
+  module: ModuleDef,
+  anchor: { r: number; c: number },
+  rotation: 0 | 90 | 270 | 180
+): boolean {
+  const rotated = rotateOffsets(module.shape.cells, rotation);
+  
+  for (const { dr, dc } of rotated) {
+    const r = anchor.r + dr;
+    const c = anchor.c + dc;
+    if (r < 0 || c < 0 || r >= grid.rows || c >= grid.cols) {
+      return false;
+    }
+    const idx = r * grid.cols + c;
+    const cell = grid.cells[idx];
+    
+    // Check if the module type can fit in this slot
+    if (cell.slot && !canModuleFitInSlot(module.slot, cell.slot, cell.slotCompatibility)) {
+      return false;
+    }
+  }
+  
+  return true;
+}

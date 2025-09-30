@@ -80,6 +80,54 @@ model Module {
   updatedAt      DateTime @updatedAt
 }
 
+model ModuleType {
+  id              String   @id
+  name            String   @unique
+  displayName     String
+  description     String?
+  
+  // Visual settings
+  color           String   // Hex color code for this module type
+  icon            String?  // Optional icon identifier
+  
+  // Module characteristics
+  baseBandwidth   Int      @default(10) // Base bandwidth cost for this type
+  category        String   @default("custom") // Category: base, weapon, defense, utility, custom
+  
+  // Usage settings
+  isActive        Boolean  @default(true)
+  isSystemType    Boolean  @default(false) // True for Power, Ammo, Utility
+  
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model CustomSlotType {
+  id              String   @id
+  name            String   @unique
+  displayName     String
+  description     String?
+  
+  // Compatibility settings
+  accepts         String[] // Array of module types this slot accepts (can include custom types)
+  preferredType   String?  // Preferred module type (for bandwidth optimization)
+  bwMultiplier    Float    @default(1.2) // Bandwidth multiplier for non-preferred types
+  
+  // Visual settings
+  color           String   // Hex color code
+  icon            String?  // Optional icon identifier
+  
+  // Usage settings
+  isActive        Boolean  @default(true)
+  isSystemSlot    Boolean  @default(false) // True for built-in slots like Hybrid-PA
+  archetypeHints  String[] @default([]) // Suggested archetypes for this slot
+  
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
 // Industrial System Tables
 
 model Player {

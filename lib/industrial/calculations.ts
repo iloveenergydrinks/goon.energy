@@ -424,3 +424,6 @@ export function formatIndustrialNumber(value: number): string {
 
 
 
+
+
+

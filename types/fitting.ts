@@ -1,4 +1,21 @@
-export type SlotType = "Power" | "Ammo" | "Utility";
+// Base module types - these are the fundamental types
+export type BaseModuleType = "Power" | "Ammo" | "Utility";
+
+// Module types can be base types or custom types
+export type ModuleType = BaseModuleType | string;
+
+// Slot types can be base types, hybrids, or custom types
+export type SlotType = ModuleType | "Hybrid-PA" | "Hybrid-PU" | "Hybrid-AU" | "Hybrid-PAU" | string;
+
+// For backward compatibility
+export type BaseSlotType = BaseModuleType;
+
+// Helper type to check if a slot accepts a module type
+export type SlotCompatibility = {
+  accepts: ModuleType[]; // Can accept any module type, including custom
+  preferredType?: ModuleType;
+  bwMultiplier?: number; // Bandwidth multiplier for non-preferred types
+};
 
 export type SecondaryCategory = "Offensive" | "Utility" | "Defensive";
 
@@ -76,6 +93,7 @@ export interface GridCell {
   r: number;
   c: number;
   slot?: SlotType;
+  slotCompatibility?: SlotCompatibility; // For hybrid/custom slots
   hole?: boolean;
 }
 
@@ -94,6 +112,7 @@ export interface Hull {
       r: number;
       c: number;
       type: SlotType;
+      compatibility?: SlotCompatibility; // For hybrid/custom slots
     }>;
   };
   
@@ -134,7 +153,7 @@ export interface ModuleShape {
 export interface ModuleDef {
   id: string;
   name?: string;
-  slot: SlotType;
+  slot: ModuleType; // Modules can have any module type, including custom
   shape: ModuleShape;
   stats: Partial<{
     powerGen: number;

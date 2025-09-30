@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { HullForm } from "@/components/admin/HullForm";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 
 // Force dynamic rendering - don't try to generate static pages at build time
 export const dynamic = 'force-dynamic';
@@ -11,14 +12,10 @@ export default async function HullAdminPage() {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-200 p-10">
       <div className="max-w-6xl mx-auto space-y-8">
-        <header className="space-y-3">
-          <h1 className="text-2xl font-bold tracking-[0.35em] uppercase text-[color:rgb(220,230,255)]">
-            Hull Catalog
-          </h1>
-          <p className="text-sm text-neutral-500">
-            Visual hull designer with automatic ID generation. Click grid cells to place slots.
-          </p>
-        </header>
+        <AdminHeader 
+          title="Hull Catalog"
+          description="Visual hull designer with automatic ID generation. Click grid cells to place slots."
+        />
 
         {/* Create New Hull */}
         <section className="border border-neutral-800 rounded-md bg-neutral-900/70 px-6 py-6">

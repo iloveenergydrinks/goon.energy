@@ -1,9 +1,9 @@
 "use client";
 import { useMemo, useState } from "react";
 import { useFittingStore } from "@/store/useFittingStore";
-import type { ModuleDef, SlotType } from "@/types/fitting";
+import type { ModuleDef, BaseSlotType } from "@/types/fitting";
 import { selectVariantForHull } from "@/lib/catalog/variants/resolveModuleVariants";
-import { SLOT_COLORS } from "@/lib/colors";
+import { getSlotColor } from "@/lib/colors";
 
 function formatModuleTitle(module: ModuleDef): string {
   const name = module.familyName ?? module.id;
@@ -52,7 +52,7 @@ export default function ModulePalette() {
   const modules = useFittingStore((s) => s.modules);
   const hulls = useFittingStore((s) => s.hulls);
   const selectedHullId = useFittingStore((s) => s.selectedHullId);
-  const [slotFilter, setSlotFilter] = useState<SlotType | "All" | "Universal">("All");
+  const [slotFilter, setSlotFilter] = useState<BaseSlotType | "All" | "Universal">("All");
   const selectedHull = hulls.find((h) => h.id === selectedHullId);
   const resolvedModules = useMemo(() => {
     return modules.map((module) => selectVariantForHull(module, selectedHull));
@@ -81,7 +81,7 @@ export default function ModulePalette() {
   return (
     <div className="space-y-3">
       <div className="sticky top-10 z-10 flex gap-2 bg-neutral-900 pt-2 pb-2">
-        {(["All", "Universal", "Power", "Ammo", "Utility"] as const).map((k: "All" | "Universal" | SlotType) => {
+        {(["All", "Universal", "Power", "Ammo", "Utility"] as const).map((k: "All" | "Universal" | BaseSlotType) => {
           const isActive = slotFilter === k;
           return (
             <button
@@ -110,7 +110,7 @@ export default function ModulePalette() {
               {slotType}
             </div>
             {moduleList.map((entry) => {
-              const slotColor = SLOT_COLORS[entry.slot as SlotType];
+              const slotColor = getSlotColor(entry.slot);
               const topStats = entry.stats ? Object.entries(entry.stats).slice(0, 2) : [];
               return (
                 <details key={entry.id} className={`rounded-md border transition-colors ${
@@ -171,15 +171,15 @@ export default function ModulePalette() {
           <div className="font-medium text-neutral-400">Slot Types:</div>
           <div className="flex gap-3">
             <span className="flex items-center gap-1.5 text-neutral-500">
-              <span className="w-3 h-3 rounded" style={{ backgroundColor: SLOT_COLORS.Power }}></span>
+              <span className="w-3 h-3 rounded" style={{ backgroundColor: getSlotColor("Power") }}></span>
               Power
             </span>
             <span className="flex items-center gap-1.5 text-neutral-500">
-              <span className="w-3 h-3 rounded" style={{ backgroundColor: SLOT_COLORS.Ammo }}></span>
+              <span className="w-3 h-3 rounded" style={{ backgroundColor: getSlotColor("Ammo") }}></span>
               Ammo
             </span>
             <span className="flex items-center gap-1.5 text-neutral-500">
-              <span className="w-3 h-3 rounded" style={{ backgroundColor: SLOT_COLORS.Utility }}></span>
+              <span className="w-3 h-3 rounded" style={{ backgroundColor: getSlotColor("Utility") }}></span>
               Utility
             </span>
           </div>
