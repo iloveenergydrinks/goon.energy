@@ -8,7 +8,6 @@ import { CargoInventory } from '@/components/industrial/CargoInventory';
 import { MaterialStackDetails } from '@/components/industrial/MaterialStackDetails';
 import { ManufacturingInterface } from '@/components/industrial/ManufacturingInterface';
 import { InventoryCard } from '@/components/industrial/InventoryCard';
-import { MarketInterface } from '@/components/industrial/MarketInterface';
 import type { 
   Material, 
   RefiningFacility,
@@ -19,7 +18,7 @@ import type {
 import { getMockIndustrialData } from '@/lib/industrial/mockData';
 import { formatIndustrialNumber, calculateMaterialTier, getMaterialGrade } from '@/lib/industrial/calculations';
 
-type TabId = 'overview' | 'mining' | 'materials' | 'refining' | 'manufacturing' | 'inventory' | 'market';
+type TabId = 'overview' | 'mining' | 'materials' | 'refining' | 'manufacturing' | 'inventory';
 
 export default function IndustrialDashboard() {
   const [activeTab, setActiveTab] = useState<TabId>('overview');
@@ -150,8 +149,7 @@ export default function IndustrialDashboard() {
     { id: 'materials', label: 'Cargo Hold', icon: '📦' },
     { id: 'refining', label: 'Purification', icon: '⚗️' },
     { id: 'manufacturing', label: 'Manufacturing', icon: '🏭' },
-    { id: 'inventory', label: 'Inventory', icon: '📋' },
-    { id: 'market', label: 'Market', icon: '💹' }
+    { id: 'inventory', label: 'Inventory', icon: '📋' }
   ];
   
   return (
@@ -586,19 +584,6 @@ export default function IndustrialDashboard() {
           </div>
         )}
         
-        {/* Market Tab */}
-        {activeTab === 'market' && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-white">Material Exchange</h2>
-            <MarketInterface
-              playerMaterials={playerData?.materials || []}
-              playerOre={parseInt(playerData?.ore || '0')}
-              onTransactionComplete={() => {
-                loadPlayerData();
-              }}
-            />
-          </div>
-        )}
       </div>
     </div>
   );
