@@ -18,8 +18,8 @@ export function MaterialCard({ material, selected, onSelect, showDetails = false
   // Calculate attribute percentages for display
   const attributePercentages = Object.entries(material.attributes).map(([key, value]) => ({
     name: key,
-    value: Math.round(value * 100),
-    display: `${Math.round(value * 100)}%`
+    value: typeof value === 'number' ? Math.round(value * 100) : value,
+    display: typeof value === 'number' ? `${Math.round(value * 100)}%` : String(value)
   }));
   
   return (
@@ -220,7 +220,7 @@ export function MaterialComparison({ materials, requirements }: MaterialComparis
                     
                     return (
                       <td key={attr} className={`text-center px-2 ${colorClass}`}>
-                        {(value * 100).toFixed(0)}%
+                        {typeof value === 'number' ? `${(value * 100).toFixed(0)}%` : value}
                       </td>
                     );
                   })}

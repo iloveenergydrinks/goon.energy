@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getTierColor, getMaterialGrade, formatIndustrialNumber } from '@/lib/industrial/calculations';
+import { getQualityGrade, getQualityTextColor } from '@/lib/industrial/quality';
 
 interface ResourceNode {
   id: string;
@@ -58,19 +59,97 @@ interface PlayerData {
   }>;
 }
 
+// Floating number animation component
+function FloatingNumber({ value, tier, quality, x, y, color }: { value: string; tier: number; quality?: string; x: number; y: number; color: string }) {
+  const isTemp = value === '...';
+  
+  return (
+    <div 
+      className="absolute pointer-events-none z-50"
+      style={{ 
+        left: `${x}px`, 
+        top: `${y}px`,
+        animation: isTemp ? 'pulse 0.5s ease-in-out infinite' : 'floatUp 1.5s ease-out forwards'
+      }}
+    >
+      <div className="flex flex-col items-center">
+        <span className="text-lg font-bold drop-shadow-lg" style={{ color }}>
+          {isTemp ? '⛏️' : `+${value}`}
+        </span>
+        {!isTemp && tier > 0 && (
+          <div className="flex flex-col items-center">
+            <span 
+              className="text-sm font-bold drop-shadow-lg"
+              style={{ 
+                color,
+                textShadow: '0 0 10px rgba(0,0,0,0.8)'
+              }}
+            >
+              T{tier}
+            </span>
+            {quality && (
+              <span 
+                className="text-xs font-bold drop-shadow-lg"
+                style={{ 
+                  color,
+                  textShadow: '0 0 10px rgba(0,0,0,0.8)'
+                }}
+              >
+                {quality}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function MiningInterface() {
   const [nodes, setNodes] = useState<ResourceNode[]>([]);
   const [player, setPlayer] = useState<PlayerData | null>(null);
-  const [selectedNode, setSelectedNode] = useState<ResourceNode | null>(null);
-  const [miningInProgress, setMiningInProgress] = useState<string | null>(null);
-  const [lastMiningResult, setLastMiningResult] = useState<MiningResult | null>(null);
   const [loading, setLoading] = useState(true);
-  const [miningAnimations, setMiningAnimations] = useState<Record<string, boolean>>({});
+  const [floatingNumbers, setFloatingNumbers] = useState<Array<{ id: string; nodeId: string; value: string; tier: number; quality?: string; x: number; y: number; color: string }>>([]);
+  const [clickPower, setClickPower] = useState(1);
+  const [autoMiners, setAutoMiners] = useState(0);
+  const [totalMined, setTotalMined] = useState(0);
+  const [clickEffects, setClickEffects] = useState<Record<string, boolean>>({});
+  const containerRef = useRef<HTMLDivElement>(null);
   
   // Load initial data
   useEffect(() => {
     loadData();
+    loadUpgrades();
   }, []);
+  
+  const loadUpgrades = async () => {
+    try {
+      const response = await fetch('/api/mining/upgrades');
+      if (response.ok) {
+        const data = await response.json();
+        setClickPower(data.clickPower || 1);
+        setAutoMiners(data.autoMiners || 0);
+      }
+    } catch (error) {
+      console.error('Error loading upgrades:', error);
+    }
+  };
+  
+  // Auto-mining effect
+  useEffect(() => {
+    if (autoMiners === 0) return;
+    
+    const interval = setInterval(() => {
+      // Auto-mine random non-depleted nodes
+      const availableNodes = nodes.filter(n => !n.depleted);
+      if (availableNodes.length > 0) {
+        const randomNode = availableNodes[Math.floor(Math.random() * availableNodes.length)];
+        handleMineNode(randomNode, true);
+      }
+    }, 1000 / Math.min(autoMiners, 10)); // Cap speed at 10 clicks/second
+    
+    return () => clearInterval(interval);
+  }, [autoMiners, nodes]);
   
   const loadData = async () => {
     setLoading(true);
@@ -82,8 +161,6 @@ export function MiningInterface() {
         if (playerData && !playerData.error) {
           setPlayer(playerData);
         }
-      } else {
-        console.error('Failed to load player data');
       }
       
       // Load or generate nodes
@@ -105,8 +182,6 @@ export function MiningInterface() {
         if (Array.isArray(nodesData)) {
           setNodes(nodesData);
         }
-      } else {
-        console.error('Failed to load nodes');
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -115,43 +190,82 @@ export function MiningInterface() {
     }
   };
   
-  const handleMineNode = async (node: ResourceNode) => {
-    if (miningInProgress || node.depleted) return;
+  const handleMineNode = async (node: ResourceNode, isAuto = false, event?: React.MouseEvent) => {
+    if (node.depleted) return;
     
-    setMiningInProgress(node.id);
-    setMiningAnimations({ ...miningAnimations, [node.id]: true });
+    // Capture click coordinates BEFORE async operations
+    let clickX = 0;
+    let clickY = 0;
+    if (!isAuto && event && event.currentTarget) {
+      const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+      clickX = event.clientX - rect.left;
+      clickY = event.clientY - rect.top;
+      
+      // Show immediate "mining..." feedback
+      const tempId = `temp-${Date.now()}`;
+      setFloatingNumbers(prev => [...prev, {
+        id: tempId,
+        nodeId: node.id,
+        value: '...',
+        tier: 0, // Will be replaced
+        x: clickX - 20,
+        y: clickY - 20,
+        color: '#666666'
+      }]);
+      
+      // Remove temp after short delay if still there
+      setTimeout(() => {
+        setFloatingNumbers(prev => prev.filter(n => n.id !== tempId));
+      }, 500);
+    }
+    
+    // Click effect
+    setClickEffects({ ...clickEffects, [node.id]: true });
+    setTimeout(() => {
+      setClickEffects(prev => ({ ...prev, [node.id]: false }));
+    }, 150);
     
     try {
       const response = await fetch('/api/mining/mine', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nodeId: node.id })
+        body: JSON.stringify({ 
+          nodeId: node.id,
+          multiplier: clickPower // Send click power multiplier
+        })
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Mining failed:', errorData);
-        // Show error to user
-        setLastMiningResult({
-          mined: {
-            material: 'Error',
-            quantity: '0',
-            tier: 1,
-            purity: 0,
-            iskReward: '0'
-          },
-          node: { id: node.id, currentAmount: node.currentAmount, depleted: false },
-          inventory: { totalQuantity: '0', stackId: '' },
-          player: { isk: player?.isk || '0' },
-          error: errorData.details || errorData.error || 'Mining failed'
-        } as any);
+        const error = await response.json().catch(() => ({ error: 'Mining failed' }));
+        console.error('Mining failed:', error);
         return;
       }
       
       const result = await response.json();
       
       if (result && result.node) {
-        setLastMiningResult(result);
+        // Show floating number with tier and quality AFTER getting result
+        if (!isAuto && clickX !== 0) {
+          // Add floating number with actual tier from result
+          const id = `${Date.now()}-${Math.random()}`;
+          const tierColor = getTierColor(result.mined.tier);
+          const qualityInfo = getQualityGrade(result.mined.purity || 0.5);
+          setFloatingNumbers(prev => [...prev, { 
+            id,
+            nodeId: node.id,
+            value: result.mined.quantity,
+            tier: result.mined.tier,
+            quality: qualityInfo.shortName,
+            x: clickX - 30,
+            y: clickY - 30,
+            color: tierColor
+          }]);
+          
+          // Remove after animation
+          setTimeout(() => {
+            setFloatingNumbers(prev => prev.filter(n => n.id !== id));
+          }, 1500);
+        }
         
         // Update local state
         setNodes(nodes.map(n => 
@@ -165,20 +279,74 @@ export function MiningInterface() {
           setPlayer({ ...player, isk: result.player.isk });
         }
         
-        // Reload player inventory
-        const playerRes = await fetch('/api/player');
-        const playerData = await playerRes.json();
-        setPlayer(playerData);
+        // Update total mined counter
+        setTotalMined(prev => prev + parseInt(result.mined.quantity));
         
-        // Show mining animation
-        setTimeout(() => {
-          setMiningAnimations({ ...miningAnimations, [node.id]: false });
-        }, 1000);
+        // If node is depleted, regenerate it after a delay
+        if (result.node.depleted) {
+          setTimeout(() => {
+            regenerateNode(node.id);
+          }, 3000); // Regenerate after 3 seconds
+        }
       }
     } catch (error) {
       console.error('Error mining node:', error);
-    } finally {
-      setMiningInProgress(null);
+      // Don't throw, just log - allow user to keep clicking
+    }
+  };
+  
+  const regenerateNode = async (nodeId: string) => {
+    try {
+      const response = await fetch('/api/mining/regenerate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nodeId })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        setNodes(prevNodes => prevNodes.map(n => {
+          if (n.id === nodeId) {
+            return {
+              ...n,
+              currentAmount: result.node.currentAmount,
+              totalAmount: result.node.totalAmount,
+              depleted: false,
+              purity: result.node.purity
+            };
+          }
+          return n;
+        }));
+      }
+    } catch (error) {
+      console.error('Error regenerating node:', error);
+    }
+  };
+  
+  const buyUpgrade = async (type: 'clickPower' | 'autoMiner') => {
+    if (!player) return;
+    
+    try {
+      const response = await fetch('/api/mining/upgrades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        
+        // Update local state
+        setClickPower(result.upgrades.clickPower);
+        setAutoMiners(result.upgrades.autoMiners);
+        setPlayer({ ...player, isk: result.player.isk });
+      } else {
+        const error = await response.json();
+        console.error('Failed to buy upgrade:', error);
+        alert(error.error || 'Failed to buy upgrade');
+      }
+    } catch (error) {
+      console.error('Error buying upgrade:', error);
     }
   };
   
@@ -190,248 +358,182 @@ export function MiningInterface() {
     );
   }
   
-  // Show demo mode if no database connection
   if (nodes.length === 0 && !loading) {
     return (
       <div className="space-y-6">
         <div className="border border-yellow-800 bg-yellow-900/20 rounded-lg p-6 text-center">
           <h3 className="text-lg font-semibold text-yellow-400 mb-2">Database Connection Required</h3>
-          <p className="text-sm text-neutral-400 mb-4">
+          <p className="text-sm text-neutral-400">
             The mining system requires a database connection to store your progress.
           </p>
-          <p className="text-xs text-neutral-500">
-            Make sure your database is configured and Prisma migrations have been run.
-          </p>
-        </div>
-        
-        {/* Demo Preview */}
-        <div className="border border-neutral-800 rounded-lg p-6">
-          <h3 className="text-sm font-semibold text-white mb-4">Mining System Features (Preview)</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-            <div className="bg-neutral-900 rounded p-3">
-              <div className="text-2xl mb-2">⛏️</div>
-              <div className="text-neutral-200 font-medium">Click-to-Mine</div>
-              <div className="text-neutral-500 mt-1">Extract resources from nodes with each click</div>
-            </div>
-            <div className="bg-neutral-900 rounded p-3">
-              <div className="text-2xl mb-2">💎</div>
-              <div className="text-neutral-200 font-medium">Material Quality</div>
-              <div className="text-neutral-500 mt-1">Tiers 1-5 with varying purity levels</div>
-            </div>
-            <div className="bg-neutral-900 rounded p-3">
-              <div className="text-2xl mb-2">📦</div>
-              <div className="text-neutral-200 font-medium">Inventory System</div>
-              <div className="text-neutral-500 mt-1">Materials stack by tier and purity</div>
-            </div>
-          </div>
         </div>
       </div>
     );
   }
   
   return (
-    <div className="space-y-6">
-      {/* Player Stats Bar */}
+    <div className="space-y-6" ref={containerRef}>
+      <style jsx>{`
+        @keyframes floatUp {
+          0% {
+            opacity: 1;
+            transform: translateY(0) scale(1) rotate(0deg);
+          }
+          50% {
+            opacity: 1;
+            transform: translateY(-30px) scale(1.3) rotate(-5deg);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(-80px) scale(1.8) rotate(5deg);
+          }
+        }
+        
+        @keyframes pulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.8;
+          }
+          50% {
+            transform: scale(1.2);
+            opacity: 1;
+          }
+        }
+      `}</style>
+      
+      {/* Stats Bar */}
       <div className="border border-neutral-800 rounded-lg p-4 bg-neutral-900/50">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <div>
-              <span className="text-xs text-neutral-500 uppercase tracking-wide">Player</span>
-              <div className="text-lg font-semibold text-white">{player?.name || 'Loading...'}</div>
-            </div>
-            <div>
-              <span className="text-xs text-neutral-500 uppercase tracking-wide">ORE Balance</span>
-              <div className="text-lg font-semibold text-amber-400">
-                {player ? formatIndustrialNumber(parseInt(player.isk)) : '0'} ORE
-              </div>
-            </div>
-            <div>
-              <span className="text-xs text-neutral-500 uppercase tracking-wide">Materials</span>
-              <div className="text-lg font-semibold text-blue-400">
-                {player?.materials?.length || 0} stacks
-              </div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div>
+            <span className="text-xs text-neutral-500 uppercase tracking-wide">ORE Balance</span>
+            <div className="text-2xl font-bold text-amber-400">
+              {player ? formatIndustrialNumber(parseInt(player.isk)) : '0'}
             </div>
           </div>
-          <div className="flex gap-2">
-            {nodes.length > 6 && (
-              <button
-                onClick={async () => {
-                  await fetch('/api/mining/nodes/clear', { method: 'DELETE' });
-                  loadData();
-                }}
-                className="px-4 py-2 text-sm border border-red-700 text-red-400 rounded-lg hover:border-red-600 transition-colors"
-              >
-                Clear Duplicates
-              </button>
-            )}
-            <button
-              onClick={loadData}
-              className="px-4 py-2 text-sm border border-neutral-700 rounded-lg hover:border-neutral-600 transition-colors"
-            >
-              Refresh
-            </button>
+          <div>
+            <span className="text-xs text-neutral-500 uppercase tracking-wide">Click Power</span>
+            <div className="text-2xl font-bold text-green-400">
+              {clickPower}x
+            </div>
+          </div>
+          <div>
+            <span className="text-xs text-neutral-500 uppercase tracking-wide">Auto-Miners</span>
+            <div className="text-2xl font-bold text-blue-400">
+              {autoMiners}
+            </div>
+          </div>
+          <div>
+            <span className="text-xs text-neutral-500 uppercase tracking-wide">Total Mined</span>
+            <div className="text-2xl font-bold text-purple-400">
+              {formatIndustrialNumber(totalMined)}
+            </div>
+          </div>
+          <div>
+            <span className="text-xs text-neutral-500 uppercase tracking-wide">Materials</span>
+            <div className="text-2xl font-bold text-cyan-400">
+              {player?.materials?.length || 0}
+            </div>
           </div>
         </div>
       </div>
       
-      {/* Mining Result Notification */}
-      {lastMiningResult && (
-        <div className={`border rounded-lg p-4 ${
-          (lastMiningResult as any).error 
-            ? 'border-red-800 bg-red-900/20' 
-            : 'border-green-800 bg-green-900/20'
-        }`}>
-          <div className="flex items-center justify-between">
-            <div>
-              {(lastMiningResult as any).error ? (
-                <>
-                  <div className="text-sm font-semibold text-red-400">Mining Failed</div>
-                  <div className="text-xs text-neutral-300 mt-1">
-                    {(lastMiningResult as any).error}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="text-sm font-semibold text-green-400">Mining Successful!</div>
-                  <div className="text-xs text-neutral-300 mt-1">
-                    Extracted {formatIndustrialNumber(parseInt(lastMiningResult.mined.quantity))} units of{' '}
-                    <span className="text-white font-medium">{lastMiningResult.mined.material}</span>{' '}
-                    <span style={{ color: getTierColor(lastMiningResult.mined.tier as any) }}>
-                      (T{lastMiningResult.mined.tier}, {(lastMiningResult.mined.purity * 100).toFixed(0)}% purity)
-                    </span>
-                  </div>
-                  <div className="text-xs text-amber-400 mt-0.5">
-                    +{formatIndustrialNumber(parseInt(lastMiningResult.mined.iskReward))} ORE
-                  </div>
-                </>
-              )}
-            </div>
-            <button
-              onClick={() => setLastMiningResult(null)}
-              className="text-neutral-500 hover:text-neutral-300"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
-      
-      {/* Resource Nodes Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Resource Nodes - Clicker Style */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
         {nodes.map(node => {
           const progress = parseInt(node.currentAmount) / parseInt(node.totalAmount);
           const tierColor = getTierColor(node.tier as any);
-          const isSelected = selectedNode?.id === node.id;
-          const isMining = miningInProgress === node.id;
-          const hasAnimation = miningAnimations[node.id];
+          const hasClickEffect = clickEffects[node.id];
           
           return (
             <button
               key={node.id}
-              onClick={() => !node.depleted && handleMineNode(node)}
-              disabled={node.depleted || isMining}
+              onClick={(e) => !node.depleted && handleMineNode(node, false, e)}
+              disabled={node.depleted}
               className={`
-                relative border rounded-lg p-4 text-left transition-all
+                relative border rounded-lg p-3 transition-all select-none
                 ${node.depleted 
-                  ? 'border-neutral-900 bg-neutral-950 opacity-50 cursor-not-allowed' 
-                  : isSelected
-                    ? 'border-2 shadow-lg'
-                    : 'border border-neutral-800 hover:border-neutral-700 hover:shadow-md'
+                  ? 'border-neutral-900 bg-neutral-950 opacity-30 cursor-not-allowed' 
+                  : 'border border-neutral-800 hover:border-neutral-600 hover:shadow-lg active:scale-95'
                 }
-                ${!node.depleted && !isMining ? 'hover:scale-[1.02] active:scale-[0.98]' : ''}
-                ${hasAnimation ? 'animate-pulse' : ''}
+                ${hasClickEffect ? 'scale-110' : ''}
               `}
               style={{
-                borderColor: isSelected && !node.depleted ? tierColor : undefined,
-                boxShadow: isSelected && !node.depleted ? `0 0 30px ${tierColor}30` : undefined
+                borderColor: !node.depleted ? `${tierColor}60` : undefined,
+                background: !node.depleted ? `linear-gradient(135deg, transparent, ${tierColor}10)` : undefined
               }}
             >
-              {/* Mining Animation Overlay */}
-              {hasAnimation && (
-                <div className="absolute inset-0 rounded-lg pointer-events-none">
-                  <div className="absolute inset-0 bg-green-400/20 animate-ping rounded-lg" />
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl animate-bounce">
-                    ⛏️
-                  </div>
-                </div>
-              )}
+              {/* Floating numbers container - only for this specific node */}
+              {floatingNumbers
+                .filter(num => num.nodeId === node.id)
+                .map(num => (
+                  <FloatingNumber key={num.id} {...num} />
+                ))}
               
-              {/* Node Type Icon */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">
-                    {node.type === 'asteroid' ? '🪨' :
-                     node.type === 'gas_cloud' ? '☁️' :
-                     node.type === 'salvage' ? '🔧' :
-                     '💎'}
-                  </span>
-                  <div>
-                    <h3 className="text-sm font-semibold text-white">{node.name}</h3>
-                    <p className="text-xs text-neutral-500">{node.sector}</p>
-                  </div>
-                </div>
-                <div
-                  className="px-2 py-1 rounded text-xs font-bold"
-                  style={{
-                    backgroundColor: `${tierColor}20`,
-                    color: tierColor,
-                    border: `1px solid ${tierColor}60`
-                  }}
-                >
-                  T{node.tier}
-                </div>
+              {/* Node Icon */}
+              <div className="text-3xl mb-2 select-none">
+                {node.type === 'asteroid' ? '🪨' :
+                 node.type === 'gas_cloud' ? '☁️' :
+                 node.type === 'salvage' ? '🔧' :
+                 '💎'}
               </div>
               
-              {/* Resource Info */}
-              <div className="space-y-2 mb-3">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-neutral-500">Resource</span>
-                  <span className="text-neutral-200 font-medium capitalize">
-                    {node.resourceType.replace('_', ' ')}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-neutral-500">Yield/Click</span>
-                  <span className="text-green-400 font-medium">
-                    ~{node.baseYield} units
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-neutral-500">Base Purity</span>
-                  <span className="text-blue-400 font-medium">
-                    {(node.purity * 100).toFixed(0)}% ({getMaterialGrade(node.purity)})
-                  </span>
-                </div>
+              {/* Node Name */}
+              <h3 className="text-xs font-semibold text-white mb-1 truncate">
+                {node.name}
+              </h3>
+              
+              {/* Tier Badge */}
+              <div
+                className="inline-block px-1.5 py-0.5 rounded text-xs font-bold mb-2"
+                style={{
+                  backgroundColor: `${tierColor}20`,
+                  color: tierColor,
+                }}
+              >
+                T{node.tier}
+              </div>
+              
+              {/* Resource Type */}
+              <div className="text-xs text-neutral-400 mb-1 capitalize">
+                {node.resourceType.replace('_', ' ')}
+              </div>
+              
+              {/* Tier Probabilities */}
+              <div className="text-xs text-neutral-500 mb-2">
+                {node.tier === 5 && '10% T3 • 30% T4 • 60% T5'}
+                {node.tier === 4 && '20% T3 • 60% T4 • 20% T5'}
+                {node.tier === 3 && '20% T2 • 60% T3 • 20% T4'}
+                {node.tier === 2 && '20% T1 • 60% T2 • 20% T3'}
+                {node.tier === 1 && '60% T1 • 30% T2 • 10% T3'}
+              </div>
+              
+              {/* Yield */}
+              <div className="text-sm font-bold text-green-400 mb-2">
+                +{node.baseYield * clickPower}/click
               </div>
               
               {/* Progress Bar */}
-              <div>
-                <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="text-neutral-500">Remaining</span>
-                  <span className="text-neutral-300">
-                    {formatIndustrialNumber(parseInt(node.currentAmount))} / {formatIndustrialNumber(parseInt(node.totalAmount))}
-                  </span>
-                </div>
-                <div className="h-2 bg-neutral-900 rounded-full overflow-hidden">
-                  <div
-                    className="h-full transition-all duration-300"
-                    style={{
-                      width: `${progress * 100}%`,
-                      backgroundColor: node.depleted ? '#6B7280' : tierColor
-                    }}
-                  />
-                </div>
+              <div className="h-2 bg-neutral-900 rounded-full overflow-hidden">
+                <div
+                  className="h-full transition-all duration-150"
+                  style={{
+                    width: `${progress * 100}%`,
+                    backgroundColor: node.depleted ? '#6B7280' : tierColor
+                  }}
+                />
               </div>
               
-              {/* Status */}
+              {/* Amount */}
+              <div className="text-xs text-neutral-500 mt-1">
+                {formatIndustrialNumber(parseInt(node.currentAmount))}
+              </div>
+              
+              {/* Depleted Overlay */}
               {node.depleted && (
-                <div className="mt-3 text-xs text-center text-red-400 font-medium">
-                  DEPLETED
-                </div>
-              )}
-              {isMining && (
-                <div className="mt-3 text-xs text-center text-green-400 font-medium animate-pulse">
-                  MINING...
+                <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
+                  <div className="text-xs text-red-400 font-bold animate-pulse">
+                    REGENERATING...
+                  </div>
                 </div>
               )}
             </button>
@@ -439,35 +541,15 @@ export function MiningInterface() {
         })}
       </div>
       
-      {/* Inventory Summary */}
-      {player && player.materials && player.materials.length > 0 && (
-        <div className="border border-neutral-800 rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-white mb-3">Current Inventory</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-            {player.materials.map(stack => (
-              <div
-                key={stack.id}
-                className="bg-neutral-900 rounded p-2 text-xs"
-              >
-                <div className="text-neutral-200 font-medium capitalize">
-                  {stack.material.name}
-                </div>
-                <div className="flex items-center justify-between mt-1">
-                  <span className="text-neutral-500">
-                    {formatIndustrialNumber(parseInt(stack.quantity))} units
-                  </span>
-                  <span
-                    className="font-bold"
-                    style={{ color: getTierColor(stack.tier as any) }}
-                  >
-                    T{stack.tier}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Quick Stats */}
+      <div className="border border-neutral-800 rounded-lg p-3 bg-neutral-900/30">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-neutral-500">Mining Rate:</span>
+          <span className="text-white">
+            {autoMiners > 0 ? `${autoMiners}/sec + manual` : 'Manual only'}
+          </span>
         </div>
-      )}
+      </div>
     </div>
   );
 }

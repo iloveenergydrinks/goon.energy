@@ -48,3 +48,34 @@ html, body {
 .custom-scroll:hover::-webkit-scrollbar-thumb {
   background: rgba(170, 170, 170, 0.45);
 }
+
+/* Animations */
+@keyframes floatUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+}
+
+@keyframes bounce-once {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-10px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  75% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-bounce-once {
+  animation: bounce-once 0.5s ease-out;
+}

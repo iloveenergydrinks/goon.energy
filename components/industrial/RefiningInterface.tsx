@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import type { Material, RefiningFacility, RefiningCycle } from '@/types/industrial';
+import type { Material, RefiningFacility } from '@/types/industrial';
 import { 
   calculateRefiningOutput, 
   getTierColor, 
@@ -12,13 +12,8 @@ import {
 interface RefiningInterfaceProps {
   materials: Material[];
   facilities: RefiningFacility[];
-  onStartRefining: (config: RefiningConfig) => void;
-}
-
-interface RefiningConfig {
-  materialId: string;
-  facilityId: string;
-  cycles: number;
+  playerMaterials?: any[];
+  onRefiningComplete?: () => void;
 }
 
 interface RefiningSimulation {
@@ -32,87 +27,180 @@ interface RefiningSimulation {
   efficiency: number;
 }
 
-export function RefiningInterface({ materials, facilities, onStartRefining }: RefiningInterfaceProps) {
+export function RefiningInterface({ materials, facilities, playerMaterials = [], onRefiningComplete }: RefiningInterfaceProps) {
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
+  const [selectedStack, setSelectedStack] = useState<any>(null);
   const [selectedFacility, setSelectedFacility] = useState<RefiningFacility | null>(null);
   const [plannedCycles, setPlannedCycles] = useState(1);
+  const [refiningQuantity, setRefiningQuantity] = useState(100);
+  const [isRefining, setIsRefining] = useState(false);
+  const [refiningResult, setRefiningResult] = useState<any>(null);
+  
+  // Group player materials by name, tier, and purity band for cleaner UI
+  const availableMaterials = React.useMemo(() => {
+    if (playerMaterials.length > 0) {
+      const grouped: Record<string, any> = {};
+      
+      playerMaterials.forEach(pm => {
+        // Group by name, tier, and purity band (10% increments)
+        const purityBand = Math.floor(pm.purity * 10) / 10;
+        const key = `${pm.material?.name}-T${pm.tier}-${purityBand}`;
+        
+        if (!grouped[key]) {
+          grouped[key] = {
+            id: pm.id, // Use first stack's ID
+            ids: [pm.id], // Track all stack IDs in this group
+            name: pm.material?.name || 'Unknown',
+            category: pm.material?.category || 'unknown',
+            tier: pm.tier,
+            purity: pm.purity,
+            minPurity: pm.purity,
+            maxPurity: pm.purity,
+            quantity: 0,
+            baseValue: pm.material?.baseValue || 100,
+            attributes: pm.attributes || {},
+            stackCount: 0
+          };
+        } else {
+          grouped[key].ids.push(pm.id);
+        }
+        grouped[key].quantity += parseInt(pm.quantity);
+        grouped[key].minPurity = Math.min(grouped[key].minPurity, pm.purity);
+        grouped[key].maxPurity = Math.max(grouped[key].maxPurity, pm.purity);
+        grouped[key].purity = (grouped[key].purity * grouped[key].stackCount + pm.purity) / (grouped[key].stackCount + 1);
+        grouped[key].stackCount++;
+      });
+      
+      return Object.values(grouped);
+    }
+    return materials;
+  }, [playerMaterials, materials]);
   
   // Simulate refining process
   const simulation = useMemo<RefiningSimulation | null>(() => {
-    if (!selectedMaterial || !selectedFacility) return null;
+    if (!selectedMaterial || !selectedFacility || refiningQuantity <= 0) return null;
     
     const cycles: RefiningSimulation['cycles'] = [];
-    let currentMaterial = { ...selectedMaterial };
+    let currentQuantity = refiningQuantity;
+    let currentPurity = selectedMaterial.purity;
+    let currentTier = selectedMaterial.tier;
     let totalWaste = 0;
     
     for (let i = 1; i <= plannedCycles; i++) {
-      const output = calculateRefiningOutput(currentMaterial, selectedFacility, i);
+      const output = calculateRefiningOutput(
+        currentQuantity,
+        currentPurity,
+        currentTier,
+        selectedFacility.efficiency,
+        i
+      );
+      
+      const waste = currentQuantity - output.outputQuantity;
       
       cycles.push({
         cycleNumber: i,
-        input: {
-          quantity: currentMaterial.quantity,
-          purity: currentMaterial.purity,
-          tier: currentMaterial.tier
+        input: { 
+          quantity: currentQuantity, 
+          purity: currentPurity, 
+          tier: currentTier 
         },
         output: {
-          quantity: output.refinedQuantity,
-          purity: output.newPurity,
-          tier: output.newTier,
-          waste: output.wasteQuantity
+          quantity: output.outputQuantity,
+          purity: output.outputPurity,
+          tier: output.outputTier,
+          waste
         }
       });
       
-      totalWaste += output.wasteQuantity;
-      
-      // Update for next cycle
-      currentMaterial = {
-        ...currentMaterial,
-        quantity: output.refinedQuantity,
-        purity: output.newPurity,
-        tier: output.newTier
-      };
+      totalWaste += waste;
+      currentQuantity = output.outputQuantity;
+      currentPurity = output.outputPurity;
+      currentTier = output.outputTier;
       
       // Stop if we run out of material
-      if (output.refinedQuantity <= 0) break;
+      if (currentQuantity <= 0) break;
     }
-    
-    const finalCycle = cycles[cycles.length - 1];
-    const efficiency = (finalCycle.output.quantity / selectedMaterial.quantity) * 100;
     
     return {
       cycles,
-      finalOutput: finalCycle.output,
+      finalOutput: { 
+        quantity: currentQuantity, 
+        purity: currentPurity, 
+        tier: currentTier 
+      },
       totalWaste,
-      efficiency
+      efficiency: selectedFacility.efficiency
     };
-  }, [selectedMaterial, selectedFacility, plannedCycles]);
+  }, [selectedMaterial, selectedFacility, plannedCycles, refiningQuantity]);
+  
+  const handleStartRefining = async () => {
+    if (!selectedMaterial || !selectedFacility || !simulation) return;
+    
+    setIsRefining(true);
+    setRefiningResult(null);
+    
+    try {
+      const response = await fetch('/api/refining', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          materialId: selectedMaterial.id,
+          quantity: refiningQuantity,
+          cycles: plannedCycles,
+          facilityType: selectedFacility.type
+        })
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to start refining');
+      }
+      
+      const result = await response.json();
+      setRefiningResult(result);
+      
+      // Reset selection
+      setSelectedMaterial(null);
+      setRefiningQuantity(1000);
+      
+      // Notify parent to refresh materials
+      if (onRefiningComplete) {
+        onRefiningComplete();
+      }
+    } catch (error) {
+      console.error('Refining error:', error);
+      alert(`Refining failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsRefining(false);
+    }
+  };
   
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="space-y-6">
       {/* Material Selection */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-white">Select Material</h3>
-        <div className="space-y-2 max-h-96 overflow-y-auto">
-          {materials.map(material => {
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold text-white">Select Material to Refine</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {availableMaterials.map(material => {
             const isSelected = selectedMaterial?.id === material.id;
             const tierColor = getTierColor(material.tier);
             
             return (
               <button
                 key={material.id}
-                onClick={() => setSelectedMaterial(material)}
-                className={`
-                  w-full p-3 rounded-lg border text-left transition-all
-                  ${isSelected
-                    ? 'border-2'
-                    : 'border border-neutral-800 hover:border-neutral-700'
-                  }
-                `}
-                style={{
-                  borderColor: isSelected ? tierColor : undefined,
-                  backgroundColor: isSelected ? `${tierColor}10` : undefined
+                onClick={() => {
+                  setSelectedMaterial(material);
+                  setRefiningQuantity(Math.min(1000, material.quantity));
                 }}
+                disabled={isRefining}
+                className={`
+                  p-3 rounded-lg border text-left transition-all
+                  ${isSelected 
+                    ? 'border-blue-500 bg-blue-500/10' 
+                    : 'border-neutral-800 hover:border-neutral-600 bg-neutral-900/50'
+                  }
+                  ${isRefining ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -122,6 +210,7 @@ export function RefiningInterface({ materials, facilities, onStartRefining }: Re
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-neutral-400">
                       {formatIndustrialNumber(material.quantity)} units
+                      {material.stackCount > 1 && ` (${material.stackCount} stacks)`}
                     </span>
                     <span
                       className="px-2 py-1 rounded text-xs font-bold"
@@ -151,7 +240,10 @@ export function RefiningInterface({ materials, facilities, onStartRefining }: Re
                     />
                   </div>
                   <div className="text-xs text-neutral-500 mt-1">
-                    Purity: {(material.purity * 100).toFixed(1)}%
+                    Purity: {material.minPurity !== material.maxPurity ? 
+                      `${(material.minPurity * 100).toFixed(0)}-${(material.maxPurity * 100).toFixed(0)}%` :
+                      `${(material.purity * 100).toFixed(1)}%`
+                    }
                   </div>
                 </div>
               </button>
@@ -161,223 +253,238 @@ export function RefiningInterface({ materials, facilities, onStartRefining }: Re
       </div>
       
       {/* Refining Configuration */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-white">Refining Setup</h3>
-        
-        {/* Facility Selection */}
-        <div>
-          <label className="text-sm text-neutral-400 mb-2 block">Select Facility</label>
-          <div className="space-y-2">
-            {facilities.map(facility => {
-              const isSelected = selectedFacility?.id === facility.id;
-              
-              return (
-                <button
-                  key={facility.id}
-                  onClick={() => setSelectedFacility(facility)}
-                  className={`
-                    w-full p-3 rounded-lg border text-left transition-all
-                    ${isSelected
-                      ? 'border-blue-500 bg-blue-500/10'
-                      : 'border-neutral-800 hover:border-neutral-700'
-                    }
-                  `}
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="text-sm font-medium text-white">{facility.name}</div>
-                      <div className="text-xs text-neutral-500 capitalize">
-                        {facility.type} Refinery • Tier {facility.tier}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs text-green-400">
-                        {(facility.efficiency * 100).toFixed(0)}% efficient
-                      </div>
-                      <div className="text-xs text-neutral-500">
-                        Max {(facility.maxPurity * 100).toFixed(0)}% purity
-                      </div>
-                    </div>
-                  </div>
-                  {facility.specialization && facility.specialization.length > 0 && (
-                    <div className="mt-2 flex gap-1">
-                      {facility.specialization.map(spec => (
-                        <span
-                          key={spec}
-                          className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded capitalize"
-                        >
-                          {spec} +15%
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <span className="text-neutral-500">Throughput:</span>
-                      <span className="text-neutral-300 ml-1">
-                        {formatIndustrialNumber(facility.throughput)}/cycle
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-neutral-500">Condition:</span>
-                      <span className={`ml-1 ${
-                        facility.condition > 80 ? 'text-green-400' :
-                        facility.condition > 50 ? 'text-yellow-400' :
-                        'text-red-400'
-                      }`}>
-                        {facility.condition}%
-                      </span>
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
+      {selectedMaterial && (
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-white">Configure Refining</h3>
+          
+          {/* Quantity Input */}
+          <div>
+            <label className="text-xs text-neutral-400">Quantity to Refine</label>
+            <div className="flex items-center gap-2 mt-1">
+              <input
+                type="number"
+                min={1}
+                max={selectedMaterial.quantity}
+                value={refiningQuantity}
+                onChange={(e) => setRefiningQuantity(Math.min(
+                  selectedMaterial.quantity,
+                  Math.max(1, parseInt(e.target.value) || 0)
+                ))}
+                disabled={isRefining}
+                className="px-3 py-2 bg-neutral-800 rounded text-sm text-white border border-neutral-700 focus:border-blue-500 focus:outline-none"
+              />
+              <span className="text-xs text-neutral-500">
+                / {formatIndustrialNumber(selectedMaterial.quantity)} available
+              </span>
+            </div>
           </div>
-        </div>
-        
-        {/* Cycle Planning */}
-        <div>
-          <label className="text-sm text-neutral-400 mb-2 block">
-            Refining Cycles: {plannedCycles}
-          </label>
-          <input
-            type="range"
-            min="1"
-            max="5"
-            value={plannedCycles}
-            onChange={(e) => setPlannedCycles(parseInt(e.target.value))}
-            className="w-full"
-          />
-          <div className="flex justify-between text-xs text-neutral-500 mt-1">
-            <span>1 cycle</span>
-            <span>5 cycles</span>
-          </div>
-        </div>
-        
-        {/* Simulation Results */}
-        {simulation && (
-          <div className="border border-neutral-800 rounded-lg p-4 space-y-3">
-            <h4 className="text-sm font-semibold text-white">Refining Simulation</h4>
-            
-            {/* Cycle Details */}
-            <div className="space-y-2">
-              {simulation.cycles.map((cycle, idx) => {
-                const inputColor = getTierColor(cycle.input.tier as 1 | 2 | 3 | 4 | 5);
-                const outputColor = getTierColor(cycle.output.tier as 1 | 2 | 3 | 4 | 5);
+          
+          {/* Facility Selection */}
+          <div>
+            <label className="text-xs text-neutral-400">Select Refining Facility</label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-1">
+              {facilities.map(facility => {
+                const isSelected = selectedFacility?.id === facility.id;
                 
                 return (
-                  <div key={idx} className="text-xs">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-neutral-500">Cycle {cycle.cycleNumber}</span>
-                      <span className="text-red-400">
-                        -{formatIndustrialNumber(cycle.output.waste)} waste
-                      </span>
+                  <button
+                    key={facility.id}
+                    onClick={() => setSelectedFacility(facility)}
+                    disabled={isRefining}
+                    className={`
+                      p-3 rounded border text-left transition-all
+                      ${isSelected 
+                        ? 'border-green-500 bg-green-500/10' 
+                        : 'border-neutral-800 hover:border-neutral-600'
+                      }
+                      ${isRefining ? 'opacity-50 cursor-not-allowed' : ''}
+                    `}
+                  >
+                    <div className="text-xs font-medium text-white capitalize">{facility.type}</div>
+                    <div className="text-xs text-neutral-500 mt-1">
+                      Efficiency: {(facility.efficiency * 100).toFixed(0)}%
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-neutral-900 rounded p-2">
-                        <div className="text-neutral-500 mb-1">Input</div>
-                        <div className="text-neutral-300">
-                          {formatIndustrialNumber(cycle.input.quantity)} units
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span style={{ color: inputColor }}>
-                            T{cycle.input.tier}
-                          </span>
-                          <span className="text-neutral-400">
-                            {(cycle.input.purity * 100).toFixed(0)}%
-                          </span>
-                        </div>
-                      </div>
-                      <div className="bg-neutral-900 rounded p-2">
-                        <div className="text-neutral-500 mb-1">Output</div>
-                        <div className="text-neutral-300">
-                          {formatIndustrialNumber(cycle.output.quantity)} units
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span style={{ color: outputColor }}>
-                            T{cycle.output.tier}
-                          </span>
-                          <span className="text-green-400">
-                            {(cycle.output.purity * 100).toFixed(0)}%
-                          </span>
-                        </div>
-                      </div>
+                    <div className="text-xs text-neutral-500">
+                      Max Purity: {(facility.maxPurity * 100).toFixed(0)}%
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
-            
-            {/* Final Summary */}
-            <div className="border-t border-neutral-800 pt-3">
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div>
-                  <span className="text-neutral-500">Final Output</span>
-                  <div className="text-lg font-semibold text-white mt-1">
-                    {formatIndustrialNumber(simulation.finalOutput.quantity)} units
+          </div>
+          
+          {/* Cycles Configuration */}
+          <div>
+            <label className="text-xs text-neutral-400">Number of Refining Cycles</label>
+            <div className="flex items-center gap-4 mt-1">
+              <input
+                type="range"
+                min={1}
+                max={5}
+                value={plannedCycles}
+                onChange={(e) => setPlannedCycles(parseInt(e.target.value))}
+                disabled={isRefining}
+                className="flex-1"
+              />
+              <span className="text-sm font-medium text-white w-8">{plannedCycles}</span>
+            </div>
+            <div className="text-xs text-neutral-500 mt-1">
+              More cycles = higher purity but more material loss
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Simulation Results */}
+      {simulation && selectedMaterial && (
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-white">Refining Simulation</h3>
+          
+          {/* Cycle Details */}
+          <div className="space-y-2">
+            {simulation.cycles.map((cycle, index) => {
+              const inputColor = getTierColor(cycle.input.tier);
+              const outputColor = getTierColor(cycle.output.tier);
+              
+              return (
+                <div key={cycle.cycleNumber} className="p-3 bg-neutral-900/50 rounded-lg border border-neutral-800">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-neutral-400">Cycle {cycle.cycleNumber}</span>
+                    <span className="text-xs text-red-400">
+                      -{formatIndustrialNumber(cycle.output.waste)} waste
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span
-                      className="px-2 py-0.5 rounded text-xs font-bold"
-                      style={{
-                        backgroundColor: `${getTierColor(simulation.finalOutput.tier as 1 | 2 | 3 | 4 | 5)}20`,
-                        color: getTierColor(simulation.finalOutput.tier as 1 | 2 | 3 | 4 | 5)
-                      }}
-                    >
-                      Tier {simulation.finalOutput.tier}
-                    </span>
-                    <span className="text-green-400">
-                      {(simulation.finalOutput.purity * 100).toFixed(1)}% pure
-                    </span>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-xs text-neutral-500 mb-1">Input</div>
+                      <div className="text-sm text-white">
+                        {formatIndustrialNumber(cycle.input.quantity)} units
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs" style={{ color: inputColor }}>
+                          T{cycle.input.tier}
+                        </span>
+                        <span className="text-xs text-neutral-400">
+                          {(cycle.input.purity * 100).toFixed(1)}% pure
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="text-xs text-neutral-500 mb-1">Output</div>
+                      <div className="text-sm text-white">
+                        {formatIndustrialNumber(cycle.output.quantity)} units
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs" style={{ color: outputColor }}>
+                          T{cycle.output.tier}
+                        </span>
+                        <span className="text-xs text-neutral-400">
+                          {(cycle.output.purity * 100).toFixed(1)}% pure
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <span className="text-neutral-500">Efficiency</span>
-                  <div className={`text-lg font-semibold mt-1 ${
-                    simulation.efficiency > 70 ? 'text-green-400' :
-                    simulation.efficiency > 50 ? 'text-yellow-400' :
-                    'text-red-400'
-                  }`}>
-                    {simulation.efficiency.toFixed(1)}%
-                  </div>
-                  <div className="text-red-400 mt-1">
-                    {formatIndustrialNumber(simulation.totalWaste)} waste
-                  </div>
+              );
+            })}
+          </div>
+          
+          {/* Summary */}
+          <div className="p-4 bg-blue-500/10 border border-blue-500/50 rounded-lg">
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <div className="text-xs text-blue-300">Final Output</div>
+                <div className="text-lg font-bold text-white">
+                  {formatIndustrialNumber(simulation.finalOutput.quantity)}
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <span 
+                    className="text-xs font-bold"
+                    style={{ color: getTierColor(simulation.finalOutput.tier) }}
+                  >
+                    Tier {simulation.finalOutput.tier}
+                  </span>
+                  <span className="text-xs text-neutral-400">
+                    {(simulation.finalOutput.purity * 100).toFixed(1)}% pure
+                  </span>
+                </div>
+              </div>
+              
+              <div>
+                <div className="text-xs text-red-300">Total Waste</div>
+                <div className="text-lg font-bold text-white">
+                  {formatIndustrialNumber(simulation.totalWaste)}
+                </div>
+                <div className="text-xs text-neutral-400 mt-1">
+                  {((simulation.totalWaste / refiningQuantity) * 100).toFixed(1)}% loss
+                </div>
+              </div>
+              
+              <div>
+                <div className="text-xs text-green-300">Efficiency</div>
+                <div className="text-lg font-bold text-white">
+                  {(simulation.efficiency * 100).toFixed(0)}%
+                </div>
+                <div className="text-xs text-neutral-400 mt-1">
+                  {selectedFacility?.type} facility
                 </div>
               </div>
             </div>
-            
-            {/* Start Button */}
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex gap-3">
             <button
-              onClick={() => {
-                if (selectedMaterial && selectedFacility) {
-                  onStartRefining({
-                    materialId: selectedMaterial.id,
-                    facilityId: selectedFacility.id,
-                    cycles: plannedCycles
-                  });
-                }
-              }}
-              disabled={!selectedMaterial || !selectedFacility}
+              onClick={handleStartRefining}
+              disabled={isRefining || !selectedFacility}
               className={`
-                w-full py-2 rounded-lg font-medium transition-colors
-                ${selectedMaterial && selectedFacility
-                  ? 'bg-green-600 hover:bg-green-700 text-white'
-                  : 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
+                flex-1 py-3 rounded font-medium transition-colors
+                ${isRefining || !selectedFacility
+                  ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
+                  : 'bg-blue-500 hover:bg-blue-600 text-white'
                 }
               `}
             >
-              Start Refining Process
+              {isRefining ? 'Refining...' : 'Start Refining'}
+            </button>
+            
+            <button
+              onClick={() => {
+                setSelectedMaterial(null);
+                setSelectedFacility(null);
+                setRefiningResult(null);
+              }}
+              disabled={isRefining}
+              className="px-6 py-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded font-medium transition-colors"
+            >
+              Cancel
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+      
+      {/* Refining Result */}
+      {refiningResult && (
+        <div className="p-4 bg-green-500/10 border border-green-500/50 rounded-lg">
+          <h3 className="text-sm font-semibold text-green-300 mb-3">Refining Complete!</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <div className="text-xs text-neutral-400">Final Quantity</div>
+              <div className="text-lg font-bold text-white">
+                {formatIndustrialNumber(parseInt(refiningResult.finalQuantity))}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-neutral-400">Final Quality</div>
+              <div className="text-lg font-bold" style={{ color: getTierColor(refiningResult.finalTier) }}>
+                T{refiningResult.finalTier} - {getMaterialGrade(refiningResult.finalPurity)}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-
-
-
-
-

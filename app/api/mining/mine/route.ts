@@ -1,199 +1,189 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { calculateMaterialTier } from '@/lib/industrial/calculations';
+import { generateQualityForMining } from '@/lib/industrial/quality';
 
-// POST /api/mining/mine - Mine a resource node
+// Cache material data to avoid repeated lookups
+const materialCache = new Map();
+
+// POST /api/mining/mine - Mine a resource node (OPTIMIZED)
 export async function POST(request: NextRequest) {
   try {
-    // Ensure Prisma is connected
-    await prisma.$connect();
-    
-    const { nodeId } = await request.json();
+    const { nodeId, multiplier = 1 } = await request.json();
     const playerId = 'demo-player';
     
     if (!nodeId) {
       return NextResponse.json({ error: 'Node ID required' }, { status: 400 });
     }
     
-    // Get the node and check if it's mineable
+    // Get the node
     const node = await prisma.resourceNode.findUnique({
-      where: { id: nodeId }
+      where: { id: nodeId },
+      select: {
+        id: true,
+        tier: true,
+        resourceType: true,
+        currentAmount: true,
+        baseYield: true,
+        depleted: true,
+        active: true
+      }
     });
     
-    if (!node) {
-      return NextResponse.json({ error: 'Node not found' }, { status: 404 });
+    if (!node || node.depleted || !node.active) {
+      return NextResponse.json({ error: 'Node unavailable' }, { status: 400 });
     }
     
-    if (node.depleted || !node.active) {
-      return NextResponse.json({ error: 'Node is depleted or inactive' }, { status: 400 });
-    }
-    
-    // Calculate mining yield with some randomness
-    const baseYield = node.baseYield;
-    const variance = 0.2; // ±20% variance
-    const actualYield = Math.floor(baseYield * (1 + (Math.random() - 0.5) * variance));
+    // Calculate yield
+    const baseYield = node.baseYield * multiplier;
+    const actualYield = Math.floor(baseYield * (0.8 + Math.random() * 0.4)); // ±20% variance
     const minedAmount = BigInt(Math.min(actualYield, Number(node.currentAmount)));
     
-    // Calculate material quality with some randomness
-    const purityVariance = 0.1; // ±10% purity variance
-    const actualPurity = Math.max(0, Math.min(1, 
-      node.purity + (Math.random() - 0.5) * purityVariance
-    ));
-    const tier = calculateMaterialTier(actualPurity);
+    // Calculate tier with discrete outcomes
+    const tierRoll = Math.random();
+    let tier: number;
     
-    // Start a transaction with longer timeout (30 seconds)
-    const result = await prisma.$transaction(async (tx) => {
-      // Update the node
-      const updatedNode = await tx.resourceNode.update({
-        where: { id: nodeId },
-        data: {
-          currentAmount: {
-            decrement: minedAmount
-          },
-          depleted: node.currentAmount - minedAmount <= 0
-        }
-      });
-      
-      // Get or create the material type
-      let material = await tx.material.findUnique({
+    if (node.tier === 5) {
+      // T5 nodes: 30% T4, 70% T5
+      if (tierRoll < 0.3) {
+        tier = 4;
+      } else {
+        tier = 5;
+      }
+    } else if (node.tier === 4) {
+      // T4 nodes: 20% T3, 60% T4, 20% T5
+      if (tierRoll < 0.2) {
+        tier = 3;
+      } else if (tierRoll < 0.8) {
+        tier = 4;
+      } else {
+        tier = 5;
+      }
+    } else if (node.tier === 3) {
+      // T3 nodes: 20% T2, 60% T3, 20% T4
+      if (tierRoll < 0.2) {
+        tier = 2;
+      } else if (tierRoll < 0.8) {
+        tier = 3;
+      } else {
+        tier = 4;
+      }
+    } else if (node.tier === 2) {
+      // T2 nodes: 20% T1, 60% T2, 20% T3
+      if (tierRoll < 0.2) {
+        tier = 1;
+      } else if (tierRoll < 0.8) {
+        tier = 2;
+      } else {
+        tier = 3;
+      }
+    } else {
+      // T1 nodes: 60% T1, 30% T2, 10% T3
+      if (tierRoll < 0.6) {
+        tier = 1;
+      } else if (tierRoll < 0.9) {
+        tier = 2;
+      } else {
+        tier = 3;
+      }
+    }
+    
+    // Generate quality-based purity using the new system
+    const actualPurity = generateQualityForMining(node.tier, tier);
+    
+    const roundedPurity = Math.round(actualPurity * 100) / 100;
+    const oreReward = BigInt(Math.floor(Number(minedAmount) * tier * 10));
+    
+    // Get or create material (use cache)
+    let material = materialCache.get(node.resourceType);
+    if (!material) {
+      material = await prisma.material.findUnique({
         where: { id: node.resourceType }
       });
       
       if (!material) {
-        // Create material if it doesn't exist
-        material = await tx.material.create({
+        // Create material if doesn't exist
+        const category = node.tier >= 4 ? 'exotic' : node.tier >= 3 ? 'crystal' : 'metal';
+        material = await prisma.material.create({
           data: {
             id: node.resourceType,
             name: node.resourceType.charAt(0).toUpperCase() + node.resourceType.slice(1).replace('_', ' '),
-            category: node.type === 'gas_cloud' ? 'gas' : 
-                     node.tier >= 4 ? 'exotic' : 
-                     node.tier >= 3 ? 'crystal' : 'metal',
+            category,
             baseValue: 100 * node.tier,
-            baseAttributes: {
-              strength: 0.5 + Math.random() * 0.3,
-              conductivity: 0.4 + Math.random() * 0.4,
-              density: 0.3 + Math.random() * 0.5,
-              reactivity: 0.4 + Math.random() * 0.4,
-              stability: 0.5 + Math.random() * 0.3,
-              elasticity: 0.3 + Math.random() * 0.4
-            }
+            baseAttributes: {}
           }
         });
       }
+      materialCache.set(node.resourceType, material);
+    }
+    
+    // Execute all database operations in parallel
+    const [updatedNode, playerMaterial, player] = await Promise.all([
+      // Update node
+      prisma.resourceNode.update({
+        where: { id: nodeId },
+        data: {
+          currentAmount: { decrement: minedAmount },
+          depleted: node.currentAmount - minedAmount <= 0
+        }
+      }),
       
-      // Add to player's inventory
-      const existingStack = await tx.playerMaterial.findUnique({
+      // Upsert player material (create or update in one operation)
+      prisma.playerMaterial.upsert({
         where: {
           playerId_materialId_tier_purity: {
             playerId,
             materialId: material.id,
             tier,
-            purity: Math.round(actualPurity * 100) / 100 // Round to 2 decimals
+            purity: roundedPurity
           }
-        }
-      });
-      
-      let playerMaterial;
-      if (existingStack) {
-        // Add to existing stack
-        playerMaterial = await tx.playerMaterial.update({
-          where: {
-            id: existingStack.id
-          },
-          data: {
-            quantity: {
-              increment: minedAmount
-            }
-          },
-          include: {
-            material: true
-          }
-        });
-      } else {
-        // Create new stack
-        playerMaterial = await tx.playerMaterial.create({
-        data: {
+        },
+        update: {
+          quantity: { increment: minedAmount }
+        },
+        create: {
           playerId,
           materialId: material.id,
           quantity: minedAmount,
           tier,
-          purity: Math.round(actualPurity * 100) / 100,
-          attributes: material.baseAttributes as any
-        },
-          include: {
-            material: true
-          }
-        });
-      }
-      
-      // Record the mining operation
-      const miningOp = await tx.miningOperation.create({
-        data: {
-          playerId,
-          nodeId,
-          materialGained: material.id,
-          quantityMined: minedAmount,
-          purityGained: actualPurity,
-          tierGained: tier
+          purity: roundedPurity,
+          attributes: {}
         }
-      });
+      }),
       
-      // Give player some ORE as bonus
-      const oreReward = BigInt(Math.floor(Number(minedAmount) * tier * 10));
-      const player = await tx.player.update({
+      // Update player ORE
+      prisma.player.update({
         where: { id: playerId },
-        data: {
-          isk: {
-            increment: oreReward
-          }
-        }
-      });
-      
-      return {
-        minedAmount,
-        material,
-        playerMaterial,
-        updatedNode,
-        iskReward: oreReward, // Keep as iskReward for compatibility
-        oreReward,
-        player
-      };
-    }, {
-      maxWait: 30000, // 30 seconds max wait
-      timeout: 30000  // 30 seconds timeout
-    });
+        data: { isk: { increment: oreReward } }
+      })
+    ]);
     
-    // Return mining results
+    // Skip mining operation recording for speed (can add back if needed)
+    
+    // Return results immediately
     return NextResponse.json({
       success: true,
       mined: {
-        material: result.material.name,
-        quantity: result.minedAmount.toString(),
+        material: material.name,
+        quantity: minedAmount.toString(),
         tier,
-        purity: Math.round(actualPurity * 100) / 100,
-        iskReward: result.oreReward.toString(), // Keep as iskReward for frontend compatibility
-        oreReward: result.oreReward.toString()
+        purity: roundedPurity,
+        iskReward: oreReward.toString()
       },
       node: {
-        id: result.updatedNode.id,
-        currentAmount: result.updatedNode.currentAmount.toString(),
-        depleted: result.updatedNode.depleted
-      },
-      inventory: {
-        totalQuantity: result.playerMaterial.quantity.toString(),
-        stackId: result.playerMaterial.id
+        id: updatedNode.id,
+        currentAmount: updatedNode.currentAmount.toString(),
+        depleted: updatedNode.depleted
       },
       player: {
-        isk: result.player.isk.toString(), // Keep as isk for compatibility
-        ore: result.player.isk.toString() // Display as ORE in UI
+        isk: player.isk.toString()
       }
     });
+    
   } catch (error) {
-    console.error('Error mining node:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    console.error('Mining error:', error);
     return NextResponse.json({ 
-      error: 'Failed to mine node',
-      details: errorMessage 
+      error: 'Mining failed',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }

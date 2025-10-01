@@ -19,7 +19,11 @@ export async function GET(request: NextRequest) {
             material: true
           }
         },
-        blueprints: true,
+        blueprints: {
+          include: {
+            blueprint: true
+          }
+        },
         _count: {
           select: {
             miningOps: true,
@@ -44,7 +48,11 @@ export async function GET(request: NextRequest) {
               material: true
             }
           },
-          blueprints: true,
+          blueprints: {
+            include: {
+              blueprint: true
+            }
+          },
           _count: {
             select: {
               miningOps: true,

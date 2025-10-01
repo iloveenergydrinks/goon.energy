@@ -161,43 +161,32 @@ export function calculateItemQuality(
  * Calculate refining output based on input, facility, and cycle
  */
 export function calculateRefiningOutput(
-  input: Material,
-  facility: RefiningFacility,
+  quantity: number,
+  purity: number,
+  tier: number,
+  facilityEfficiency: number,
   cycleNumber: number
-): RefiningCycle['output'] {
+): { outputQuantity: number; outputPurity: number; outputTier: number } {
   // Base efficiency decreases with each cycle
-  const cycleEfficiency = facility.efficiency * Math.pow(0.85, cycleNumber - 1);
-  
-  // Specialization bonus
-  const specializationBonus = facility.specialization?.includes(input.category) ? 1.15 : 1.0;
+  const cycleEfficiency = facilityEfficiency * Math.pow(0.85, cycleNumber - 1);
   
   // Calculate output quantity (with waste)
-  const retentionRate = cycleEfficiency * specializationBonus;
-  const refinedQuantity = Math.floor(input.quantity * retentionRate);
-  const wasteQuantity = input.quantity - refinedQuantity;
+  const retentionRate = cycleEfficiency;
+  const outputQuantity = Math.floor(quantity * retentionRate);
   
   // Calculate new purity (increases with each cycle but with diminishing returns)
-  const purityGain = (facility.maxPurity - input.purity) * (0.4 / cycleNumber);
-  const newPurity = Math.min(facility.maxPurity, input.purity + purityGain);
+  // Assume max purity of 1.0 (100%)
+  const maxPurity = 1.0;
+  const purityGain = (maxPurity - purity) * (0.4 / cycleNumber);
+  const outputPurity = Math.min(maxPurity, purity + purityGain);
   
   // Determine new tier based on purity
-  const newTier = calculateMaterialTier(newPurity);
-  
-  // Chance for valuable byproducts at higher purities
-  const byproducts: RefiningCycle['output']['byproducts'] = [];
-  if (newPurity > 0.7 && Math.random() < 0.1) {
-    byproducts.push({
-      materialId: 'trace_elements',
-      quantity: Math.floor(wasteQuantity * 0.05)
-    });
-  }
+  const outputTier = calculateMaterialTier(outputPurity);
   
   return {
-    refinedQuantity,
-    newPurity,
-    newTier,
-    wasteQuantity,
-    byproducts: byproducts.length > 0 ? byproducts : undefined
+    outputQuantity,
+    outputPurity,
+    outputTier
   };
 }
 
@@ -412,15 +401,23 @@ export function getTierColor(tier: MaterialTier): string {
 /**
  * Format large numbers for display
  */
-export function formatIndustrialNumber(value: number): string {
-  if (value >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1)}M`;
+export function formatIndustrialNumber(value: number | undefined | null): string {
+  if (!value && value !== 0) return '0';
+  
+  const num = typeof value === 'number' ? value : Number(value);
+  if (isNaN(num)) return '0';
+  
+  if (num >= 1_000_000) {
+    return `${(num / 1_000_000).toFixed(1)}M`;
   }
-  if (value >= 1_000) {
-    return `${(value / 1_000).toFixed(1)}K`;
+  if (num >= 1_000) {
+    return `${(num / 1_000).toFixed(1)}K`;
   }
-  return value.toString();
+  return num.toString();
 }
+
+
+
 
 
 
