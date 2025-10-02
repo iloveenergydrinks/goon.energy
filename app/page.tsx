@@ -15,7 +15,7 @@ export default async function Home() {
     <div className="min-h-screen p-10 bg-neutral-950">
       <div className="max-w-[1400px] mx-auto">
         <SurfaceSummary placement="top" catalog={catalog} />
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+        <div className="flex flex-wrap  items-center justify-between gap-3 mb-2">
           <h1 className="text-3xl font-bold tracking-[0.35em] uppercase text-[color:rgb(220,230,255)]">
             Ship Builder
           </h1>
