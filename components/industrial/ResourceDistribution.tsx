@@ -10,12 +10,21 @@ const ROOM_DATA = [
     description: "Tutorial/Starting Area - No PvP, no hazards",
     qualityRange: "30-50%",
     distribution: [
-      { tier: "T1", material: "Iron", percentage: 39, rarity: "common" },
-      { tier: "T1", material: "Copper", percentage: 34, rarity: "common" },
-      { tier: "T1", material: "Silicon", percentage: 24, rarity: "common" },
+      { tier: "T1", material: "Iron", percentage: 38.5, rarity: "common" },
+      { tier: "T1", material: "Copper", percentage: 33.5, rarity: "common" },
+      { tier: "T1", material: "Silicon", percentage: 23.5, rarity: "common" },
       { tier: "T2", material: "Silver", percentage: 2, rarity: "rare" },
       { tier: "T2", material: "Gold", percentage: 0.8, rarity: "rare" },
-      { tier: "T2", material: "Titanium", percentage: 0.2, rarity: "very-rare" },
+      { tier: "T2", material: "Titanium", percentage: 0.5, rarity: "very-rare" },
+      { tier: "T3", material: "Platinum", percentage: 0.3, rarity: "very-rare" },
+      { tier: "T3", material: "Uranium", percentage: 0.2, rarity: "very-rare" },
+      { tier: "T3", material: "Thorium", percentage: 0.15, rarity: "ultra-rare" },
+      { tier: "T4", material: "Rare Earth", percentage: 0.1, rarity: "ultra-rare" },
+      { tier: "T4", material: "Neutronium", percentage: 0.08, rarity: "ultra-rare" },
+      { tier: "T4", material: "Plasma", percentage: 0.05, rarity: "ultra-rare" },
+      { tier: "T5", material: "Dark Matter", percentage: 0.03, rarity: "legendary" },
+      { tier: "T5", material: "Antimatter", percentage: 0.02, rarity: "legendary" },
+      { tier: "T5", material: "Strange Matter", percentage: 0.01, rarity: "legendary" },
     ]
   },
   {
@@ -25,15 +34,21 @@ const ROOM_DATA = [
     description: "Minor equipment wear, occasional power fluctuations",
     qualityRange: "40-65%",
     distribution: [
-      { tier: "T1", material: "Iron", percentage: 19, rarity: "common" },
-      { tier: "T1", material: "Copper", percentage: 14, rarity: "common" },
-      { tier: "T1", material: "Silicon", percentage: 14, rarity: "common" },
-      { tier: "T2", material: "Silver", percentage: 19, rarity: "common" },
-      { tier: "T2", material: "Gold", percentage: 19, rarity: "common" },
+      { tier: "T1", material: "Iron", percentage: 18.5, rarity: "common" },
+      { tier: "T1", material: "Copper", percentage: 13.5, rarity: "common" },
+      { tier: "T1", material: "Silicon", percentage: 13.5, rarity: "common" },
+      { tier: "T2", material: "Silver", percentage: 18.5, rarity: "common" },
+      { tier: "T2", material: "Gold", percentage: 18.5, rarity: "common" },
       { tier: "T2", material: "Titanium", percentage: 10, rarity: "common" },
-      { tier: "T3", material: "Platinum", percentage: 3, rarity: "rare" },
-      { tier: "T3", material: "Uranium", percentage: 1.5, rarity: "rare" },
-      { tier: "T3", material: "Thorium", percentage: 0.5, rarity: "very-rare" },
+      { tier: "T3", material: "Platinum", percentage: 3.5, rarity: "rare" },
+      { tier: "T3", material: "Uranium", percentage: 2, rarity: "rare" },
+      { tier: "T3", material: "Thorium", percentage: 1, rarity: "rare" },
+      { tier: "T4", material: "Rare Earth", percentage: 0.5, rarity: "very-rare" },
+      { tier: "T4", material: "Neutronium", percentage: 0.3, rarity: "very-rare" },
+      { tier: "T4", material: "Plasma", percentage: 0.15, rarity: "ultra-rare" },
+      { tier: "T5", material: "Dark Matter", percentage: 0.08, rarity: "legendary" },
+      { tier: "T5", material: "Antimatter", percentage: 0.05, rarity: "legendary" },
+      { tier: "T5", material: "Strange Matter", percentage: 0.02, rarity: "legendary" },
     ]
   },
   {
@@ -109,7 +124,9 @@ const TIER_COLORS = {
 const RARITY_STYLES = {
   "common": "",
   "rare": "italic text-yellow-500",
-  "very-rare": "italic font-bold text-red-500",
+  "very-rare": "italic font-bold text-orange-500",
+  "ultra-rare": "italic font-bold text-red-500",
+  "legendary": "italic font-bold text-purple-500 animate-pulse",
 };
 
 export function ResourceDistribution() {
