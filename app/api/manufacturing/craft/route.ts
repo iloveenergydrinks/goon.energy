@@ -4,7 +4,7 @@ import { getQualityGrade } from '@/lib/industrial/quality';
 
 export async function POST(request: Request) {
   try {
-    const { blueprintId, materials, batchSize = 1 } = await request.json();
+    const { blueprintId, materials, components = {}, batchSize = 1 } = await request.json();
     
     if (!blueprintId || !materials) {
       return NextResponse.json(
@@ -102,6 +102,40 @@ export async function POST(request: Request) {
       }
     }
     
+    // Check for required components
+    const requiredComponents = blueprint.requiredComponents as any[] || [];
+    
+    for (const required of requiredComponents) {
+      const componentStackId = components[required.componentId];
+      if (!componentStackId) {
+        return NextResponse.json(
+          { error: `Missing component: ${required.componentId}` },
+          { status: 400 }
+        );
+      }
+      
+      const playerComponent = await prisma.playerComponent.findUnique({
+        where: { id: componentStackId }
+      });
+      
+      if (!playerComponent) {
+        return NextResponse.json(
+          { error: `Component not found: ${required.componentId}` },
+          { status: 404 }
+        );
+      }
+      
+      const requiredQuantity = required.quantity * batchSize; // No discount on components
+      const availableQuantity = parseInt(playerComponent.quantity.toString());
+      
+      if (availableQuantity < requiredQuantity) {
+        return NextResponse.json(
+          { error: `Insufficient ${required.componentId}: need ${requiredQuantity}, have ${availableQuantity}` },
+          { status: 400 }
+        );
+      }
+    }
+    
     // Calculate quality from materials
     let totalQuality = 0;
     let qualityCount = 0;
@@ -183,6 +217,21 @@ export async function POST(request: Request) {
       
       await prisma.playerMaterial.update({
         where: { id: materialStackId },
+        data: {
+          quantity: {
+            decrement: requiredQuantity
+          }
+        }
+      });
+    }
+    
+    // Consume components
+    for (const required of requiredComponents) {
+      const componentStackId = components[required.componentId];
+      const requiredQuantity = required.quantity * batchSize;
+      
+      await prisma.playerComponent.update({
+        where: { id: componentStackId },
         data: {
           quantity: {
             decrement: requiredQuantity

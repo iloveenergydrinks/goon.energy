@@ -22,6 +22,7 @@ async function reseedBlueprints() {
         { materialType: 'Titanium', quantity: 50 },
         { materialType: 'Plasma', quantity: 20 }
       ],
+      requiredComponents: [], // No components needed for basic tier
       baseStats: {
         shieldHP: 100,
         rechargeRate: 5,
@@ -40,6 +41,10 @@ async function reseedBlueprints() {
         { materialType: 'Plasma', quantity: 50 },
         { materialType: 'Quantum', quantity: 10 }
       ],
+      requiredComponents: [
+        { componentId: 'power_core', quantity: 1 },
+        { componentId: 'cooling_gel', quantity: 2 }
+      ],
       baseStats: {
         shieldHP: 200,
         rechargeRate: 8,
@@ -57,6 +62,7 @@ async function reseedBlueprints() {
         { materialType: 'Iron', quantity: 40 },
         { materialType: 'Silicon', quantity: 30 }
       ],
+      requiredComponents: [],
       baseStats: {
         damage: 50,
         fireRate: 2,
@@ -76,6 +82,11 @@ async function reseedBlueprints() {
         { materialType: 'Plasma', quantity: 60 },
         { materialType: 'Dark matter', quantity: 20 }
       ],
+      requiredComponents: [
+        { componentId: 'power_core', quantity: 2 },
+        { componentId: 'cooling_gel', quantity: 3 },
+        { componentId: 'plasma_injector', quantity: 1 }
+      ],
       baseStats: {
         damage: 150,
         fireRate: 1,
@@ -94,6 +105,7 @@ async function reseedBlueprints() {
         { materialType: 'Iron', quantity: 60 },
         { materialType: 'Titanium', quantity: 20 }
       ],
+      requiredComponents: [],
       baseStats: {
         cargoBonus: 25,
         massIncrease: 5
@@ -109,6 +121,9 @@ async function reseedBlueprints() {
       requiredMaterials: [
         { materialType: 'Plasma', quantity: 40 },
         { materialType: 'Silicon', quantity: 40 }
+      ],
+      requiredComponents: [
+        { componentId: 'circuit_fragment', quantity: 2 }
       ],
       baseStats: {
         speedBonus: 50,
@@ -128,6 +143,12 @@ async function reseedBlueprints() {
         { materialType: 'Quantum', quantity: 50 },
         { materialType: 'Dark matter', quantity: 30 },
         { materialType: 'Titanium', quantity: 200 }
+      ],
+      requiredComponents: [
+        { componentId: 'quantum_processor', quantity: 1 },
+        { componentId: 'zero_point_capacitor', quantity: 1 },
+        { componentId: 'power_core', quantity: 3 },
+        { componentId: 'flux_dust', quantity: 5 }
       ],
       baseStats: {
         shieldHP: 500,
@@ -149,6 +170,10 @@ async function reseedBlueprints() {
         { materialType: 'Titanium', quantity: 150 },
         { materialType: 'Iron', quantity: 100 }
       ],
+      requiredComponents: [
+        { componentId: 'structural_lattice', quantity: 2 },
+        { componentId: 'alloy_binder', quantity: 3 }
+      ],
       baseStats: {
         armorHP: 300,
         adaptiveResistance: 15,
@@ -165,6 +190,10 @@ async function reseedBlueprints() {
       requiredMaterials: [
         { materialType: 'Silicon', quantity: 60 },
         { materialType: 'Quantum', quantity: 5 }
+      ],
+      requiredComponents: [
+        { componentId: 'circuit_fragment', quantity: 3 },
+        { componentId: 'neural_processor', quantity: 1 }
       ],
       baseStats: {
         scanRange: 10000,
@@ -183,6 +212,7 @@ async function reseedBlueprints() {
         { materialType: 'Iron', quantity: 50 },
         { materialType: 'Silicon', quantity: 20 }
       ],
+      requiredComponents: [],
       baseStats: {
         miningYield: 100,
         cycleTime: 60,

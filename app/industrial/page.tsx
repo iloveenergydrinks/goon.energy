@@ -699,6 +699,7 @@ export default function IndustrialDashboard() {
             <ManufacturingInterface
               blueprints={playerBlueprints}
               playerMaterials={playerData?.materials || []}
+              playerComponents={playerComponents}
               onCraftComplete={() => {
                 loadPlayerData();
               }}

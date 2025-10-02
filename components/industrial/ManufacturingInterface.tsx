@@ -9,6 +9,7 @@ interface Blueprint {
   description?: string;
   type: string;
   requiredMaterials: any;
+  requiredComponents?: any;
   baseStats: any;
   tier: number;
   masteryRequired: number;
@@ -29,19 +30,32 @@ interface PlayerMaterial {
   tier: number;
 }
 
+interface PlayerComponent {
+  id: string;
+  componentId: string;
+  quantity: string;
+  quality: number;
+  name: string;
+  emoji: string;
+  rarity: string;
+}
+
 interface ManufacturingInterfaceProps {
   blueprints: Blueprint[];
   playerMaterials: PlayerMaterial[];
+  playerComponents?: PlayerComponent[];
   onCraftComplete?: () => void;
 }
 
 export function ManufacturingInterface({
   blueprints,
   playerMaterials,
+  playerComponents = [],
   onCraftComplete
 }: ManufacturingInterfaceProps) {
   const [selectedBlueprint, setSelectedBlueprint] = useState<Blueprint | null>(null);
   const [selectedMaterials, setSelectedMaterials] = useState<Record<string, string>>({});
+  const [selectedComponents, setSelectedComponents] = useState<Record<string, string>>({});
   const [batchSize, setBatchSize] = useState(1);
   const [isCrafting, setIsCrafting] = useState(false);
   const [lastResult, setLastResult] = useState<any>(null);
@@ -172,12 +186,29 @@ export function ManufacturingInterface({
     
     setIsCrafting(true);
     try {
+      // Auto-select components if not manually selected
+      const finalComponents: Record<string, string> = {};
+      if (selectedBlueprint.requiredComponents) {
+        for (const required of (selectedBlueprint.requiredComponents as any[])) {
+          if (selectedComponents[required.componentId]) {
+            finalComponents[required.componentId] = selectedComponents[required.componentId];
+          } else {
+            // Auto-select first available component
+            const available = playerComponents.find(c => c.componentId === required.componentId);
+            if (available) {
+              finalComponents[required.componentId] = available.id;
+            }
+          }
+        }
+      }
+      
       const response = await fetch('/api/manufacturing/craft', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           blueprintId: selectedBlueprint.id,
           materials: selectedMaterials,
+          components: finalComponents,
           batchSize
         })
       });
@@ -294,6 +325,53 @@ export function ManufacturingInterface({
                   </div>
                 ))}
               </div>
+
+              {/* Component Selection */}
+              {selectedBlueprint.requiredComponents && (selectedBlueprint.requiredComponents as any[]).length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-sm font-bold mb-2 text-yellow-400">Required Components</h4>
+                  <div className="space-y-2">
+                    {(selectedBlueprint.requiredComponents as any[]).map(required => {
+                      const availableComponents = playerComponents.filter(c => c.componentId === required.componentId);
+                      const component = availableComponents[0];
+                      const totalAvailable = availableComponents.reduce((sum, c) => sum + parseInt(c.quantity), 0);
+                      const needed = required.quantity * batchSize;
+                      
+                      return (
+                        <div key={required.componentId} className="flex items-center gap-3 p-2 bg-neutral-800 rounded">
+                          <span className="text-lg">{component?.emoji || '📦'}</span>
+                          <div className="flex-1">
+                            <div className="text-sm font-medium">{component?.name || required.componentId}</div>
+                            <div className="text-xs text-neutral-400">
+                              Need: {needed} | Have: {totalAvailable}
+                            </div>
+                          </div>
+                          {totalAvailable < needed && (
+                            <span className="text-xs text-red-400">Insufficient!</span>
+                          )}
+                          {availableComponents.length > 1 && (
+                            <select
+                              value={selectedComponents[required.componentId] || ''}
+                              onChange={(e) => setSelectedComponents(prev => ({
+                                ...prev,
+                                [required.componentId]: e.target.value
+                              }))}
+                              className="bg-neutral-700 rounded px-2 py-1 text-xs"
+                            >
+                              <option value="">Auto-select</option>
+                              {availableComponents.map(comp => (
+                                <option key={comp.id} value={comp.id}>
+                                  Quality: {comp.quality}% - Qty: {comp.quantity}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Batch Size */}
               <div className="mt-4 flex items-center gap-4">

@@ -294,6 +294,7 @@ model Blueprint {
   
   // Recipe
   requiredMaterials  Json     // Array of {materialType: string, quantity: number}
+  requiredComponents Json?    // Array of {componentId: string, quantity: number}
   baseStats          Json     // Base stats of the crafted item
   
   // Progression
