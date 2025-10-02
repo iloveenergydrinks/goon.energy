@@ -44,6 +44,7 @@ interface ManufacturingInterfaceProps {
   blueprints: Blueprint[];
   playerMaterials: PlayerMaterial[];
   playerComponents?: PlayerComponent[];
+  isLoading?: boolean;
   onCraftComplete?: () => void;
 }
 
@@ -51,6 +52,7 @@ export function ManufacturingInterface({
   blueprints,
   playerMaterials,
   playerComponents = [],
+  isLoading = false,
   onCraftComplete
 }: ManufacturingInterfaceProps) {
   const [selectedBlueprint, setSelectedBlueprint] = useState<Blueprint | null>(null);
@@ -241,7 +243,20 @@ export function ManufacturingInterface({
       <div className="col-span-1 space-y-2">
         <h3 className="text-lg font-bold mb-2">Select Blueprint</h3>
         <div className="space-y-2 max-h-[600px] overflow-y-auto">
-          {blueprints
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-pulse">
+                <div className="w-8 h-8 bg-blue-500 rounded-full mx-auto mb-4"></div>
+                <p className="text-neutral-400">Loading blueprints...</p>
+              </div>
+            </div>
+          ) : blueprints.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-neutral-400">No blueprints available</p>
+              <p className="text-xs text-neutral-500 mt-2">Complete missions to unlock blueprints</p>
+            </div>
+          ) : (
+            blueprints
             .filter(bp => bp.unlocked)
             .sort((a, b) => a.tier - b.tier)
             .map(blueprint => (
@@ -276,7 +291,8 @@ export function ManufacturingInterface({
                   </div>
                 )}
               </div>
-            ))}
+            ))
+          )}
         </div>
       </div>
 
@@ -468,7 +484,7 @@ export function ManufacturingInterface({
           </>
         ) : (
           <div className="bg-neutral-900 rounded-lg p-8 text-center text-neutral-400">
-            Select a blueprint to begin manufacturing
+            {isLoading ? 'Loading blueprints...' : 'Select a blueprint to begin manufacturing'}
           </div>
         )}
       </div>

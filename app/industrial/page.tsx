@@ -35,10 +35,18 @@ export default function IndustrialDashboard() {
   const [cargoSubTab, setCargoSubTab] = useState<'materials' | 'components'>('materials');
   const [synthesisMode, setSynthesisMode] = useState(false);
   const [selectedForSynthesis, setSelectedForSynthesis] = useState<string[]>([]);
+  const [isLoadingBlueprints, setIsLoadingBlueprints] = useState(true);
   
-  // Load player data
+  // Load player data on mount
   useEffect(() => {
     loadPlayerData();
+  }, []);
+  
+  // Reload data when tab changes
+  useEffect(() => {
+    if (activeTab === 'manufacturing' && playerBlueprints.length === 0) {
+      loadPlayerData();
+    }
   }, [activeTab]);
   
   const loadPlayerComponents = async () => {
@@ -158,11 +166,13 @@ export default function IndustrialDashboard() {
       }
       
       // Fetch blueprints
+      setIsLoadingBlueprints(true);
       const blueprintsResponse = await fetch('/api/blueprints');
       if (blueprintsResponse.ok) {
         const blueprintsData = await blueprintsResponse.json();
         setPlayerBlueprints(blueprintsData.blueprints || []);
       }
+      setIsLoadingBlueprints(false);
       
       // Fetch inventory
       const inventoryResponse = await fetch('/api/inventory');
@@ -835,6 +845,7 @@ export default function IndustrialDashboard() {
               blueprints={playerBlueprints}
               playerMaterials={playerData?.materials || []}
               playerComponents={playerComponents}
+              isLoading={isLoadingBlueprints}
               onCraftComplete={() => {
                 loadPlayerData();
               }}
@@ -926,4 +937,5 @@ function QuickAction({ title, description, icon, onClick }: {
     </button>
   );
 }
+
 
