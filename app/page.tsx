@@ -13,7 +13,7 @@ export default function Home() {
             ⚗️ Industrial Complex
           </a>
           <a
-            href="/builder"
+            href="/shipbuilder"
             className="px-6 py-3 rounded-md border border-neutral-700/70 text-neutral-400 hover:border-neutral-500 hover:text-white transition-colors"
           >
             🚀 Ship Builder

@@ -26,7 +26,7 @@ export default function BuilderPage() {
   
   useEffect(() => {
     if (!grid) {
-      router.replace("/");
+      router.replace("/shipbuilder");
     }
   }, [grid, router]);
   
@@ -50,7 +50,7 @@ export default function BuilderPage() {
             <button
               onClick={() => {
                 resetWizard();
-                router.push("/");
+                router.push("/shipbuilder");
               }}
               className="px-6 py-2 rounded font-medium bg-neutral-700 hover:bg-neutral-600 text-white transition-all"
             >
