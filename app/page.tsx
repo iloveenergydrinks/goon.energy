@@ -1,15 +1,14 @@
+"use client";
+
 import HullStep from "@/components/wizard/HullStep";
 import PrimaryStep from "@/components/wizard/PrimaryStep";
 import SecondaryStep from "@/components/wizard/SecondaryStep";
 import SurfaceSummary from "@/components/wizard/SurfaceSummary";
-import { loadCatalog } from "@/lib/catalog";
 import BuilderColumns from "@/components/builder/BuilderColumns";
+import { useState, useEffect } from "react";
 
-// Force dynamic rendering - don't try to generate static pages at build time
-export const dynamic = 'force-dynamic';
-
-export default async function Home() {
-  const catalog = await loadCatalog();
+export default function Home() {
+  const [catalog, setCatalog] = useState(null);
 
   return (
     <div className="min-h-screen p-10 bg-neutral-950">
