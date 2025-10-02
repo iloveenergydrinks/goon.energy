@@ -31,6 +31,8 @@ export default function IndustrialDashboard() {
   const [multiSelect, setMultiSelect] = useState(false);
   const [playerBlueprints, setPlayerBlueprints] = useState<any[]>([]);
   const [playerModules, setPlayerModules] = useState<any[]>([]);
+  const [playerComponents, setPlayerComponents] = useState<any[]>([]);
+  const [cargoSubTab, setCargoSubTab] = useState<'materials' | 'components'>('materials');
   
   // Load player data
   useEffect(() => {
@@ -118,6 +120,13 @@ export default function IndustrialDashboard() {
       if (inventoryResponse.ok) {
         const inventoryData = await inventoryResponse.json();
         setPlayerModules(inventoryData.modules || []);
+      }
+      
+      // Fetch player components
+      const componentsResponse = await fetch('/api/player/components');
+      if (componentsResponse.ok) {
+        const componentsData = await componentsResponse.json();
+        setPlayerComponents(componentsData.components || []);
       }
     } catch (error) {
       console.error('Error loading player data:', error);
@@ -455,52 +464,81 @@ export default function IndustrialDashboard() {
         {activeTab === 'materials' && (
           <>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-white">Cargo Hold</h2>
+              <div className="flex items-center gap-4">
+                <h2 className="text-xl font-semibold text-white">Cargo Hold</h2>
+                <div className="flex gap-1 bg-neutral-800 rounded-lg p-1">
+                  <button
+                    onClick={() => setCargoSubTab('materials')}
+                    className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${
+                      cargoSubTab === 'materials' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'text-neutral-400 hover:text-white'
+                    }`}
+                  >
+                    📦 Materials ({realMaterials.length})
+                  </button>
+                  <button
+                    onClick={() => setCargoSubTab('components')}
+                    className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${
+                      cargoSubTab === 'components' 
+                        ? 'bg-purple-600 text-white' 
+                        : 'text-neutral-400 hover:text-white'
+                    }`}
+                  >
+                    💎 Components ({playerComponents.length})
+                  </button>
+                </div>
+              </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={async () => {
-                    const response = await fetch('/api/materials/consolidate', { 
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ preservePremium: true })
-                    });
-                    if (response.ok) {
-                      const result = await response.json();
-                      const message = result.preservedPremium > 0 
-                        ? `Consolidated ${result.consolidatedGroups} groups, removed ${result.deletedStacks} duplicates, preserved ${result.preservedPremium} premium stacks`
-                        : `Consolidated ${result.consolidatedGroups} groups, removed ${result.deletedStacks} duplicates`;
-                      alert(message);
-                      loadPlayerData();
-                    }
-                  }}
-                  className="px-3 py-1.5 text-sm bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
-                  title="Consolidates materials within purity bands, preserving premium (85%+) stacks"
-                >
-                  🔀 Smart Consolidate
-                </button>
-                <button 
-                  onClick={loadPlayerData}
-                  className="px-3 py-1.5 text-sm border border-blue-700 text-blue-400 rounded-lg hover:border-blue-600 transition-colors"
-                >
-                  🔄 Refresh
-                </button>
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={multiSelect}
-                    onChange={(e) => {
-                      setMultiSelect(e.target.checked);
-                      if (!e.target.checked) setSelectedMaterials([]);
-                    }}
-                    className="rounded border-neutral-600"
-                  />
-                  <span className="text-neutral-400">Multi-select</span>
-                </label>
+                {cargoSubTab === 'materials' && (
+                  <>
+                    <button
+                      onClick={async () => {
+                        const response = await fetch('/api/materials/consolidate', { 
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ preservePremium: true })
+                        });
+                        if (response.ok) {
+                          const result = await response.json();
+                          const message = result.preservedPremium > 0 
+                            ? `Consolidated ${result.consolidatedGroups} groups, removed ${result.deletedStacks} duplicates, preserved ${result.preservedPremium} premium stacks`
+                            : `Consolidated ${result.consolidatedGroups} groups, removed ${result.deletedStacks} duplicates`;
+                          alert(message);
+                          loadPlayerData();
+                        }
+                      }}
+                      className="px-3 py-1.5 text-sm bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                      title="Consolidates materials within purity bands, preserving premium (85%+) stacks"
+                    >
+                      🔀 Smart Consolidate
+                    </button>
+                    <button 
+                      onClick={loadPlayerData}
+                      className="px-3 py-1.5 text-sm border border-blue-700 text-blue-400 rounded-lg hover:border-blue-600 transition-colors"
+                    >
+                      🔄 Refresh
+                    </button>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={multiSelect}
+                        onChange={(e) => {
+                          setMultiSelect(e.target.checked);
+                          if (!e.target.checked) setSelectedMaterials([]);
+                        }}
+                        className="rounded border-neutral-600"
+                      />
+                      <span className="text-neutral-400">Multi-select</span>
+                    </label>
+                  </>
+                )}
               </div>
             </div>
             
-            <CargoInventory
-              materials={materials}
+            {cargoSubTab === 'materials' ? (
+              <CargoInventory
+              materials={realMaterials}
               onMaterialSelect={(material) => {
                 if (multiSelect) {
                       setSelectedMaterials(prev => {
@@ -532,8 +570,104 @@ export default function IndustrialDashboard() {
               }}
               onShowDetails={setDetailMaterial}
             />
+            ) : (
+              /* Components View */
+              <div className="space-y-4">
+                <div className="grid grid-cols-4 gap-4 mb-6">
+                  <div className="bg-neutral-900/50 rounded-lg p-3 border border-neutral-800">
+                    <div className="text-xs text-neutral-500">Total Components</div>
+                    <div className="text-lg font-bold text-white">
+                      {playerComponents.reduce((sum, c) => sum + parseInt(c.quantity || 0), 0)}
+                    </div>
+                  </div>
+                  <div className="bg-neutral-900/50 rounded-lg p-3 border border-neutral-800">
+                    <div className="text-xs text-neutral-500">Unique Types</div>
+                    <div className="text-lg font-bold text-white">
+                      {new Set(playerComponents.map(c => c.componentId)).size}
+                    </div>
+                  </div>
+                  <div className="bg-neutral-900/50 rounded-lg p-3 border border-neutral-800">
+                    <div className="text-xs text-neutral-500">Legendary</div>
+                    <div className="text-lg font-bold text-purple-400">
+                      {playerComponents.filter(c => c.rarity === 'legendary').reduce((sum, c) => sum + parseInt(c.quantity || 0), 0)}
+                    </div>
+                  </div>
+                  <div className="bg-neutral-900/50 rounded-lg p-3 border border-neutral-800">
+                    <div className="text-xs text-neutral-500">Rare</div>
+                    <div className="text-lg font-bold text-blue-400">
+                      {playerComponents.filter(c => c.rarity === 'rare').reduce((sum, c) => sum + parseInt(c.quantity || 0), 0)}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Components Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {playerComponents.length === 0 ? (
+                    <div className="col-span-full text-center py-12">
+                      <div className="text-6xl mb-4">💎</div>
+                      <div className="text-lg font-medium text-neutral-400">No components yet</div>
+                      <div className="text-sm text-neutral-500 mt-2">
+                        Components drop when mining nodes. Higher tier materials and rooms = better drops!
+                      </div>
+                    </div>
+                  ) : (
+                    playerComponents.map((component) => (
+                      <div
+                        key={component.id}
+                        className={`p-4 rounded-lg border transition-all ${
+                          component.rarity === 'legendary' 
+                            ? 'bg-purple-900/10 border-purple-700 hover:border-purple-600' :
+                          component.rarity === 'rare' 
+                            ? 'bg-blue-900/10 border-blue-700 hover:border-blue-600' :
+                          component.rarity === 'uncommon' 
+                            ? 'bg-green-900/10 border-green-700 hover:border-green-600' :
+                          'bg-neutral-900/50 border-neutral-700 hover:border-neutral-600'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <span className="text-3xl">{component.emoji}</span>
+                          <span className={`px-2 py-1 rounded text-xs font-bold ${
+                            component.rarity === 'legendary' 
+                              ? 'bg-purple-600 text-white' :
+                            component.rarity === 'rare' 
+                              ? 'bg-blue-600 text-white' :
+                            component.rarity === 'uncommon' 
+                              ? 'bg-green-600 text-white' :
+                            'bg-gray-600 text-white'
+                          }`}>
+                            {component.rarity.toUpperCase()}
+                          </span>
+                        </div>
+                        
+                        <h3 className="text-sm font-semibold text-white mb-1">{component.name}</h3>
+                        <p className="text-xs text-neutral-400 mb-3">{component.description}</p>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-500">Quantity:</span>
+                            <span className="text-white font-bold">{component.quantity}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-500">Quality:</span>
+                            <span className="text-green-400 font-bold">{component.quality}%</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-500">Use:</span>
+                            <span className={`font-medium ${
+                              component.use.includes('Required') ? 'text-red-400' : 'text-yellow-400'
+                            }`}>
+                              {component.use}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
             
-            {detailMaterial && (
+            {detailMaterial && cargoSubTab === 'materials' && (
               <MaterialStackDetails
                 material={detailMaterial}
                 onClose={() => setDetailMaterial(null)}
