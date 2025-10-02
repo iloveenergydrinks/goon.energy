@@ -645,9 +645,16 @@ export async function loadCatalog(): Promise<Catalog> {
 
   let [primFromDb, secFromDb, hullFromDb, modFromDb] = await fetchCatalogRows();
 
-  if (!primFromDb.length || !secFromDb.length || !hullFromDb.length || !modFromDb.length) {
+  // Only seed if we have NO data at all - modules being empty is fine now
+  // since we're moving to a different system
+  if (!primFromDb.length && !secFromDb.length && !hullFromDb.length && !modFromDb.length) {
     await seedFromJson();
     [primFromDb, secFromDb, hullFromDb, modFromDb] = await fetchCatalogRows();
+  }
+  
+  // If modules are empty but we have other data, just use empty array
+  if (!modFromDb.length) {
+    modFromDb = [];
   }
 
   const prim = uniqueBy(
