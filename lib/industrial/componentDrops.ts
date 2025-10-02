@@ -13,29 +13,29 @@ export interface ComponentDrop {
 
 // Component definitions (matching the UI)
 export const COMPONENT_DEFINITIONS: ComponentDrop[] = [
-  // Common
-  { id: 'flux_dust', name: 'Flux Dust', emoji: '✨', rarity: 'common', baseRate: 5.0, minRoom: 1, minTier: 2, description: '+5% quality on any craft', use: 'Optional enhancer' },
-  { id: 'circuit_fragment', name: 'Circuit Fragment', emoji: '🔌', rarity: 'common', baseRate: 3.0, minRoom: 1, minTier: 2, description: 'Required for electronic modules', use: 'Crafting component' },
-  { id: 'alloy_binder', name: 'Alloy Binder', emoji: '🔗', rarity: 'common', baseRate: 4.0, minRoom: 1, minTier: 2, description: 'Reduces quality mismatch penalty', use: 'Optional enhancer' },
-  { id: 'cooling_gel', name: 'Cooling Gel', emoji: '❄️', rarity: 'common', baseRate: 3.0, minRoom: 1, minTier: 2, description: 'Required for energy weapons', use: 'Crafting component' },
+  // Common - Reduced from 3-5% to 0.5-1%
+  { id: 'flux_dust', name: 'Flux Dust', emoji: '✨', rarity: 'common', baseRate: 1.0, minRoom: 1, minTier: 2, description: '+5% quality on any craft', use: 'Optional enhancer' },
+  { id: 'circuit_fragment', name: 'Circuit Fragment', emoji: '🔌', rarity: 'common', baseRate: 0.6, minRoom: 1, minTier: 2, description: 'Required for electronic modules', use: 'Crafting component' },
+  { id: 'alloy_binder', name: 'Alloy Binder', emoji: '🔗', rarity: 'common', baseRate: 0.8, minRoom: 1, minTier: 2, description: 'Reduces quality mismatch penalty', use: 'Optional enhancer' },
+  { id: 'cooling_gel', name: 'Cooling Gel', emoji: '❄️', rarity: 'common', baseRate: 0.5, minRoom: 1, minTier: 2, description: 'Required for energy weapons', use: 'Crafting component' },
   
-  // Uncommon
-  { id: 'power_core', name: 'Power Core', emoji: '⚡', rarity: 'uncommon', baseRate: 2.0, minRoom: 2, minTier: 3, description: 'Required for T2+ weapons and shields', use: 'Required for Tier 2' },
-  { id: 'control_matrix', name: 'Control Matrix', emoji: '🎛️', rarity: 'uncommon', baseRate: 1.5, minRoom: 2, minTier: 3, description: 'Required for targeting systems', use: 'Required for Tier 2' },
-  { id: 'structural_lattice', name: 'Structural Lattice', emoji: '🏗️', rarity: 'uncommon', baseRate: 2.5, minRoom: 1, minTier: 3, description: 'Required for armor and hull mods', use: 'Required for Tier 2' },
-  { id: 'neural_processor', name: 'Neural Processor', emoji: '🧠', rarity: 'uncommon', baseRate: 1.0, minRoom: 3, minTier: 3, description: 'Required for AI modules', use: 'Required for Tier 2' },
+  // Uncommon - Reduced from 1-2.5% to 0.2-0.5%
+  { id: 'power_core', name: 'Power Core', emoji: '⚡', rarity: 'uncommon', baseRate: 0.4, minRoom: 2, minTier: 3, description: 'Required for T2+ weapons and shields', use: 'Required for Tier 2' },
+  { id: 'control_matrix', name: 'Control Matrix', emoji: '🎛️', rarity: 'uncommon', baseRate: 0.3, minRoom: 2, minTier: 3, description: 'Required for targeting systems', use: 'Required for Tier 2' },
+  { id: 'structural_lattice', name: 'Structural Lattice', emoji: '🏗️', rarity: 'uncommon', baseRate: 0.5, minRoom: 1, minTier: 3, description: 'Required for armor and hull mods', use: 'Required for Tier 2' },
+  { id: 'neural_processor', name: 'Neural Processor', emoji: '🧠', rarity: 'uncommon', baseRate: 0.2, minRoom: 3, minTier: 3, description: 'Required for AI modules', use: 'Required for Tier 2' },
   
-  // Rare
-  { id: 'quantum_processor', name: 'Quantum Processor', emoji: '💎', rarity: 'rare', baseRate: 0.5, minRoom: 3, minTier: 4, description: 'Required for T3+ advanced weapons', use: 'Required for Tier 3' },
-  { id: 'zero_point_capacitor', name: 'Zero-Point Capacitor', emoji: '🔮', rarity: 'rare', baseRate: 0.3, minRoom: 4, minTier: 4, description: 'Required for elite shields', use: 'Required for Tier 3' },
-  { id: 'graviton_mesh', name: 'Graviton Mesh', emoji: '🌀', rarity: 'rare', baseRate: 0.4, minRoom: 3, minTier: 4, description: 'Required for propulsion systems', use: 'Required for Tier 3' },
-  { id: 'plasma_injector', name: 'Plasma Injector', emoji: '💉', rarity: 'rare', baseRate: 0.6, minRoom: 3, minTier: 4, description: 'Damage amplifier component', use: 'Required for Tier 3' },
+  // Rare - Reduced from 0.3-0.6% to 0.05-0.15%
+  { id: 'quantum_processor', name: 'Quantum Processor', emoji: '💎', rarity: 'rare', baseRate: 0.1, minRoom: 3, minTier: 4, description: 'Required for T3+ advanced weapons', use: 'Required for Tier 3' },
+  { id: 'zero_point_capacitor', name: 'Zero-Point Capacitor', emoji: '🔮', rarity: 'rare', baseRate: 0.05, minRoom: 4, minTier: 4, description: 'Required for elite shields', use: 'Required for Tier 3' },
+  { id: 'graviton_mesh', name: 'Graviton Mesh', emoji: '🌀', rarity: 'rare', baseRate: 0.08, minRoom: 3, minTier: 4, description: 'Required for propulsion systems', use: 'Required for Tier 3' },
+  { id: 'plasma_injector', name: 'Plasma Injector', emoji: '💉', rarity: 'rare', baseRate: 0.15, minRoom: 3, minTier: 4, description: 'Damage amplifier component', use: 'Required for Tier 3' },
   
-  // Legendary
-  { id: 'singularity_core', name: 'Singularity Core', emoji: '🌟', rarity: 'legendary', baseRate: 0.05, minRoom: 5, minTier: 5, description: 'Required for doomsday weapons', use: 'Required for Tier 5' },
-  { id: 'chrono_fragment', name: 'Chrono Fragment', emoji: '⏳', rarity: 'legendary', baseRate: 0.03, minRoom: 1, minTier: 2, description: '🎰 LOTTERY ITEM - Can drop anywhere!', use: 'Ultra rare component' },
-  { id: 'void_crystal', name: 'Void Crystal', emoji: '🔷', rarity: 'legendary', baseRate: 0.08, minRoom: 4, minTier: 5, description: 'Interdimensional technology', use: 'Required for Tier 5' },
-  { id: 'dark_energy_cell', name: 'Dark Energy Cell', emoji: '⚫', rarity: 'legendary', baseRate: 0.04, minRoom: 5, minTier: 5, description: 'Infinite power source', use: 'Required for Tier 5' },
+  // Legendary - Reduced from 0.03-0.08% to 0.005-0.02%
+  { id: 'singularity_core', name: 'Singularity Core', emoji: '🌟', rarity: 'legendary', baseRate: 0.01, minRoom: 5, minTier: 5, description: 'Required for doomsday weapons', use: 'Required for Tier 5' },
+  { id: 'chrono_fragment', name: 'Chrono Fragment', emoji: '⏳', rarity: 'legendary', baseRate: 0.005, minRoom: 1, minTier: 2, description: '🎰 LOTTERY ITEM - Can drop anywhere!', use: 'Ultra rare component' },
+  { id: 'void_crystal', name: 'Void Crystal', emoji: '🔷', rarity: 'legendary', baseRate: 0.02, minRoom: 4, minTier: 5, description: 'Interdimensional technology', use: 'Required for Tier 5' },
+  { id: 'dark_energy_cell', name: 'Dark Energy Cell', emoji: '⚫', rarity: 'legendary', baseRate: 0.008, minRoom: 5, minTier: 5, description: 'Infinite power source', use: 'Required for Tier 5' },
 ];
 
 // Room multipliers (Room 1-5)
