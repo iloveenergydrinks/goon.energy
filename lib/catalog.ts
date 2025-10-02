@@ -54,6 +54,9 @@ export interface Catalog {
 }
 
 async function seedFromJson() {
+  // DISABLED: No longer seeding ship components
+  return;
+  /*
   await prisma.$transaction([
     prisma.module.deleteMany(),
     prisma.secondarySystem.deleteMany(),
@@ -61,12 +64,11 @@ async function seedFromJson() {
     prisma.hull.deleteMany(),
   ]);
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   await prisma.hull.createMany({ data: hullSeed as any });
   await prisma.primarySystem.createMany({ data: primarySeed as any });
   await prisma.secondarySystem.createMany({ data: secondarySeed as any });
   await prisma.module.createMany({ data: moduleSeed as any });
-  /* eslint-enable @typescript-eslint/no-explicit-any */
+  */
 }
 
 async function fetchCatalogRows() {
@@ -90,6 +92,9 @@ type NewPrimarySpec = {
 };
 
 async function ensureNewPrimaries() {
+  // DISABLED: No longer creating primaries
+  return;
+  /*
   const specs = (newPrimaries as unknown as Array<NewPrimarySpec>);
   const keepIds = specs.map((x) => x.id);
 
@@ -160,9 +165,9 @@ async function ensureNewPrimaries() {
         update: updateDataFallback,
         create: createDataFallback,
       });
-      /* eslint-enable @typescript-eslint/no-explicit-any */
     }
   }
+  */
 }
 
 // -------------------- Hull generator (16 hulls, 2 per archetype) --------------------
@@ -419,6 +424,9 @@ function computeBudgets(rows: number, cols: number, CP: number, CA: number, CU: 
 type HullArchetypeSpec = { id: string; name: string; sizeId: string; archetype: string; description?: string };
 
 function plannedHulls(): HullArchetypeSpec[] {
+  // DISABLED: No longer creating hulls
+  return [];
+  /*
   return [
     // SUPPORT
     { id: "swift_medic_frigate", name: "Swift Medic", sizeId: "Frigate", archetype: "support" },
@@ -484,6 +492,7 @@ function plannedHulls(): HullArchetypeSpec[] {
     { id: "fortress_cruiser", name: "Fortress", sizeId: "Cruiser", archetype: "bulwark" },
     { id: "redoubt_cruiser", name: "Redoubt", sizeId: "Cruiser", archetype: "bulwark" },
   ];
+  */
 }
 
 function getBaseStatsForHull(spec: HullArchetypeSpec): Record<string, number> {
@@ -527,6 +536,9 @@ function getBaseStatsForHull(spec: HullArchetypeSpec): Record<string, number> {
 }
 
 async function ensureNewHulls() {
+  // DISABLED: No longer creating hulls
+  return;
+  /*
   const specs = plannedHulls();
   const keepIds = specs.map((s) => s.id);
   await prisma.hull.deleteMany({ where: { id: { notIn: keepIds } } });
@@ -579,8 +591,8 @@ async function ensureNewHulls() {
       compatibleTags: [spec.archetype],
     };
     await prisma.hull.upsert({ where: { id: spec.id }, update: data, create: data });
-    /* eslint-enable @typescript-eslint/no-explicit-any */
   }
+  */
 }
 
 type NewSecondarySpec = {
@@ -596,6 +608,9 @@ type NewSecondarySpec = {
 };
 
 async function ensureNewSecondaries() {
+  // DISABLED: No longer creating secondaries
+  return;
+  /*
   const specs = (newSecondaries as unknown as Array<NewSecondarySpec>);
   const keepIds = specs.map((x) => x.id);
   await prisma.secondarySystem.deleteMany({ where: { id: { notIn: keepIds } } });
@@ -629,8 +644,8 @@ async function ensureNewSecondaries() {
       tagAffinities: s.tagAffinities ?? null,
     };
     await prisma.secondarySystem.upsert({ where: { id: s.id }, update: updateData, create: createData });
-    /* eslint-enable @typescript-eslint/no-explicit-any */
   }
+  */
 }
 
 export async function loadCatalog(): Promise<Catalog> {
