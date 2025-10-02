@@ -8,6 +8,7 @@ import { CargoInventory } from '@/components/industrial/CargoInventory';
 import { MaterialStackDetails } from '@/components/industrial/MaterialStackDetails';
 import { ManufacturingInterface } from '@/components/industrial/ManufacturingInterface';
 import { InventoryCard } from '@/components/industrial/InventoryCard';
+import { ResourceDistribution } from '@/components/industrial/ResourceDistribution';
 import type { 
   Material, 
   RefiningFacility,
@@ -367,6 +368,9 @@ export default function IndustrialDashboard() {
                 </div>
               </div>
             </div>
+
+            {/* Resource Distribution */}
+            <ResourceDistribution />
 
             {/* Manufacturing Preview */}
             <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6">
