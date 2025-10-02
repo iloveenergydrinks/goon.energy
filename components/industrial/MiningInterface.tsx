@@ -60,7 +60,15 @@ interface PlayerData {
 }
 
 // Floating number animation component
-function FloatingNumber({ value, tier, quality, x, y, color }: { value: string; tier: number; quality?: string; x: number; y: number; color: string }) {
+function FloatingNumber({ value, tier, quality, components, x, y, color }: { 
+  value: string; 
+  tier: number; 
+  quality?: string; 
+  components?: Array<{name: string; emoji: string; rarity: string}>;
+  x: number; 
+  y: number; 
+  color: string 
+}) {
   const isTemp = value === '...';
   
   return (
@@ -69,7 +77,7 @@ function FloatingNumber({ value, tier, quality, x, y, color }: { value: string; 
       style={{ 
         left: `${x}px`, 
         top: `${y}px`,
-        animation: isTemp ? 'pulse 0.5s ease-in-out infinite' : 'floatUp 1.5s ease-out forwards'
+        animation: isTemp ? 'pulse 0.5s ease-in-out infinite' : 'floatUp 2.5s ease-out forwards'
       }}
     >
       <div className="flex flex-col items-center">
@@ -100,6 +108,29 @@ function FloatingNumber({ value, tier, quality, x, y, color }: { value: string; 
             )}
           </div>
         )}
+        {components && components.length > 0 && (
+          <div className="flex flex-col items-center gap-0.5 mt-2">
+            {components.map((comp, i) => (
+              <div 
+                key={i} 
+                className={`flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold ${
+                  comp.rarity === 'legendary' ? 'bg-purple-900/90 text-purple-100 border border-purple-500' :
+                  comp.rarity === 'rare' ? 'bg-blue-900/90 text-blue-100 border border-blue-500' :
+                  comp.rarity === 'uncommon' ? 'bg-green-900/90 text-green-100 border border-green-500' :
+                  'bg-gray-900/90 text-gray-100 border border-gray-500'
+                }`}
+                style={{ 
+                  animationDelay: `${i * 100}ms`,
+                  animation: 'bounce-once 0.5s ease-out',
+                  textShadow: '0 0 5px rgba(0,0,0,0.8)'
+                }}
+              >
+                <span className="text-base">{comp.emoji}</span>
+                <span>{comp.name}!</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -109,7 +140,7 @@ export function MiningInterface() {
   const [nodes, setNodes] = useState<ResourceNode[]>([]);
   const [player, setPlayer] = useState<PlayerData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [floatingNumbers, setFloatingNumbers] = useState<Array<{ id: string; nodeId: string; value: string; tier: number; quality?: string; x: number; y: number; color: string }>>([]);
+  const [floatingNumbers, setFloatingNumbers] = useState<Array<{ id: string; nodeId: string; value: string; tier: number; quality?: string; components?: Array<{name: string; emoji: string; rarity: string}>; x: number; y: number; color: string }>>([]);
   const [clickPower, setClickPower] = useState(1);
   const [autoMiners, setAutoMiners] = useState(0);
   const [totalMined, setTotalMined] = useState(0);
@@ -256,6 +287,7 @@ export function MiningInterface() {
             value: result.mined.quantity,
             tier: result.mined.tier,
             quality: qualityInfo.shortName,
+            components: result.componentDrops, // Add component drops
             x: clickX - 30,
             y: clickY - 30,
             color: tierColor
@@ -264,7 +296,7 @@ export function MiningInterface() {
           // Remove after animation
           setTimeout(() => {
             setFloatingNumbers(prev => prev.filter(n => n.id !== id));
-          }, 1500);
+          }, 2500); // Increased time to show components
         }
         
         // Update local state

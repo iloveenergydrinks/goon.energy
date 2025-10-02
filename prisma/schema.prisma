@@ -144,6 +144,7 @@ model Player {
   
   // Relations
   materials       PlayerMaterial[]
+  components      PlayerComponent[]
   resourceNodes   ResourceNode[]
   miningOps       MiningOperation[]
   blueprints      PlayerBlueprint[]
@@ -237,6 +238,25 @@ model PlayerMaterial {
   updatedAt       DateTime @updatedAt
   
   @@unique([playerId, materialId, tier, purity])
+  @@index([playerId])
+}
+
+model PlayerComponent {
+  id              String   @id @default(cuid())
+  playerId        String
+  componentId     String   // e.g., 'flux_dust', 'quantum_processor'
+  
+  // Component details
+  quantity        BigInt
+  quality         Int      @default(100) // 1-100 quality rating
+  
+  // Relations
+  player          Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([playerId, componentId, quality])
   @@index([playerId])
 }
 

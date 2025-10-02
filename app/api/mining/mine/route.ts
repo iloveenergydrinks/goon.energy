@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateQualityForMining } from '@/lib/industrial/quality';
+import { calculateComponentDrops, formatComponentDrops } from '@/lib/industrial/componentDrops';
 
 // Cache material data to avoid repeated lookups
 const materialCache = new Map();
@@ -116,8 +117,34 @@ export async function POST(request: NextRequest) {
       materialCache.set(node.resourceType, material);
     }
     
+    // Calculate component drops
+    const componentDrops = calculateComponentDrops(node.tier, tier);
+    const formattedDrops = formatComponentDrops(componentDrops);
+    
+    // Prepare component upserts
+    const componentUpserts = componentDrops.map(componentId => 
+      prisma.playerComponent.upsert({
+        where: {
+          playerId_componentId_quality: {
+            playerId,
+            componentId,
+            quality: 100 // Default quality for now
+          }
+        },
+        update: {
+          quantity: { increment: 1n }
+        },
+        create: {
+          playerId,
+          componentId,
+          quantity: 1n,
+          quality: 100
+        }
+      })
+    );
+    
     // Execute all database operations in parallel
-    const [updatedNode, playerMaterial, player] = await Promise.all([
+    const [updatedNode, playerMaterial, player, ...components] = await Promise.all([
       // Update node
       prisma.resourceNode.update({
         where: { id: nodeId },
@@ -154,7 +181,10 @@ export async function POST(request: NextRequest) {
       prisma.player.update({
         where: { id: playerId },
         data: { isk: { increment: oreReward } }
-      })
+      }),
+      
+      // Add component drops
+      ...componentUpserts
     ]);
     
     // Skip mining operation recording for speed (can add back if needed)
@@ -169,6 +199,7 @@ export async function POST(request: NextRequest) {
         purity: roundedPurity,
         iskReward: oreReward.toString()
       },
+      componentDrops: formattedDrops, // Add component drops to response
       node: {
         id: updatedNode.id,
         currentAmount: updatedNode.currentAmount.toString(),
