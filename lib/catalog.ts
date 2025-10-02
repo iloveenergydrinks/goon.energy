@@ -131,14 +131,12 @@ async function ensureNewPrimaries() {
         update: updateData,
         create: createData,
       });
-      /* eslint-enable @typescript-eslint/no-explicit-any */
     } catch (err) {
       const message = (err as Error)?.message ?? String(err);
       if (!message.includes("Unknown argument `metadata`")) {
         throw err;
       }
       // Fallback path: encode metadata under tagAffinities
-      /* eslint-disable @typescript-eslint/no-explicit-any */
       const updateDataFallback: any = {
         name: p.name,
         description: p.description,
