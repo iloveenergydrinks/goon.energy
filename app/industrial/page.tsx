@@ -9,6 +9,7 @@ import { MaterialStackDetails } from '@/components/industrial/MaterialStackDetai
 import { ManufacturingInterface } from '@/components/industrial/ManufacturingInterface';
 import { InventoryCard } from '@/components/industrial/InventoryCard';
 import { ResourceDistribution } from '@/components/industrial/ResourceDistribution';
+import { MiningDropTable } from '@/components/industrial/MiningDropTable';
 import type { 
   Material, 
   RefiningFacility,
@@ -371,6 +372,9 @@ export default function IndustrialDashboard() {
 
             {/* Resource Distribution */}
             <ResourceDistribution />
+            
+            {/* Mining Drop Table */}
+            <MiningDropTable />
 
             {/* Manufacturing Preview */}
             <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6">
