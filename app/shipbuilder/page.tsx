@@ -9,7 +9,53 @@ import BuilderColumns from "@/components/builder/BuilderColumns";
 export const dynamic = 'force-dynamic';
 
 export default async function ShipBuilder() {
-  const catalog = await loadCatalog();
+  let catalog;
+  try {
+    catalog = await loadCatalog();
+  } catch (error) {
+    // If catalog fails to load (empty database), provide empty defaults
+    catalog = {
+      hulls: [],
+      primaries: [],
+      secondaries: [],
+      modules: [],
+      hullsById: {},
+      primariesById: {},
+      secondariesById: {},
+      modulesById: {}
+    };
+  }
+
+  // Check if catalog is empty
+  const isEmpty = catalog.hulls.length === 0 && catalog.primaries.length === 0 && catalog.secondaries.length === 0;
+
+  if (isEmpty) {
+    return (
+      <div className="min-h-screen p-10 bg-neutral-950 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <h1 className="text-2xl font-bold mb-4 text-white">Ship Catalog Empty</h1>
+          <p className="text-neutral-400 mb-6">
+            No ships, weapons, or systems have been configured yet. 
+            Please use the admin panel to add components to the catalog.
+          </p>
+          <div className="flex gap-4 justify-center">
+            <a
+              href="/admin"
+              className="px-6 py-3 rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+            >
+              Go to Admin Panel
+            </a>
+            <a
+              href="/"
+              className="px-6 py-3 rounded-md border border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-white transition-colors"
+            >
+              Back to Home
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-10 bg-neutral-950">

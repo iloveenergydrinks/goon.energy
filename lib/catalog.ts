@@ -726,10 +726,11 @@ export async function loadCatalog(): Promise<Catalog> {
     )
   );
 
-  assert(prim.length > 0, "No primaries loaded");
-  assert(secs.length > 0, "No secondaries loaded");
-  assert(hls.length > 0, "No hulls loaded");
-  assert(mods.length > 0, "No modules loaded");
+  // Allow empty catalogs - users will add components via admin
+  // assert(prim.length > 0, "No primaries loaded");
+  // assert(secs.length > 0, "No secondaries loaded");
+  // assert(hls.length > 0, "No hulls loaded");
+  // assert(mods.length > 0, "No modules loaded");
 
   // Validate hulls have proper grids
   for (const h of hls) {
