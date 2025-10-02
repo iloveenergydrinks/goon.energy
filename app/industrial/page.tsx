@@ -33,12 +33,61 @@ export default function IndustrialDashboard() {
   const [playerModules, setPlayerModules] = useState<any[]>([]);
   const [playerComponents, setPlayerComponents] = useState<any[]>([]);
   const [cargoSubTab, setCargoSubTab] = useState<'materials' | 'components'>('materials');
+  const [synthesisMode, setSynthesisMode] = useState(false);
+  const [selectedForSynthesis, setSelectedForSynthesis] = useState<string[]>([]);
   
   // Load player data
   useEffect(() => {
     loadPlayerData();
   }, [activeTab]);
   
+  const loadPlayerComponents = async () => {
+    try {
+      const componentsResponse = await fetch('/api/player/components');
+      if (componentsResponse.ok) {
+        const componentsData = await componentsResponse.json();
+        setPlayerComponents(componentsData.components || []);
+      }
+    } catch (error) {
+      console.error('Error loading player components:', error);
+    }
+  };
+
+  const handleSynthesis = async () => {
+    if (selectedForSynthesis.length !== 3) {
+      alert('Select exactly 3 components of the same type to synthesize');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/components/synthesize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ componentIds: selectedForSynthesis })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        alert(data.error || 'Synthesis failed');
+        return;
+      }
+
+      // Show success message
+      alert(data.result.message);
+      
+      // Reset synthesis mode
+      setSynthesisMode(false);
+      setSelectedForSynthesis([]);
+      
+      // Reload components
+      loadPlayerComponents();
+    } catch (error) {
+      console.error('Synthesis error:', error);
+      alert('Failed to synthesize components');
+    }
+  };
+
   const loadPlayerData = async () => {
     try {
       // Fetch player data
@@ -123,11 +172,7 @@ export default function IndustrialDashboard() {
       }
       
       // Fetch player components
-      const componentsResponse = await fetch('/api/player/components');
-      if (componentsResponse.ok) {
-        const componentsData = await componentsResponse.json();
-        setPlayerComponents(componentsData.components || []);
-      }
+      loadPlayerComponents();
     } catch (error) {
       console.error('Error loading player data:', error);
     }
@@ -573,32 +618,93 @@ export default function IndustrialDashboard() {
             ) : (
               /* Components View */
               <div className="space-y-4">
-                <div className="grid grid-cols-4 gap-4 mb-6">
-                  <div className="bg-neutral-900/50 rounded-lg p-3 border border-neutral-800">
-                    <div className="text-xs text-neutral-500">Total Components</div>
-                    <div className="text-lg font-bold text-white">
-                      {playerComponents.reduce((sum, c) => sum + parseInt(c.quantity || 0), 0)}
+                {/* Synthesis Controls */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="grid grid-cols-4 gap-4 flex-1">
+                    <div className="bg-neutral-900/50 rounded-lg p-3 border border-neutral-800">
+                      <div className="text-xs text-neutral-500">Total Components</div>
+                      <div className="text-lg font-bold text-white">
+                        {playerComponents.reduce((sum, c) => sum + parseInt(c.quantity || 0), 0)}
+                      </div>
+                    </div>
+                    <div className="bg-neutral-900/50 rounded-lg p-3 border border-neutral-800">
+                      <div className="text-xs text-neutral-500">Unique Types</div>
+                      <div className="text-lg font-bold text-white">
+                        {new Set(playerComponents.map(c => c.componentId)).size}
+                      </div>
+                    </div>
+                    <div className="bg-neutral-900/50 rounded-lg p-3 border border-neutral-800">
+                      <div className="text-xs text-neutral-500">Legendary</div>
+                      <div className="text-lg font-bold text-purple-400">
+                        {playerComponents.filter(c => c.rarity === 'legendary').reduce((sum, c) => sum + parseInt(c.quantity || 0), 0)}
+                      </div>
+                    </div>
+                    <div className="bg-neutral-900/50 rounded-lg p-3 border border-neutral-800">
+                      <div className="text-xs text-neutral-500">Rare</div>
+                      <div className="text-lg font-bold text-blue-400">
+                        {playerComponents.filter(c => c.rarity === 'rare').reduce((sum, c) => sum + parseInt(c.quantity || 0), 0)}
+                      </div>
                     </div>
                   </div>
-                  <div className="bg-neutral-900/50 rounded-lg p-3 border border-neutral-800">
-                    <div className="text-xs text-neutral-500">Unique Types</div>
-                    <div className="text-lg font-bold text-white">
-                      {new Set(playerComponents.map(c => c.componentId)).size}
-                    </div>
-                  </div>
-                  <div className="bg-neutral-900/50 rounded-lg p-3 border border-neutral-800">
-                    <div className="text-xs text-neutral-500">Legendary</div>
-                    <div className="text-lg font-bold text-purple-400">
-                      {playerComponents.filter(c => c.rarity === 'legendary').reduce((sum, c) => sum + parseInt(c.quantity || 0), 0)}
-                    </div>
-                  </div>
-                  <div className="bg-neutral-900/50 rounded-lg p-3 border border-neutral-800">
-                    <div className="text-xs text-neutral-500">Rare</div>
-                    <div className="text-lg font-bold text-blue-400">
-                      {playerComponents.filter(c => c.rarity === 'rare').reduce((sum, c) => sum + parseInt(c.quantity || 0), 0)}
-                    </div>
+                  
+                  {/* Synthesis Button */}
+                  <div className="ml-4">
+                    {!synthesisMode ? (
+                      <button
+                        onClick={() => {
+                          setSynthesisMode(true);
+                          setSelectedForSynthesis([]);
+                        }}
+                        className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all flex items-center gap-2"
+                      >
+                        <span>⚗️</span>
+                        <span>Synthesis Mode</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={handleSynthesis}
+                          disabled={selectedForSynthesis.length !== 3}
+                          className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
+                            selectedForSynthesis.length === 3
+                              ? 'bg-green-600 text-white hover:bg-green-700'
+                              : 'bg-neutral-700 text-neutral-400 cursor-not-allowed'
+                          }`}
+                        >
+                          <span>✨</span>
+                          <span>Synthesize ({selectedForSynthesis.length}/3)</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSynthesisMode(false);
+                            setSelectedForSynthesis([]);
+                          }}
+                          className="px-4 py-2 bg-neutral-700 text-white rounded-lg font-medium hover:bg-neutral-600 transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
+                
+                {/* Synthesis Info */}
+                {synthesisMode && (
+                  <div className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border border-purple-700/50 rounded-lg p-4 mb-4">
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">⚗️</span>
+                      <div className="flex-1">
+                        <h3 className="text-sm font-bold text-white mb-1">Component Synthesis</h3>
+                        <p className="text-xs text-neutral-300">
+                          Select 3 components of the same type and quality to synthesize them into 1 component of higher quality.
+                        </p>
+                        <div className="mt-2 text-xs text-neutral-400">
+                          <span className="text-yellow-400">Example:</span> 3x Power Core (80%) → 1x Power Core (85%)
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 
                 {/* Components Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -611,19 +717,47 @@ export default function IndustrialDashboard() {
                       </div>
                     </div>
                   ) : (
-                    playerComponents.map((component) => (
-                      <div
-                        key={component.id}
-                        className={`p-4 rounded-lg border transition-all ${
-                          component.rarity === 'legendary' 
-                            ? 'bg-purple-900/10 border-purple-700 hover:border-purple-600' :
-                          component.rarity === 'rare' 
-                            ? 'bg-blue-900/10 border-blue-700 hover:border-blue-600' :
-                          component.rarity === 'uncommon' 
-                            ? 'bg-green-900/10 border-green-700 hover:border-green-600' :
-                          'bg-neutral-900/50 border-neutral-700 hover:border-neutral-600'
-                        }`}
-                      >
+                    playerComponents.map((component) => {
+                      const isSelected = selectedForSynthesis.includes(component.id);
+                      const canSelect = synthesisMode && (
+                        selectedForSynthesis.length === 0 ||
+                        (selectedForSynthesis.length < 3 && 
+                         playerComponents.find(c => c.id === selectedForSynthesis[0])?.componentId === component.componentId &&
+                         playerComponents.find(c => c.id === selectedForSynthesis[0])?.quality === component.quality)
+                      );
+                      
+                      return (
+                        <div
+                          key={component.id}
+                          onClick={() => {
+                            if (!synthesisMode) return;
+                            
+                            if (isSelected) {
+                              setSelectedForSynthesis(prev => prev.filter(id => id !== component.id));
+                            } else if (canSelect) {
+                              setSelectedForSynthesis(prev => [...prev, component.id]);
+                            }
+                          }}
+                          className={`p-4 rounded-lg border transition-all ${
+                            synthesisMode ? 'cursor-pointer' : ''
+                          } ${
+                            isSelected 
+                              ? 'ring-2 ring-purple-500 bg-purple-900/30' :
+                            canSelect 
+                              ? 'hover:ring-1 hover:ring-purple-400' :
+                            synthesisMode 
+                              ? 'opacity-50 cursor-not-allowed' :
+                            ''
+                          } ${
+                            component.rarity === 'legendary' 
+                              ? 'bg-purple-900/10 border-purple-700 hover:border-purple-600' :
+                            component.rarity === 'rare' 
+                              ? 'bg-blue-900/10 border-blue-700 hover:border-blue-600' :
+                            component.rarity === 'uncommon' 
+                              ? 'bg-green-900/10 border-green-700 hover:border-green-600' :
+                            'bg-neutral-900/50 border-neutral-700 hover:border-neutral-600'
+                          }`}
+                        >
                         <div className="flex items-start justify-between mb-3">
                           <span className="text-3xl">{component.emoji}</span>
                           <span className={`px-2 py-1 rounded text-xs font-bold ${
@@ -661,7 +795,8 @@ export default function IndustrialDashboard() {
                           </div>
                         </div>
                       </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>
