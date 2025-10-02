@@ -638,23 +638,32 @@ export async function loadCatalog(): Promise<Catalog> {
     throw new Error("loadCatalog must be invoked on the server");
   }
 
-  // First, ensure the new primaries/secondaries exist
-  await ensureNewHulls();
-  await ensureNewPrimaries();
-  await ensureNewSecondaries();
+  // DISABLED: No longer auto-creating ship components
+  // await ensureNewHulls();
+  // await ensureNewPrimaries();
+  // await ensureNewSecondaries();
 
   let [primFromDb, secFromDb, hullFromDb, modFromDb] = await fetchCatalogRows();
 
-  // Only seed if we have NO data at all - modules being empty is fine now
-  // since we're moving to a different system
-  if (!primFromDb.length && !secFromDb.length && !hullFromDb.length && !modFromDb.length) {
-    await seedFromJson();
-    [primFromDb, secFromDb, hullFromDb, modFromDb] = await fetchCatalogRows();
-  }
+  // DISABLED: No longer auto-seeding ship components
+  // Only return empty arrays if nothing in DB
+  // if (!primFromDb.length && !secFromDb.length && !hullFromDb.length && !modFromDb.length) {
+  //   await seedFromJson();
+  //   [primFromDb, secFromDb, hullFromDb, modFromDb] = await fetchCatalogRows();
+  // }
   
-  // If modules are empty but we have other data, just use empty array
+  // If any component is empty, just use empty array
   if (!modFromDb.length) {
     modFromDb = [];
+  }
+  if (!hullFromDb.length) {
+    hullFromDb = [];
+  }
+  if (!primFromDb.length) {
+    primFromDb = [];
+  }
+  if (!secFromDb.length) {
+    secFromDb = [];
   }
 
   const prim = uniqueBy(
