@@ -104,7 +104,7 @@ async function ensureNewPrimaries() {
   for (const p of specs) {
     // Attempt write with metadata; if client/schema mismatch, fallback to tagAffinities
     try {
-      /* eslint-disable @typescript-eslint/no-explicit-any */
+      // eslint-disable @typescript-eslint/no-explicit-any
       const updateData: any = {
         name: p.name,
         description: p.description,
@@ -575,7 +575,7 @@ async function ensureNewHulls() {
         spec.archetype === 'bulwark' ? 'area denial and fortification' : 'combat'
       }`;
 
-    /* eslint-disable @typescript-eslint/no-explicit-any */
+    // eslint-disable @typescript-eslint/no-explicit-any
     const data: any = {
       id: spec.id,
       name: spec.name,
@@ -613,7 +613,7 @@ async function ensureNewSecondaries() {
   const keepIds = specs.map((x) => x.id);
   await prisma.secondarySystem.deleteMany({ where: { id: { notIn: keepIds } } });
   for (const s of specs) {
-    /* eslint-disable @typescript-eslint/no-explicit-any */
+    // eslint-disable @typescript-eslint/no-explicit-any
     const updateData: any = {
       name: s.name,
       description: s.description ?? null,
