@@ -1,8 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { calculateRefiningOutput, calculateMaterialTier } from '@/lib/industrial/calculations';
+import { calculateMaterialTier } from '@/lib/industrial/calculations';
 import { estimateRefiningTimeSeconds } from '@/lib/industrial/time';
 import { getCaptainEffects } from '@/lib/industrial/captains';
+
+// New refining formula: repeatable with diminishing returns
+function calculateRefiningCycle(
+  inputPurity: number,
+  improvementRate: number = 0.3, // Base 30% improvement toward 100%
+  lossRate: number = 0.2 // Base 20% quantity loss
+): { outputPurity: number; retentionRate: number } {
+  // Purity improvement: (100 - current) × rate + current
+  const purityGain = (100 - inputPurity) * improvementRate;
+  const outputPurity = Math.min(100, inputPurity + purityGain);
+  
+  // Quantity retention
+  const retentionRate = 1 - lossRate;
+  
+  return { outputPurity, retentionRate };
+}
 
 // GET /api/refining - Get player's refining jobs
 export async function GET(request: NextRequest) {
@@ -54,7 +70,8 @@ export async function GET(request: NextRequest) {
                   quantity: job.outputQuantity!,
                   tier: job.outputTier!,
                   purity: job.outputPurity!,
-                  attributes: anyStack?.attributes ?? {}
+                  attributes: anyStack?.attributes ?? {},
+                  isRefined: true // Refining always produces refined materials
                 }
               });
             }
@@ -133,37 +150,36 @@ export async function POST(request: NextRequest) {
 
     // Apply captain effects to yields/purity
     const effects = getCaptainEffects(captainId);
-    const yieldBonus = effects.refiningYieldBonus ?? 0;
-    const purityBonus = effects.refiningPurityBonus ?? 0;
+    const yieldBonus = effects.refiningYieldBonus ?? 0; // Reduces loss rate
+    const purityBonus = effects.refiningPurityBonus ?? 0; // Adds to improvement rate
+
+    // Base refining parameters
+    const baseLossRate = 0.2; // 20% material loss per cycle
+    const baseImprovementRate = 0.3; // 30% improvement toward 100%
 
     // Simulate cycles to compute final output (but do not grant yet)
     let currentQuantity = BigInt(quantity);
-    let currentPurity = playerMaterial.purity;
-    let currentTier = playerMaterial.tier;
+    let currentPurity = playerMaterial.purity * 100; // Convert to 0-100 scale
     let totalWaste = BigInt(0);
 
     for (let cycle = 1; cycle <= cycles; cycle++) {
-      const output = calculateRefiningOutput(
-        parseInt(currentQuantity.toString()),
-        currentPurity,
-        currentTier,
-        efficiency,
-        cycle
-      );
-      // Apply captain effects
-      const adjustedQuantity = Math.floor(output.outputQuantity * (1 + yieldBonus));
-      const adjustedPurity = Math.min(1.0, output.outputPurity + purityBonus);
-      const adjustedTier = calculateMaterialTier(adjustedPurity);
-
-      const outputQuantity = BigInt(adjustedQuantity);
+      // Calculate this cycle's refining
+      const adjustedLossRate = Math.max(0.05, baseLossRate * (1 - yieldBonus)); // Captain reduces loss
+      const adjustedImprovementRate = baseImprovementRate + purityBonus; // Captain adds to improvement
+      
+      const result = calculateRefiningCycle(currentPurity, adjustedImprovementRate, adjustedLossRate);
+      
+      const outputQuantity = BigInt(Math.floor(Number(currentQuantity) * result.retentionRate));
       const wasteQuantity = currentQuantity - outputQuantity;
       totalWaste += wasteQuantity;
 
       currentQuantity = outputQuantity;
-      currentPurity = adjustedPurity;
-      currentTier = adjustedTier;
+      currentPurity = result.outputPurity;
       if (currentQuantity <= BigInt(0)) break;
     }
+
+    const finalPurity = currentPurity / 100; // Convert back to 0-1 scale
+    const currentTier = calculateMaterialTier(finalPurity);
 
     // Estimate time for the whole refining job
     const estimatedSeconds = estimateRefiningTimeSeconds(parseInt(BigInt(quantity).toString()), cycles, captainId);
@@ -189,7 +205,7 @@ export async function POST(request: NextRequest) {
           facilityType,
           facilityEfficiency: efficiency,
           outputQuantity: currentQuantity,
-          outputPurity: currentPurity,
+          outputPurity: finalPurity,
           outputTier: currentTier,
           wasteQuantity: totalWaste,
           status: 'pending',
@@ -205,9 +221,10 @@ export async function POST(request: NextRequest) {
       estimatedCompletion: estimatedCompletion.toISOString(),
       preview: {
         outputQuantity: currentQuantity.toString(),
-        outputPurity: currentPurity,
+        outputPurity: finalPurity,
         outputTier: currentTier,
-        wasteQuantity: totalWaste.toString()
+        wasteQuantity: totalWaste.toString(),
+        purityImprovement: finalPurity - playerMaterial.purity
       }
     });
   } catch (error) {

@@ -212,6 +212,10 @@ model Material {
   // Base attributes (for newly mined materials)
   baseAttributes  Json     // { strength, conductivity, density, reactivity, stability, elasticity }
   
+  // Material base stats by tier (used in manufacturing)
+  // Format: { 1: {...}, 2: {...}, 3: {...}, 4: {...}, 5: {...} }
+  tierStats       Json?    // Per-tier attribute values
+  
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
@@ -229,6 +233,7 @@ model PlayerMaterial {
   tier            Int      // 1-5
   purity          Float    // 0-1
   attributes      Json     // Actual attributes for this stack
+  isRefined       Boolean  @default(true) // false = raw ore, true = refined mineral
   
   // Relations
   player          Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)

@@ -301,8 +301,18 @@ export function CargoInventory({
           }
         `}
       >
-        {/* Selection indicator and purity band badge */}
+        {/* Selection indicator, raw/refined badge, and purity band badge */}
         <div className="absolute top-2 right-2 flex items-center gap-2">
+          {/* Raw vs Refined badge */}
+          {material.stacks && material.stacks[0] && (
+            <span className={`px-2 py-1 rounded text-xs font-bold ${
+              (material.stacks[0] as any).isRefined === false
+                ? 'bg-orange-900/30 text-orange-400 border border-orange-700'
+                : 'bg-blue-900/30 text-blue-400 border border-blue-700'
+            }`}>
+              {(material.stacks[0] as any).isRefined === false ? '🪨 ORE' : '✨ REFINED'}
+            </span>
+          )}
           {purityBand === 'premium' && (
             <span className={`px-2 py-1 rounded text-xs font-bold ${bandInfo.bg} ${bandInfo.color}`}>
               PREMIUM

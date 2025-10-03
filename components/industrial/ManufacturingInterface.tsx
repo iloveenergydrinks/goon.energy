@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { getQualityGrade, getQualityBadgeStyles } from '@/lib/industrial/quality';
-import { computeManufacturingQualityScore } from '@/lib/industrial/calculations';
+import { getMaterialStats, getAttributeForStat } from '@/lib/industrial/materialStats';
 import { getCaptainEffects } from '@/lib/industrial/captains';
 
 interface Blueprint {
@@ -136,18 +136,16 @@ export function ManufacturingInterface({
     return grouped;
   }, [playerMaterials]);
 
-  // Calculate crafting preview (rating-based)
+  // Calculate crafting preview (NEW: per-stat attribute-based)
   const craftingPreview = useMemo(() => {
     if (!selectedBlueprint) return null;
     
     const requiredMaterials = selectedBlueprint.requiredMaterials as any[];
     let canCraft = true;
-    const materialPurities: number[] = [];
     const materialDetails: any[] = [];
-    
-    // No batch discount: scale linearly with batchSize
     const materialMultiplier = batchSize;
     
+    // Verify materials
     for (const required of requiredMaterials) {
       const selectedId = selectedMaterials[required.materialType];
       const playerMat = playerMaterials.find(m => m.id === selectedId);
@@ -166,15 +164,15 @@ export function ManufacturingInterface({
         const requiredQty = Math.floor(required.quantity * materialMultiplier);
         const qualityGrade = getQualityGrade(playerMat.purity);
         
-        materialPurities.push(playerMat.purity);
-        
         materialDetails.push({
           type: required.materialType,
           required: requiredQty,
           available,
           quality: qualityGrade,
           purity: playerMat.purity,
-          sufficient: available >= requiredQty
+          tier: playerMat.tier,
+          sufficient: available >= requiredQty,
+          affects: required.affects || []
         });
         
         if (available < requiredQty) {
@@ -183,32 +181,55 @@ export function ManufacturingInterface({
       }
     }
     
-    // Compute rating-based quality
+    // Calculate final stats using NEW attribute-based system
     const captainEffects = getCaptainEffects(captainId);
-    const captainBonusPct = captainEffects.manufacturingQualityBonus || 0; // e.g., 0.05
-    const quality = computeManufacturingQualityScore(
-      materialPurities,
-      selectedBlueprint.tier,
-      captainBonusPct
-    );
-
-    // Calculate final stats using multiplier
+    const captainBonus = captainEffects.manufacturingQualityBonus || 0;
     const baseStats = selectedBlueprint.baseStats as any;
     const finalStats: any = {};
+    const statContributions: Record<string, any[]> = {};
     
-    for (const [stat, value] of Object.entries(baseStats)) {
-      if (typeof value === 'number') {
-        finalStats[stat] = Math.round(value * quality.multiplier);
+    for (const [statName, baseValue] of Object.entries(baseStats)) {
+      if (typeof baseValue !== 'number') {
+        finalStats[statName] = baseValue;
+        continue;
+      }
+      
+      // Find which materials affect this stat
+      const contributors: any[] = [];
+      for (const detail of materialDetails) {
+        if (detail.affects && detail.affects.includes(statName) && detail.tier && detail.purity) {
+          const materialStats = getMaterialStats(detail.type, detail.tier);
+          const attribute = getAttributeForStat(statName);
+          const attributeValue = materialStats[attribute];
+          
+          contributors.push({
+            material: detail.type,
+            attribute,
+            value: attributeValue,
+            purity: detail.purity
+          });
+        }
+      }
+      
+      if (contributors.length === 0) {
+        // No material affects this stat
+        finalStats[statName] = baseValue;
       } else {
-        finalStats[stat] = value;
+        // Calculate: finalStat = baseStat × (materialValue / 100) × purity × (1 + captain)
+        const avgValue = contributors.reduce((sum, c) => sum + c.value, 0) / contributors.length;
+        const avgPurity = contributors.reduce((sum, c) => sum + c.purity, 0) / contributors.length;
+        const multiplier = (avgValue / 100) * avgPurity * (1 + captainBonus);
+        
+        finalStats[statName] = Math.round(baseValue * multiplier);
+        statContributions[statName] = contributors;
       }
     }
     
     return {
       canCraft,
       materialDetails,
-      quality, // { score, grade, multiplier, mismatchPenalty }
-      finalStats
+      finalStats,
+      statContributions
     };
   }, [selectedBlueprint, selectedMaterials, batchSize, playerMaterials, captainId]);
 
@@ -454,41 +475,31 @@ export function ManufacturingInterface({
             {craftingPreview && (
               <div className="bg-neutral-900 rounded-lg p-4">
                 <h3 className="text-lg font-bold mb-3">Output Preview</h3>
-                
-                {/* Quality Calculation */}
-                <div className="space-y-2 mb-4">
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="flex items-center justify-between">
-                      <span>Item Rating:</span>
-                      <span className="font-bold">{craftingPreview.quality.score}/100</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Grade:</span>
-                      <span className="font-bold">{craftingPreview.quality.grade}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Stat Multiplier:</span>
-                      <span className="font-bold">{(craftingPreview.quality.multiplier).toFixed(2)}×</span>
-                    </div>
-                    {craftingPreview.quality.mismatchPenalty > 0 && (
-                      <div className="flex items-center justify-between text-red-400">
-                        <span>Mismatch Penalty:</span>
-                        <span className="font-bold">-{craftingPreview.quality.mismatchPenalty} pts</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
 
-                {/* Final Stats */}
-                <div className="bg-neutral-800 rounded p-3">
+                {/* Final Stats with Material Contributions */}
+                <div className="bg-neutral-800 rounded p-3 mb-3">
                   <div className="text-sm font-semibold mb-2">Module Stats:</div>
-                  <div className="space-y-1">
-                    {Object.entries(craftingPreview.finalStats).map(([stat, value]) => (
-                      <div key={stat} className="flex justify-between text-sm">
-                        <span className="capitalize">{stat.replace(/([A-Z])/g, ' $1').trim()}:</span>
-                        <span className="font-mono">{value}</span>
-                      </div>
-                    ))}
+                  <div className="space-y-2">
+                    {Object.entries(craftingPreview.finalStats).map(([stat, value]) => {
+                      const contributors = craftingPreview.statContributions?.[stat];
+                      return (
+                        <div key={stat} className="space-y-1">
+                          <div className="flex justify-between text-sm">
+                            <span className="capitalize text-white">{stat.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                            <span className="font-mono font-bold text-green-400">{value}</span>
+                          </div>
+                          {contributors && contributors.length > 0 && (
+                            <div className="text-xs text-neutral-500 pl-2">
+                              {contributors.map((c: any, i: number) => (
+                                <div key={i}>
+                                  ← {c.material} ({c.attribute}: {c.value.toFixed(0)}, {(c.purity * 100).toFixed(0)}% purity)
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 

@@ -5,7 +5,8 @@ const prisma = new PrismaClient();
 async function reseedBlueprints() {
   console.log('🏭 Re-seeding blueprints with better names...');
   
-  // Clear existing blueprints and player blueprints
+  // Clear existing data in dependency order
+  await prisma.manufacturingJob.deleteMany();
   await prisma.playerBlueprint.deleteMany();
   await prisma.blueprint.deleteMany();
   console.log('Cleared existing blueprints');
@@ -19,8 +20,8 @@ async function reseedBlueprints() {
       type: 'module',
       moduleId: 'shield-gen-mk1', // We'll use a placeholder ID
       requiredMaterials: [
-        { materialType: 'Titanium', quantity: 50 },
-        { materialType: 'Plasma', quantity: 20 }
+        { materialType: 'Titanium', quantity: 50, affects: ['shieldHP'] },
+        { materialType: 'Plasma', quantity: 20, affects: ['rechargeRate', 'powerDraw'] }
       ],
       requiredComponents: [], // No components needed for basic tier
       baseStats: {
@@ -37,9 +38,9 @@ async function reseedBlueprints() {
       type: 'module',
       moduleId: 'shield-gen-mk2',
       requiredMaterials: [
-        { materialType: 'Titanium', quantity: 100 },
-        { materialType: 'Plasma', quantity: 50 },
-        { materialType: 'Quantum', quantity: 10 }
+        { materialType: 'Titanium', quantity: 100, affects: ['shieldHP'] },
+        { materialType: 'Plasma', quantity: 50, affects: ['rechargeRate'] },
+        { materialType: 'Quantum', quantity: 10, affects: ['powerDraw'] }
       ],
       requiredComponents: [
         { componentId: 'power_core', quantity: 1 },
@@ -59,8 +60,8 @@ async function reseedBlueprints() {
       type: 'module',
       moduleId: 'pulse-laser-mk1',
       requiredMaterials: [
-        { materialType: 'Iron', quantity: 40 },
-        { materialType: 'Silicon', quantity: 30 }
+        { materialType: 'Iron', quantity: 40, affects: ['damage'] },
+        { materialType: 'Silicon', quantity: 30, affects: ['range', 'fireRate'] }
       ],
       requiredComponents: [],
       baseStats: {

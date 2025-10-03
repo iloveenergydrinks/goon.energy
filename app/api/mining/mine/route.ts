@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
         }
       }),
       
-      // Upsert player material (create or update in one operation)
+      // Upsert player material (create or update in one operation) - as RAW ORE
       prisma.playerMaterial.upsert({
         where: {
           playerId_materialId_tier_purity: {
@@ -173,7 +173,8 @@ export async function POST(request: NextRequest) {
           quantity: minedAmount,
           tier,
           purity: roundedPurity,
-          attributes: {}
+          attributes: {},
+          isRefined: false // Mining drops RAW ORE
         }
       }),
       

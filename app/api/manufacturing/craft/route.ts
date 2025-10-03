@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getQualityGrade } from '@/lib/industrial/quality';
 import { estimateManufacturingTimeSeconds } from '@/lib/industrial/time';
 import { getCaptainEffects } from '@/lib/industrial/captains';
-import { computeManufacturingQualityScore } from '@/lib/industrial/calculations';
+import { getMaterialStats, getAttributeForStat } from '@/lib/industrial/materialStats';
 
 export async function POST(request: NextRequest) {
   try {
@@ -132,33 +132,80 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    // Collect material purities for rating model
-    const materialPurities: number[] = [];
+    // NEW: Calculate per-stat contributions using material attributes
+    const baseStats = blueprint.baseStats as any;
+    const materialContributions: Record<string, { materialType: string; attribute: string; value: number; purity: number }[]> = {};
     
+    // Gather material stats for each required material
     for (const required of requiredMaterials) {
       const materialStackId = materials[required.materialType];
       const playerMaterial = await prisma.playerMaterial.findUnique({
-        where: { id: materialStackId }
+        where: { id: materialStackId },
+        include: { material: true }
       });
       
-      if (playerMaterial) {
-        materialPurities.push(playerMaterial.purity);
+      if (!playerMaterial) continue;
+      
+      // Get material base stats for this tier
+      const materialStats = getMaterialStats(required.materialType, playerMaterial.tier);
+      
+      // For each stat this material affects
+      const affectedStats = required.affects || [];
+      for (const statName of affectedStats) {
+        if (!materialContributions[statName]) {
+          materialContributions[statName] = [];
+        }
+        
+        const attribute = getAttributeForStat(statName);
+        const attributeValue = materialStats[attribute];
+        
+        materialContributions[statName].push({
+          materialType: required.materialType,
+          attribute,
+          value: attributeValue,
+          purity: playerMaterial.purity
+        });
       }
     }
-    // Compute rating and multiplier using new model, with captain bonus
-    const effects = getCaptainEffects(captainId);
-    const captainQualityBonusPct = effects.manufacturingQualityBonus || 0;
-    const qualityResult = computeManufacturingQualityScore(
-      materialPurities,
-      blueprint.tier || 1,
-      captainQualityBonusPct
-    );
     
-    // Convert to timed job: consume inputs now, produce output after estimated time
-    // Estimate time based on blueprint tier and material purity
-    const avgPurity = materialPurities.length > 0
-      ? materialPurities.reduce((a,b)=>a+b,0) / materialPurities.length
-      : 0.5;
+    // Captain effects
+    const effects = getCaptainEffects(captainId);
+    const captainQualityBonus = effects.manufacturingQualityBonus || 0;
+    
+    // Calculate final stats using: finalStat = baseStat × materialValue × purity × (1 + captainBonus)
+    const finalStats: any = {};
+    let totalMultiplier = 0;
+    let statCount = 0;
+    
+    for (const [statName, baseValue] of Object.entries(baseStats)) {
+      if (typeof baseValue !== 'number') {
+        finalStats[statName] = baseValue;
+        continue;
+      }
+      
+      const contributors = materialContributions[statName];
+      if (!contributors || contributors.length === 0) {
+        // No material affects this stat; use base
+        finalStats[statName] = baseValue;
+      } else {
+        // Average contribution from all materials affecting this stat
+        const avgValue = contributors.reduce((sum, c) => sum + c.value, 0) / contributors.length;
+        const avgPurity = contributors.reduce((sum, c) => sum + c.purity, 0) / contributors.length;
+        
+        // finalStat = baseStat × (materialValue / 100) × purity × (1 + captain)
+        const materialMultiplier = (avgValue / 100) * avgPurity * (1 + captainQualityBonus);
+        finalStats[statName] = Math.round(baseValue * materialMultiplier);
+        
+        totalMultiplier += materialMultiplier;
+        statCount++;
+      }
+    }
+    
+    // Calculate average quality for job storage (for UI display)
+    const avgQuality = statCount > 0 ? totalMultiplier / statCount : 1.0;
+    
+    // Estimate time
+    const avgPurity = Object.values(materialContributions).flat().reduce((sum, c) => sum + c.purity, 0) / Math.max(1, Object.values(materialContributions).flat().length) || 0.5;
     const estimatedSeconds = estimateManufacturingTimeSeconds(blueprint.tier || 1, batchSize, avgPurity, captainId);
     const estimatedCompletion = new Date(Date.now() + estimatedSeconds * 1000);
     
@@ -206,8 +253,10 @@ export async function POST(request: NextRequest) {
         facilityType: 'basic',
         facilityQualityBonus: 1.0,
         outputType: 'module',
-        // Store multiplier (0.7..1.3) derived from rating for final stat application
-        outputQuality: qualityResult.multiplier,
+        // Store average quality multiplier for reference
+        outputQuality: avgQuality,
+        // Store final computed stats for job finalization
+        statBonuses: finalStats,
         status: 'pending',
         estimatedTime: estimatedSeconds,
         estimatedCompletion,
@@ -235,10 +284,8 @@ export async function POST(request: NextRequest) {
       estimatedSeconds,
       estimatedCompletion: estimatedCompletion.toISOString(),
       qualityPreview: {
-        score: qualityResult.score,
-        grade: qualityResult.grade,
-        multiplier: qualityResult.multiplier,
-        mismatchPenalty: qualityResult.mismatchPenalty
+        avgMultiplier: avgQuality,
+        finalStats
       }
     });
     
@@ -273,27 +320,18 @@ export async function GET(request: NextRequest) {
     });
 
     for (const job of dueJobs) {
-      // Create modules now
+      // Create modules now using pre-computed stats from job
       const blueprint = job.blueprint;
       const createdModuleIds: string[] = [];
+      const finalStats = job.statBonuses as any || {};
+      
       for (let i = 0; i < (job.batchSize || 1); i++) {
-        // Use exact quality from job (no variance for now; can add small ±1-2% later if desired)
-        const moduleQuality = job.outputQuality ?? 1.0;
-        const baseStats = blueprint.baseStats as any;
-        const finalStats: any = {};
-        for (const [stat, value] of Object.entries(baseStats)) {
-          if (typeof value === 'number') {
-            finalStats[stat] = Math.round(value * moduleQuality);
-          } else {
-            finalStats[stat] = value;
-          }
-        }
         const craftedModule = await prisma.playerModule.create({
           data: {
             playerId,
             moduleId: blueprint.moduleId || blueprint.id,
             blueprintId: blueprint.id,
-            quality: moduleQuality,
+            quality: job.outputQuality ?? 1.0,
             stats: { ...finalStats, blueprintName: blueprint.name }
           }
         });

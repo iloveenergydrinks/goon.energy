@@ -143,7 +143,8 @@ export default function IndustrialDashboard() {
             grouped[key].stacks.push({
               id: pm.id,
             quantity: parseInt(pm.quantity),
-              purity: pm.purity
+              purity: pm.purity,
+              isRefined: pm.isRefined // Track raw vs refined
             });
           });
           
