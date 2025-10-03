@@ -2,6 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getComponentById } from '@/lib/industrial/componentDrops';
 
+export async function DELETE(request: NextRequest) {
+  try {
+    const { componentId } = await request.json();
+    
+    if (!componentId) {
+      return NextResponse.json({ error: 'Missing componentId' }, { status: 400 });
+    }
+    
+    await prisma.playerComponent.delete({
+      where: { id: componentId }
+    });
+    
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting component:', error);
+    return NextResponse.json({ error: 'Failed to delete component' }, { status: 500 });
+  }
+}
+
 // GET /api/player/components - Get player's components
 export async function GET(request: NextRequest) {
   try {

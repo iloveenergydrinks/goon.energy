@@ -1,6 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export async function DELETE(request: NextRequest) {
+  try {
+    const { materialId } = await request.json();
+    
+    if (!materialId) {
+      return NextResponse.json({ error: 'Missing materialId' }, { status: 400 });
+    }
+    
+    await prisma.playerMaterial.delete({
+      where: { id: materialId }
+    });
+    
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting material:', error);
+    return NextResponse.json({ error: 'Failed to delete material' }, { status: 500 });
+  }
+}
+
 // GET /api/player/materials - Get player materials
 export async function GET(request: NextRequest) {
   try {
@@ -38,6 +57,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch materials' }, { status: 500 });
   }
 }
+
+
+
 
 
 

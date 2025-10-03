@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
           consolidated++;
         }
       }
-    });
+    }, { timeout: 30000 }); // Increase timeout to 30s for large consolidations
     
     // Get final material count for reporting
     const finalMaterials = await prisma.playerMaterial.findMany({

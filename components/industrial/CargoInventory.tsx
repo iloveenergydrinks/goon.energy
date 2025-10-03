@@ -15,6 +15,7 @@ interface CargoInventoryProps {
   onSell?: (materials: Material[]) => void;
   onTransfer?: (materials: Material[]) => void;
   onShowDetails?: (material: Material) => void;
+  onDelete?: (materialId: string) => void;
 }
 
 type ViewMode = 'grid' | 'list' | 'compact';
@@ -46,7 +47,8 @@ export function CargoInventory({
   onRefine,
   onSell,
   onTransfer,
-  onShowDetails
+  onShowDetails,
+  onDelete
 }: CargoInventoryProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortBy, setSortBy] = useState<SortBy>('tier');
@@ -401,10 +403,23 @@ export function CargoInventory({
           )}
 
           {/* Value */}
-          <div className="pt-2 border-t border-neutral-800">
+          <div className="pt-2 border-t border-neutral-800 flex items-center justify-between">
             <div className="text-xs text-green-400 font-medium">
               {formatIndustrialNumber(value)} ISK
             </div>
+            {onDelete && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (confirm(`Destroy ${material.quantity} ${material.name}?`)) {
+                    onDelete(material.id);
+                  }
+                }}
+                className="text-xs px-2 py-1 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded border border-red-500/50 transition-colors"
+              >
+                🗑️
+              </button>
+            )}
           </div>
         </div>
       </div>

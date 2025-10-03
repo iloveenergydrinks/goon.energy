@@ -11,6 +11,8 @@ import type {
   ResearchAggressiveness,
   RefiningCycle
 } from '@/types/industrial';
+import type { QualityGrade } from '@/lib/industrial/quality';
+import { getQualityGrade } from '@/lib/industrial/quality';
 
 // Tier thresholds based on purity
 const TIER_THRESHOLDS = {
@@ -155,6 +157,66 @@ export function calculateItemQuality(
   const totalQuality = blueprintQuality + materialQuality + facilityQuality;
   
   return Math.min(100, Math.max(0, totalQuality));
+}
+
+// =============================
+// New: Item Rating (0-100) model
+// =============================
+
+// Base score by material grade (from purity)
+export const MATERIAL_GRADE_BASE_SCORE: Record<QualityGrade, number> = {
+  SC: 20, // Scrap
+  CR: 35, // Crude
+  ST: 50, // Standard
+  RF: 65, // Refined
+  PR: 80, // Pure
+  PS: 92, // Pristine
+  QT: 100 // Quantum
+};
+
+export function materialPurityToScore(purity: number): number {
+  const grade = getQualityGrade(purity).grade;
+  return MATERIAL_GRADE_BASE_SCORE[grade];
+}
+
+export function scoreToItemGrade(score: number): "F" | "E" | "D" | "C" | "B" | "A" | "S" {
+  if (score >= 97) return 'S';
+  if (score >= 90) return 'A';
+  if (score >= 80) return 'B';
+  if (score >= 70) return 'C';
+  if (score >= 60) return 'D';
+  if (score >= 50) return 'E';
+  return 'F';
+}
+
+export function scoreToMultiplier(score: number): number {
+  // Map 0..100 -> 0.7..1.3 (50 -> 1.0)
+  const clamped = Math.max(0, Math.min(100, score));
+  return Math.round((0.7 + (clamped / 100) * 0.6) * 1000) / 1000;
+}
+
+export function computeManufacturingQualityScore(
+  materialPurities: number[],
+  blueprintTier: number,
+  captainQualityBonusPct: number = 0
+): { score: number; grade: "F" | "E" | "D" | "C" | "B" | "A" | "S"; multiplier: number; mismatchPenalty: number } {
+  if (materialPurities.length === 0) {
+    return { score: 50, grade: 'E', multiplier: 1.0, mismatchPenalty: 0 };
+  }
+  const scores = materialPurities.map(p => materialPurityToScore(p));
+  const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+  const max = Math.max(...scores);
+  const min = Math.min(...scores);
+  const spread = max - min;
+  // Penalize heavy mixing; cap at 12 points
+  const mismatchPenalty = Math.min(12, Math.round(spread * 0.25));
+  const blueprintBonus = Math.max(0, Math.round((blueprintTier - 1) * 5));
+  const captainBonusPts = Math.round((captainQualityBonusPct || 0) * 100);
+  const raw = avg + blueprintBonus + captainBonusPts - mismatchPenalty;
+  const score = Math.max(0, Math.min(100, Math.round(raw)));
+  const grade = scoreToItemGrade(score);
+  const multiplier = scoreToMultiplier(score);
+  return { score, grade, multiplier, mismatchPenalty };
 }
 
 /**

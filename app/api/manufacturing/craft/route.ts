@@ -1,10 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getQualityGrade } from '@/lib/industrial/quality';
+import { estimateManufacturingTimeSeconds } from '@/lib/industrial/time';
+import { getCaptainEffects } from '@/lib/industrial/captains';
+import { computeManufacturingQualityScore } from '@/lib/industrial/calculations';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const { blueprintId, materials, components = {}, batchSize = 1 } = await request.json();
+    const { blueprintId, materials, components = {}, batchSize = 1, captainId = null } = await request.json();
     
     if (!blueprintId || !materials) {
       return NextResponse.json(
@@ -60,15 +63,8 @@ export async function POST(request: Request) {
     // Parse required materials
     const requiredMaterials = blueprint.requiredMaterials as any[];
     
-    // Calculate batch discount
-    let materialMultiplier = batchSize;
-    if (batchSize >= 25) {
-      materialMultiplier = batchSize * 0.7; // 30% discount
-    } else if (batchSize >= 10) {
-      materialMultiplier = batchSize * 0.8; // 20% discount
-    } else if (batchSize >= 5) {
-      materialMultiplier = batchSize * 0.9; // 10% discount
-    }
+    // Remove batch discounts: materials scale linearly with batchSize
+    const materialMultiplier = batchSize;
     
     // Verify player has required materials
     for (const required of requiredMaterials) {
@@ -136,10 +132,8 @@ export async function POST(request: Request) {
       }
     }
     
-    // Calculate quality from materials
-    let totalQuality = 0;
-    let qualityCount = 0;
-    const materialQualities: number[] = [];
+    // Collect material purities for rating model
+    const materialPurities: number[] = [];
     
     for (const required of requiredMaterials) {
       const materialStackId = materials[required.materialType];
@@ -148,69 +142,27 @@ export async function POST(request: Request) {
       });
       
       if (playerMaterial) {
-        const qualityGrade = getQualityGrade(playerMaterial.purity);
-        const effectiveness = qualityGrade.effectiveness;
-        totalQuality += effectiveness;
-        qualityCount++;
-        materialQualities.push(effectiveness);
+        materialPurities.push(playerMaterial.purity);
       }
     }
+    // Compute rating and multiplier using new model, with captain bonus
+    const effects = getCaptainEffects(captainId);
+    const captainQualityBonusPct = effects.manufacturingQualityBonus || 0;
+    const qualityResult = computeManufacturingQualityScore(
+      materialPurities,
+      blueprint.tier || 1,
+      captainQualityBonusPct
+    );
     
-    // Calculate average quality
-    const averageQuality = totalQuality / qualityCount;
+    // Convert to timed job: consume inputs now, produce output after estimated time
+    // Estimate time based on blueprint tier and material purity
+    const avgPurity = materialPurities.length > 0
+      ? materialPurities.reduce((a,b)=>a+b,0) / materialPurities.length
+      : 0.5;
+    const estimatedSeconds = estimateManufacturingTimeSeconds(blueprint.tier || 1, batchSize, avgPurity, captainId);
+    const estimatedCompletion = new Date(Date.now() + estimatedSeconds * 1000);
     
-    // Apply quality mismatch penalty
-    const maxQuality = Math.max(...materialQualities);
-    const minQuality = Math.min(...materialQualities);
-    const qualityDifference = maxQuality - minQuality;
-    
-    let finalQuality = averageQuality;
-    if (qualityDifference > 0.2) { // More than 20% difference
-      const penalty = Math.min(0.5, qualityDifference * 0.5); // Up to 50% penalty
-      finalQuality = averageQuality * (1 - penalty);
-    }
-    
-    // Mastery bonus removed for now
-    // finalQuality stays as is
-    
-    // Create the crafted modules
-    const craftedModules = [];
-    
-    for (let i = 0; i < batchSize; i++) {
-      // Add some variance for batch crafting (+/- 5%)
-      const variance = batchSize > 1 ? (Math.random() * 0.1 - 0.05) : 0;
-      const moduleQuality = Math.max(0.7, Math.min(1.3, finalQuality + variance));
-      
-      // Calculate final stats
-      const baseStats = blueprint.baseStats as any;
-      const finalStats: any = {};
-      
-      for (const [stat, value] of Object.entries(baseStats)) {
-        if (typeof value === 'number') {
-          finalStats[stat] = Math.round(value * moduleQuality);
-        } else {
-          finalStats[stat] = value;
-        }
-      }
-      
-      // Create the module with blueprint name for better display
-      const craftedModule = await prisma.playerModule.create({
-        data: {
-          playerId: player.id,
-          moduleId: blueprint.moduleId || blueprint.id,
-          blueprintId: blueprint.id,
-          quality: moduleQuality,
-          stats: {
-            ...finalStats,
-            blueprintName: blueprint.name // Store the blueprint name for display
-          }
-        }
-      });
-      
-      craftedModules.push(craftedModule);
-    }
-    
-    // Consume materials
+    // Consume materials now
     for (const required of requiredMaterials) {
       const materialStackId = materials[required.materialType];
       const requiredQuantity = Math.floor(required.quantity * materialMultiplier);
@@ -242,6 +194,28 @@ export async function POST(request: Request) {
     
     // Mastery system removed for now
     
+    // Create a manufacturing job record (no immediate module creation)
+    await prisma.manufacturingJob.create({
+      data: {
+        playerId: player.id,
+        blueprintId: blueprint.id,
+        materials: requiredMaterials.map((req: any) => ({
+          materialType: req.materialType,
+          quantity: Math.floor(req.quantity * materialMultiplier)
+        })),
+        facilityType: 'basic',
+        facilityQualityBonus: 1.0,
+        outputType: 'module',
+        // Store multiplier (0.7..1.3) derived from rating for final stat application
+        outputQuality: qualityResult.multiplier,
+        status: 'pending',
+        estimatedTime: estimatedSeconds,
+        estimatedCompletion,
+        captainId: captainId || undefined,
+        batchSize
+      }
+    });
+
     // Update blueprint usage
     await prisma.playerBlueprint.update({
       where: {
@@ -251,17 +225,21 @@ export async function POST(request: Request) {
         }
       },
       data: {
-        timesUsed: {
-          increment: batchSize
-        }
+        timesUsed: { increment: batchSize }
       }
     });
     
     return NextResponse.json({
       success: true,
-      modules: craftedModules,
-      quality: finalQuality,
-      message: `Crafted ${batchSize} ${blueprint.name}${batchSize > 1 ? 's' : ''} at ${Math.round(finalQuality * 100)}% quality`
+      message: `Queued ${batchSize} ${blueprint.name}${batchSize > 1 ? 's' : ''}`,
+      estimatedSeconds,
+      estimatedCompletion: estimatedCompletion.toISOString(),
+      qualityPreview: {
+        score: qualityResult.score,
+        grade: qualityResult.grade,
+        multiplier: qualityResult.multiplier,
+        mismatchPenalty: qualityResult.mismatchPenalty
+      }
     });
     
   } catch (error) {
@@ -270,5 +248,72 @@ export async function POST(request: Request) {
       { error: 'Failed to craft module' },
       { status: 500 }
     );
+  }
+}
+
+// GET to finalize any completed manufacturing jobs and list jobs
+export async function GET(request: NextRequest) {
+  try {
+    const playerId = 'demo-player';
+    const now = new Date();
+
+    // Fetch all pending/processing jobs and finalize those whose time has elapsed
+    const candidates = await prisma.manufacturingJob.findMany({
+      where: {
+        playerId,
+        status: { in: ['pending', 'processing'] }
+      },
+      include: { blueprint: true }
+    });
+
+    const dueJobs = candidates.filter(job => {
+      const started = new Date(job.startedAt).getTime();
+      const etaMs = (job.estimatedTime || 0) * 1000;
+      return started + etaMs <= now.getTime();
+    });
+
+    for (const job of dueJobs) {
+      // Create modules now
+      const blueprint = job.blueprint;
+      const createdModuleIds: string[] = [];
+      for (let i = 0; i < (job.batchSize || 1); i++) {
+        // Use exact quality from job (no variance for now; can add small ±1-2% later if desired)
+        const moduleQuality = job.outputQuality ?? 1.0;
+        const baseStats = blueprint.baseStats as any;
+        const finalStats: any = {};
+        for (const [stat, value] of Object.entries(baseStats)) {
+          if (typeof value === 'number') {
+            finalStats[stat] = Math.round(value * moduleQuality);
+          } else {
+            finalStats[stat] = value;
+          }
+        }
+        const craftedModule = await prisma.playerModule.create({
+          data: {
+            playerId,
+            moduleId: blueprint.moduleId || blueprint.id,
+            blueprintId: blueprint.id,
+            quality: moduleQuality,
+            stats: { ...finalStats, blueprintName: blueprint.name }
+          }
+        });
+        createdModuleIds.push(craftedModule.id);
+      }
+
+      await prisma.manufacturingJob.update({
+        where: { id: job.id },
+        data: { status: 'completed', completedAt: now, outputId: createdModuleIds[0] }
+      });
+    }
+
+    const jobs = await prisma.manufacturingJob.findMany({
+      where: { playerId },
+      include: { blueprint: true },
+      orderBy: { startedAt: 'desc' }
+    });
+    return NextResponse.json(jobs);
+  } catch (error) {
+    console.error('Manufacturing GET error:', error);
+    return NextResponse.json({ error: 'Failed to fetch manufacturing jobs' }, { status: 500 });
   }
 }

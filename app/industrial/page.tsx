@@ -610,20 +610,25 @@ export default function IndustrialDashboard() {
               }}
               selectedMaterials={selectedMaterials}
               multiSelect={multiSelect}
-              showActions={true}
-              onRefine={(materials) => {
-                setActiveTab('refining');
-                setSelectedMaterials(materials);
-              }}
-              onSell={async (materials) => {
-                // TODO: Implement selling
-                console.log('Selling materials:', materials);
-              }}
-              onTransfer={async (materials) => {
-                // TODO: Implement transfer
-                console.log('Transferring materials:', materials);
-              }}
+              showActions={false}
               onShowDetails={setDetailMaterial}
+              onDelete={async (materialId) => {
+                try {
+                  const response = await fetch(`/api/player/materials`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ materialId })
+                  });
+                  if (response.ok) {
+                    loadPlayerData();
+                  } else {
+                    alert('Failed to destroy material');
+                  }
+                } catch (error) {
+                  console.error('Error destroying material:', error);
+                  alert('Failed to destroy material');
+                }
+              }}
             />
             ) : (
               /* Components View */
@@ -770,17 +775,43 @@ export default function IndustrialDashboard() {
                         >
                         <div className="flex items-start justify-between mb-3">
                           <span className="text-3xl">{component.emoji}</span>
-                          <span className={`px-2 py-1 rounded text-xs font-bold ${
-                            component.rarity === 'legendary' 
-                              ? 'bg-purple-600 text-white' :
-                            component.rarity === 'rare' 
-                              ? 'bg-blue-600 text-white' :
-                            component.rarity === 'uncommon' 
-                              ? 'bg-green-600 text-white' :
-                            'bg-gray-600 text-white'
-                          }`}>
-                            {component.rarity.toUpperCase()}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-1 rounded text-xs font-bold ${
+                              component.rarity === 'legendary' 
+                                ? 'bg-purple-600 text-white' :
+                              component.rarity === 'rare' 
+                                ? 'bg-blue-600 text-white' :
+                              component.rarity === 'uncommon' 
+                                ? 'bg-green-600 text-white' :
+                              'bg-gray-600 text-white'
+                            }`}>
+                              {component.rarity.toUpperCase()}
+                            </span>
+                            {!synthesisMode && (
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  if (confirm(`Destroy ${component.quantity} ${component.name}?`)) {
+                                    try {
+                                      const response = await fetch(`/api/player/components`, {
+                                        method: 'DELETE',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ componentId: component.id })
+                                      });
+                                      if (response.ok) {
+                                        loadPlayerComponents();
+                                      }
+                                    } catch (error) {
+                                      console.error('Error destroying component:', error);
+                                    }
+                                  }
+                                }}
+                                className="text-xs px-2 py-1 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded border border-red-500/50 transition-colors"
+                              >
+                                🗑️
+                              </button>
+                            )}
+                          </div>
                         </div>
                         
                         <h3 className="text-sm font-semibold text-white mb-1">{component.name}</h3>
@@ -862,7 +893,27 @@ export default function IndustrialDashboard() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {playerModules.map((module) => (
-                <InventoryCard key={module.id} module={module} />
+                <InventoryCard 
+                  key={module.id} 
+                  module={module}
+                  onDelete={async (moduleId) => {
+                    try {
+                      const response = await fetch(`/api/inventory`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ moduleId })
+                      });
+                      if (response.ok) {
+                        loadPlayerData();
+                      } else {
+                        alert('Failed to destroy module');
+                      }
+                    } catch (error) {
+                      console.error('Error destroying module:', error);
+                      alert('Failed to destroy module');
+                    }
+                  }}
+                />
               ))}
               {playerModules.length === 0 && (
                 <div className="col-span-full text-center py-12 text-neutral-500">

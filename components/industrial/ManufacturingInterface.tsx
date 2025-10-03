@@ -2,6 +2,8 @@
 
 import React, { useState, useMemo } from 'react';
 import { getQualityGrade, getQualityBadgeStyles } from '@/lib/industrial/quality';
+import { computeManufacturingQualityScore } from '@/lib/industrial/calculations';
+import { getCaptainEffects } from '@/lib/industrial/captains';
 
 interface Blueprint {
   id: string;
@@ -61,6 +63,58 @@ export function ManufacturingInterface({
   const [batchSize, setBatchSize] = useState(1);
   const [isCrafting, setIsCrafting] = useState(false);
   const [lastResult, setLastResult] = useState<any>(null);
+  const [captainId, setCaptainId] = useState<string>('none');
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [polling, setPolling] = useState<boolean>(false);
+  const [now, setNow] = useState<number>(Date.now());
+
+  // Update current time every second for live countdown
+  React.useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  async function pollJobs(forceOnce: boolean = false) {
+    try {
+      const res = await fetch('/api/manufacturing/craft', { method: 'GET' });
+      if (res.ok) {
+        const data = await res.json();
+        // Normalize fields
+        const normalized = Array.isArray(data) ? data : (data.jobs || []);
+        const prevCompleted = jobs.filter(j => j.status === 'completed').length;
+        const newJobs = normalized.map((j: any) => ({
+          id: j.id,
+          status: j.status,
+          estimatedCompletion: j.estimatedCompletion || (j.startedAt && j.estimatedTime ? new Date(new Date(j.startedAt).getTime() + (j.estimatedTime * 1000)).toISOString() : null),
+          batchSize: j.batchSize || 1,
+          blueprintId: j.blueprintId,
+          blueprintName: j.blueprint?.name
+        }));
+        setJobs(newJobs);
+        
+        // Auto-refresh inventory when jobs complete
+        const nowCompleted = newJobs.filter(j => j.status === 'completed').length;
+        if (nowCompleted > prevCompleted && onCraftComplete) {
+          onCraftComplete();
+        }
+      }
+    } catch (e) {
+      console.error('Failed to poll manufacturing jobs', e);
+    } finally {
+      if (!forceOnce) {
+        setTimeout(() => pollJobs(false), 1000); // Poll every 1s for live timer
+      }
+    }
+  }
+
+  // Start polling on mount so ETA shows even before first craft
+  React.useEffect(() => {
+    if (!polling) {
+      setPolling(true);
+      pollJobs(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Group materials by type and tier for selection
   const materialsByType = useMemo(() => {
@@ -82,26 +136,17 @@ export function ManufacturingInterface({
     return grouped;
   }, [playerMaterials]);
 
-  // Calculate crafting preview
+  // Calculate crafting preview (rating-based)
   const craftingPreview = useMemo(() => {
     if (!selectedBlueprint) return null;
     
     const requiredMaterials = selectedBlueprint.requiredMaterials as any[];
     let canCraft = true;
-    let totalQuality = 0;
-    let qualityCount = 0;
-    const materialQualities: number[] = [];
+    const materialPurities: number[] = [];
     const materialDetails: any[] = [];
     
-    // Calculate batch discount
-    let materialMultiplier = batchSize;
-    if (batchSize >= 25) {
-      materialMultiplier = batchSize * 0.7;
-    } else if (batchSize >= 10) {
-      materialMultiplier = batchSize * 0.8;
-    } else if (batchSize >= 5) {
-      materialMultiplier = batchSize * 0.9;
-    }
+    // No batch discount: scale linearly with batchSize
+    const materialMultiplier = batchSize;
     
     for (const required of requiredMaterials) {
       const selectedId = selectedMaterials[required.materialType];
@@ -121,9 +166,7 @@ export function ManufacturingInterface({
         const requiredQty = Math.floor(required.quantity * materialMultiplier);
         const qualityGrade = getQualityGrade(playerMat.purity);
         
-        totalQuality += qualityGrade.effectiveness;
-        qualityCount++;
-        materialQualities.push(qualityGrade.effectiveness);
+        materialPurities.push(playerMat.purity);
         
         materialDetails.push({
           type: required.materialType,
@@ -140,33 +183,22 @@ export function ManufacturingInterface({
       }
     }
     
-    // Calculate average quality
-    const averageQuality = qualityCount > 0 ? totalQuality / qualityCount : 0;
-    
-    // Apply quality mismatch penalty
-    let finalQuality = averageQuality;
-    let qualityPenalty = 0;
-    
-    if (materialQualities.length > 1) {
-      const maxQuality = Math.max(...materialQualities);
-      const minQuality = Math.min(...materialQualities);
-      const qualityDifference = maxQuality - minQuality;
-      
-      if (qualityDifference > 0.2) {
-        qualityPenalty = Math.min(0.5, qualityDifference * 0.5);
-        finalQuality = averageQuality * (1 - qualityPenalty);
-      }
-    }
-    
-    // No mastery bonus for now
-    
-    // Calculate final stats
+    // Compute rating-based quality
+    const captainEffects = getCaptainEffects(captainId);
+    const captainBonusPct = captainEffects.manufacturingQualityBonus || 0; // e.g., 0.05
+    const quality = computeManufacturingQualityScore(
+      materialPurities,
+      selectedBlueprint.tier,
+      captainBonusPct
+    );
+
+    // Calculate final stats using multiplier
     const baseStats = selectedBlueprint.baseStats as any;
     const finalStats: any = {};
     
     for (const [stat, value] of Object.entries(baseStats)) {
       if (typeof value === 'number') {
-        finalStats[stat] = Math.round(value * finalQuality);
+        finalStats[stat] = Math.round(value * quality.multiplier);
       } else {
         finalStats[stat] = value;
       }
@@ -175,13 +207,10 @@ export function ManufacturingInterface({
     return {
       canCraft,
       materialDetails,
-      averageQuality,
-      finalQuality,
-      qualityPenalty,
-      finalStats,
-      discount: batchSize >= 25 ? 30 : batchSize >= 10 ? 20 : batchSize >= 5 ? 10 : 0
+      quality, // { score, grade, multiplier, mismatchPenalty }
+      finalStats
     };
-  }, [selectedBlueprint, selectedMaterials, batchSize, playerMaterials]);
+  }, [selectedBlueprint, selectedMaterials, batchSize, playerMaterials, captainId]);
 
   const handleCraft = async () => {
     if (!selectedBlueprint || !craftingPreview?.canCraft) return;
@@ -211,7 +240,8 @@ export function ManufacturingInterface({
           blueprintId: selectedBlueprint.id,
           materials: selectedMaterials,
           components: finalComponents,
-          batchSize
+          batchSize,
+          captainId
         })
       });
       
@@ -219,6 +249,8 @@ export function ManufacturingInterface({
       
       if (response.ok) {
         setLastResult(result);
+        // Immediately poll to show the new job in Active Jobs panel
+        pollJobs(true);
         onCraftComplete?.();
         
         // Clear selection after successful craft
@@ -319,12 +351,7 @@ export function ManufacturingInterface({
                       {materialsByType[required.materialType]?.map(mat => {
                         const qualityGrade = getQualityGrade(mat.purity);
                         const available = parseInt(mat.quantity);
-                        const needed = Math.floor(required.quantity * (
-                          batchSize >= 25 ? batchSize * 0.7 :
-                          batchSize >= 10 ? batchSize * 0.8 :
-                          batchSize >= 5 ? batchSize * 0.9 :
-                          batchSize
-                        ));
+                        const needed = Math.floor(required.quantity * batchSize);
                         
                         return (
                           <option
@@ -389,7 +416,7 @@ export function ManufacturingInterface({
                 </div>
               )}
 
-              {/* Batch Size */}
+              {/* Captain & Batch Size */}
               <div className="mt-4 flex items-center gap-4">
                 <label className="text-sm">Batch Size:</label>
                 <div className="flex gap-2">
@@ -404,13 +431,21 @@ export function ManufacturingInterface({
                       }`}
                     >
                       ×{size}
-                      {size > 1 && craftingPreview && (
-                        <span className="text-xs ml-1 text-green-400">
-                          -{size >= 25 ? 30 : size >= 10 ? 20 : size >= 5 ? 10 : 0}%
-                        </span>
-                      )}
                     </button>
                   ))}
+                </div>
+                <div className="ml-auto flex items-center gap-2">
+                  <label className="text-sm text-neutral-400">Captain:</label>
+                  <select
+                    value={captainId}
+                    onChange={(e) => setCaptainId(e.target.value)}
+                    className="bg-neutral-800 rounded px-3 py-2 text-sm"
+                  >
+                    <option value="none">No Captain</option>
+                    <option value="assembly_maestro">Assembly Maestro (+Quality, faster)</option>
+                    <option value="balanced_veteran">Balanced Veteran (small bonuses)</option>
+                    <option value="refiner_ace">Refiner Ace (refining focused)</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -422,28 +457,25 @@ export function ManufacturingInterface({
                 
                 {/* Quality Calculation */}
                 <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-sm">
-                    <span>Average Quality:</span>
-                    <span>{Math.round(craftingPreview.averageQuality * 100)}%</span>
-                  </div>
-                  
-                  {craftingPreview.qualityPenalty > 0 && (
-                    <div className="flex justify-between text-sm text-red-400">
-                      <span>⚠️ Quality Mismatch:</span>
-                      <span>-{Math.round(craftingPreview.qualityPenalty * 100)}%</span>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span>Item Rating:</span>
+                      <span className="font-bold">{craftingPreview.quality.score}/100</span>
                     </div>
-                  )}
-                  
-                  <div className="flex justify-between font-bold border-t border-neutral-700 pt-2">
-                    <span>Final Quality:</span>
-                    <span className={`${
-                      craftingPreview.finalQuality >= 1.2 ? 'text-purple-400' :
-                      craftingPreview.finalQuality >= 1.0 ? 'text-green-400' :
-                      craftingPreview.finalQuality >= 0.8 ? 'text-yellow-400' :
-                      'text-red-400'
-                    }`}>
-                      {Math.round(craftingPreview.finalQuality * 100)}%
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span>Grade:</span>
+                      <span className="font-bold">{craftingPreview.quality.grade}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Stat Multiplier:</span>
+                      <span className="font-bold">{(craftingPreview.quality.multiplier).toFixed(2)}×</span>
+                    </div>
+                    {craftingPreview.quality.mismatchPenalty > 0 && (
+                      <div className="flex items-center justify-between text-red-400">
+                        <span>Mismatch Penalty:</span>
+                        <span className="font-bold">-{craftingPreview.quality.mismatchPenalty} pts</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -473,10 +505,36 @@ export function ManufacturingInterface({
                   {isCrafting ? 'Crafting...' : `Craft ${batchSize > 1 ? `${batchSize}× ` : ''}${selectedBlueprint.name}`}
                 </button>
 
+                {/* Estimated Time Preview */}
+                <div className="mt-4 p-3 bg-neutral-800 rounded border border-neutral-700">
+                  <div className="text-xs text-neutral-400 mb-1">Estimated Manufacturing Time</div>
+                  <div className="text-lg font-bold text-blue-400">
+                    {craftingPreview.canCraft ? (
+                      <>~{Math.round((selectedBlueprint.tier || 1) * 60 * (1 - (captainId === 'assembly_maestro' ? 0.15 : captainId === 'balanced_veteran' ? 0.05 : 0)))}s</>
+                    ) : '--'}
+                  </div>
+                </div>
+
                 {/* Result Message */}
                 {lastResult && (
                   <div className="mt-4 p-3 bg-green-500/20 border border-green-500 rounded-lg">
                     <div className="font-semibold text-green-400">{lastResult.message}</div>
+                    {lastResult.estimatedCompletion && (() => {
+                      const eta = new Date(lastResult.estimatedCompletion).getTime();
+                      const remaining = Math.max(0, Math.floor((eta - now) / 1000));
+                      const minutes = Math.floor(remaining / 60);
+                      const seconds = remaining % 60;
+                      
+                      return (
+                        <div className="text-sm text-white mt-2 font-mono">
+                          {remaining > 0 ? (
+                            <span className="text-blue-400">⏱ {minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`} remaining</span>
+                          ) : (
+                            <span className="text-green-400 animate-pulse">✓ Ready to collect!</span>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -487,6 +545,51 @@ export function ManufacturingInterface({
             {isLoading ? 'Loading blueprints...' : 'Select a blueprint to begin manufacturing'}
           </div>
         )}
+
+        {/* Active Jobs Panel */}
+        <div className="bg-neutral-900 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-lg font-bold">Active Manufacturing Jobs</h3>
+            <button
+              onClick={() => pollJobs(true)}
+              className="text-xs px-2 py-1 border border-neutral-700 rounded hover:border-neutral-600"
+            >
+              Refresh
+            </button>
+          </div>
+          {jobs.length === 0 ? (
+            <div className="text-sm text-neutral-500">No active jobs.</div>
+          ) : (
+            <div className="space-y-2">
+              {jobs.map(job => {
+                const eta = job.estimatedCompletion ? new Date(job.estimatedCompletion).getTime() : null;
+                const remaining = eta ? Math.max(0, Math.floor((eta - now) / 1000)) : 0;
+                const minutes = Math.floor(remaining / 60);
+                const seconds = remaining % 60;
+                
+                return (
+                  <div key={job.id} className="p-2 bg-neutral-800 rounded border border-neutral-700 text-sm flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="font-medium">{job.blueprintName || job.blueprintId}</div>
+                      <div className="text-xs text-neutral-400">Batch: {job.batchSize || 1} • Status: {job.status}</div>
+                    </div>
+                    <div className="text-right">
+                      {job.status === 'completed' ? (
+                        <div className="text-xs text-green-400 font-bold">✓ Completed</div>
+                      ) : remaining > 0 ? (
+                        <div className="text-xs font-mono text-blue-400">
+                          {minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`}
+                        </div>
+                      ) : (
+                        <div className="text-xs text-yellow-400 animate-pulse">Finalizing...</div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
