@@ -1,3 +1,11 @@
+// Material naming: Ore vs Refined
+export function getMaterialDisplayName(materialName: string, isRefined: boolean): string {
+  if (isRefined) {
+    return materialName; // "Titanium"
+  }
+  return `${materialName} Ore`; // "Titanium Ore"
+}
+
 // Material base attribute values by tier
 // These define how strong each material type is at each tier level
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { MaterialCard, MaterialComparison } from '@/components/industrial/MaterialCard';
-import { PurificationInterface } from '@/components/industrial/PurificationInterface';
+import { RefiningInterface } from '@/components/industrial/RefiningInterface';
 import { MiningInterface } from '@/components/industrial/MiningInterface';
 import { CargoInventory } from '@/components/industrial/CargoInventory';
 import { MaterialStackDetails } from '@/components/industrial/MaterialStackDetails';
@@ -214,7 +214,7 @@ export default function IndustrialDashboard() {
     { id: 'overview', label: 'Overview', icon: '📊' },
     { id: 'mining', label: 'Mining', icon: '⛏️' },
     { id: 'materials', label: 'Cargo Hold', icon: '📦' },
-    { id: 'refining', label: 'Purification', icon: '⚗️' },
+    { id: 'refining', label: 'Refining', icon: '⚗️' },
     { id: 'manufacturing', label: 'Manufacturing', icon: '🏭' },
     { id: 'inventory', label: 'Inventory', icon: '📋' }
   ];
@@ -853,15 +853,16 @@ export default function IndustrialDashboard() {
           </>
         )}
         
-        {/* Purification Tab (formerly Refining) */}
+        {/* Refining Tab */}
         {activeTab === 'refining' && (
           <div>
-            <h2 className="text-xl font-semibold text-white mb-6">Purification Chamber</h2>
-            <PurificationInterface
-              materials={selectedMaterials.length > 0 ? selectedMaterials : []}
+            <h2 className="text-xl font-semibold text-white mb-6">Refining Bay</h2>
+            <RefiningInterface
+              materials={[]}
+              facilities={refiningFacilities}
               playerMaterials={playerData?.materials || []}
-              onPurificationComplete={() => {
-                // Reload materials after purification
+              onRefiningComplete={() => {
+                // Reload materials after refining
                 loadPlayerData();
                 setSelectedMaterials([]);
               }}

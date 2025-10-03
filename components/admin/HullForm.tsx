@@ -173,7 +173,7 @@ export function HullForm({ hull, mode }: HullFormProps) {
       <div className="space-y-2">
         <h3 className="text-xs uppercase tracking-[0.3em] text-neutral-500">Grid Layout</h3>
         <p className="text-xs text-neutral-400">
-          Click cells to cycle: Empty → Power → Ammo → Utility
+          Grid Layout - Custom slots will appear after Utility
         </p>
         <GridBuilder
           fieldName="grid"

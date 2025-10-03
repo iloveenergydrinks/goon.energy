@@ -35,19 +35,10 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
   const [isRefining, setIsRefining] = useState(false);
   const [refiningResult, setRefiningResult] = useState<any>(null);
   const [captainId, setCaptainId] = useState<string>('none');
-  const [now, setNow] = useState<number>(Date.now());
-  const [filterType, setFilterType] = useState<'all' | 'ore' | 'refined'>('ore'); // Default to ore
-  const [sortBy, setSortBy] = useState<'tier' | 'purity' | 'quantity'>('tier');
-
-  // Update current time every second for live countdown
-  React.useEffect(() => {
-    const interval = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(interval);
-  }, []);
   
-  // Filter and sort player materials
+  // Group player materials
   const availableMaterials = useMemo(() => {
-    let filtered = playerMaterials.map(pm => ({
+    return playerMaterials.map(pm => ({
       id: pm.id,
       name: pm.material?.name || 'Unknown',
       category: pm.material?.category || 'unknown',
@@ -58,24 +49,7 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
       baseValue: pm.material?.baseValue || 100,
       attributes: pm.attributes || {}
     }));
-    
-    // Apply filter
-    if (filterType === 'ore') {
-      filtered = filtered.filter(m => m.isRefined === false);
-    } else if (filterType === 'refined') {
-      filtered = filtered.filter(m => m.isRefined !== false);
-    }
-    
-    // Sort
-    filtered.sort((a, b) => {
-      if (sortBy === 'tier') return b.tier - a.tier;
-      if (sortBy === 'purity') return b.purity - a.purity;
-      if (sortBy === 'quantity') return b.quantity - a.quantity;
-      return 0;
-    });
-    
-    return filtered;
-  }, [playerMaterials, filterType, sortBy]);
+  }, [playerMaterials]);
   
   // Simulate refining cycles with diminishing returns
   const simulation = useMemo<RefiningCyclePreview[]>(() => {
@@ -153,77 +127,29 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
   };
   
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Left Column: Material Selection */}
-      <div className="lg:col-span-1 space-y-4">
-        <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-800/50 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-blue-400 mb-2">⚗️ Refining</h3>
-          <p className="text-xs text-neutral-300">
-            Each cycle: <span className="text-red-400">-20% quantity</span>, <span className="text-green-400">+purity</span> (diminishing returns)
-          </p>
-        </div>
-        
-        {/* Filters */}
-        <div className="bg-neutral-900/50 border border-neutral-800 rounded-lg p-3">
-          <div className="flex flex-col gap-2">
-            <div className="flex gap-2">
-              <button
-                onClick={() => setFilterType('ore')}
-                className={`flex-1 px-3 py-2 rounded text-xs font-medium transition-colors ${
-                  filterType === 'ore'
-                    ? 'bg-orange-600 text-white'
-                    : 'bg-neutral-800 text-neutral-400 hover:text-white'
-                }`}
-              >
-                🪨 Ore Only
-              </button>
-              <button
-                onClick={() => setFilterType('refined')}
-                className={`flex-1 px-3 py-2 rounded text-xs font-medium transition-colors ${
-                  filterType === 'refined'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-neutral-800 text-neutral-400 hover:text-white'
-                }`}
-              >
-                ✨ Minerals Only
-              </button>
-              <button
-                onClick={() => setFilterType('all')}
-                className={`flex-1 px-3 py-2 rounded text-xs font-medium transition-colors ${
-                  filterType === 'all'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-neutral-800 text-neutral-400 hover:text-white'
-                }`}
-              >
-                All
-              </button>
-            </div>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2 bg-neutral-800 rounded text-xs text-white border border-neutral-700"
-            >
-              <option value="tier">Sort by Tier</option>
-              <option value="purity">Sort by Purity</option>
-              <option value="quantity">Sort by Quantity</option>
-            </select>
-          </div>
-        </div>
+    <div className="space-y-6">
+      {/* Explainer */}
+      <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-800/50 rounded-lg p-4">
+        <h3 className="text-lg font-semibold text-blue-400 mb-2">⚗️ Refining Process</h3>
+        <p className="text-sm text-neutral-300">
+          Refining improves material purity through repeated cycles. Each cycle:
+        </p>
+        <ul className="text-sm text-neutral-400 mt-2 space-y-1 list-disc list-inside">
+          <li><span className="text-red-400">Loses 20% quantity</span> (material sink)</li>
+          <li><span className="text-green-400">Improves purity</span> by 30% of the gap to 100%</li>
+          <li>Diminishing returns - harder to improve as purity approaches 100%</li>
+          <li>First refine converts <span className="text-orange-400">🪨 Raw Ore</span> → <span className="text-blue-400">✨ Refined Mineral</span></li>
+        </ul>
+      </div>
       
-        {/* Material List */}
-        <div className="space-y-2 max-h-[500px] overflow-y-auto">
-          {availableMaterials.length === 0 && (
-            <div className="text-center py-8 text-neutral-500 text-sm">
-              {filterType === 'ore' ? 'No ore available. Go mine some!' : 'No refined minerals. Refine some ore first!'}
-            </div>
-          )}
+      {/* Material Selection */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold text-white">Select Material to Refine</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {availableMaterials.map(material => {
             const isSelected = selectedMaterial?.id === material.id;
             const tierColor = getTierColor(material.tier);
             const qualityInfo = getQualityGrade(material.purity);
-            
-            // Determine if this is ore or refined
-            const isOre = material.isRefined === false;
             
             return (
               <button
@@ -234,12 +160,10 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
                 }}
                 disabled={isRefining}
                 className={`
-                  p-3 rounded-lg border-2 text-left transition-all relative
+                  p-3 rounded-lg border text-left transition-all
                   ${isSelected 
-                    ? 'border-blue-500 bg-blue-500/10 shadow-lg' 
-                    : isOre
-                      ? 'border-orange-700/50 bg-orange-900/10 hover:border-orange-600'
-                      : 'border-blue-700/50 bg-blue-900/10 hover:border-blue-600'
+                    ? 'border-blue-500 bg-blue-500/10' 
+                    : 'border-neutral-800 hover:border-neutral-600 bg-neutral-900/50'
                   }
                   ${isRefining ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
@@ -250,12 +174,12 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
                       <div className="text-sm font-medium text-white">
                         {getMaterialDisplayName(material.name, material.isRefined)}
                       </div>
-                      <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${
                         material.isRefined === false
-                          ? 'bg-orange-600 text-white'
-                          : 'bg-blue-600 text-white'
+                          ? 'bg-orange-900/30 text-orange-400 border border-orange-700'
+                          : 'bg-blue-900/30 text-blue-400 border border-blue-700'
                       }`}>
-                        {material.isRefined === false ? '🪨 ORE' : '✨ MINERAL'}
+                        {material.isRefined === false ? '🪨 ORE' : '✨ REFINED'}
                       </span>
                     </div>
                     <div className="text-xs text-neutral-500">{material.category}</div>
@@ -292,12 +216,10 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
         </div>
       </div>
       
-      {/* Right Column: Refining Configuration and Preview */}
-      <div className="lg:col-span-2 space-y-4">
-      {selectedMaterial ? (
-        <>
-          <div className="bg-neutral-900 rounded-lg border border-neutral-800 p-4">
-            <h3 className="text-lg font-semibold text-white mb-4">Configure Refining</h3>
+      {/* Refining Configuration */}
+      {selectedMaterial && (
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-white">Configure Refining</h3>
           
           {/* Quantity Input */}
           <div>
@@ -386,10 +308,12 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
               <option value="balanced_veteran">Balanced Veteran (small bonuses)</option>
             </select>
           </div>
-          
-          {/* Simulation Results */}
-          {simulation.length > 0 && (
-            <div className="space-y-4 mt-4">
+        </div>
+      )}
+      
+      {/* Simulation Results */}
+      {simulation.length > 0 && selectedMaterial && (
+        <div className="space-y-4">
           <h3 className="text-sm font-semibold text-white">Refining Simulation</h3>
           
           {/* Cycle Details */}
@@ -473,11 +397,9 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
               </div>
             </div>
           )}
-            </div>
-          )}
           
           {/* Action Buttons */}
-          <div className="flex gap-3 mt-4">
+          <div className="flex gap-3">
             <button
               onClick={handleStartRefining}
               disabled={isRefining || !selectedFacility}
@@ -504,30 +426,16 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
               Cancel
             </button>
           </div>
-          </div>
-        </>
-      ) : null}
+        </div>
+      )}
       
       {/* Refining Result */}
       {refiningResult && (
         <div className="p-4 bg-green-500/10 border border-green-500/50 rounded-lg">
           <h3 className="text-sm font-semibold text-green-300 mb-2">Refining Job Queued</h3>
-          {refiningResult.estimatedCompletion && (() => {
-            const eta = new Date(refiningResult.estimatedCompletion).getTime();
-            const remaining = Math.max(0, Math.floor((eta - now) / 1000));
-            const minutes = Math.floor(remaining / 60);
-            const seconds = remaining % 60;
-            
-            return (
-              <div className="text-lg font-mono text-blue-400 mb-3">
-                {remaining > 0 ? (
-                  <span>⏱ {minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`} remaining</span>
-                ) : (
-                  <span className="text-green-400 animate-pulse">✓ Ready to collect!</span>
-                )}
-              </div>
-            );
-          })()}
+          <div className="text-xs text-neutral-400 mb-2">
+            ETA: {refiningResult.estimatedCompletion ? new Date(refiningResult.estimatedCompletion).toLocaleTimeString() : '...'}
+          </div>
           {refiningResult.preview && (
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -546,23 +454,6 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
           )}
         </div>
       )}
-      
-      {/* Empty state when nothing selected */}
-      {!selectedMaterial && (
-        <div className="bg-neutral-900 rounded-lg border border-neutral-800 p-8 text-center">
-          <div className="text-4xl mb-3">⚗️</div>
-          <h3 className="text-lg font-semibold text-white mb-2">Select Material</h3>
-          <p className="text-sm text-neutral-400">
-            Choose a material from the left to begin refining
-          </p>
-          <div className="mt-4 text-xs text-neutral-500 space-y-1">
-            <p>💡 Refine <span className="text-orange-400">🪨 Ore</span> to get <span className="text-blue-400">✨ Minerals</span></p>
-            <p>💡 Keep refining to improve purity (diminishing returns)</p>
-            <p>💡 Higher purity = stronger crafted modules</p>
-          </div>
-        </div>
-      )}
-      </div>
     </div>
   );
 }
