@@ -116,6 +116,12 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
   const handleStartRefining = async () => {
     if (!selectedMaterial || !selectedFacility) return;
     
+    // Check if final output would be too small
+    if (simulation.length > 0 && simulation[simulation.length - 1].outputQuantity < 1) {
+      alert(`Cannot refine: final output would be ${simulation[simulation.length - 1].outputQuantity.toFixed(1)} units. Reduce cycles or increase input quantity.`);
+      return;
+    }
+    
     setIsRefining(true);
     setRefiningResult(null);
     
@@ -480,16 +486,18 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
           <div className="flex gap-3 mt-4">
             <button
               onClick={handleStartRefining}
-              disabled={isRefining || !selectedFacility}
+              disabled={isRefining || !selectedFacility || (simulation.length > 0 && simulation[simulation.length - 1].outputQuantity < 1)}
               className={`
                 flex-1 py-3 rounded font-medium transition-colors
-                ${isRefining || !selectedFacility
+                ${isRefining || !selectedFacility || (simulation.length > 0 && simulation[simulation.length - 1].outputQuantity < 1)
                   ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
                   : 'bg-blue-500 hover:bg-blue-600 text-white'
                 }
               `}
             >
-              {isRefining ? 'Refining...' : `Start Refining (${plannedCycles} cycle${plannedCycles > 1 ? 's' : ''})`}
+              {isRefining ? 'Refining...' : 
+               simulation.length > 0 && simulation[simulation.length - 1].outputQuantity < 1 ? 'Output too small!' :
+               `Start Refining (${plannedCycles} cycle${plannedCycles > 1 ? 's' : ''})`}
             </button>
             
             <button
