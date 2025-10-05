@@ -372,7 +372,11 @@ export function ManufacturingInterface({
                       }))}
                       className="flex-1 bg-neutral-800 rounded px-3 py-2 text-sm"
                     >
-                      <option value="">Select quality...</option>
+                      <option value="">
+                        {!materialsByType[required.materialType] || materialsByType[required.materialType].length === 0
+                          ? 'No refined materials - refine ore first!'
+                          : 'Select quality...'}
+                      </option>
                       {materialsByType[required.materialType]?.map(mat => {
                         const qualityGrade = getQualityGrade(mat.purity);
                         const available = parseInt(mat.quantity);
@@ -384,7 +388,7 @@ export function ManufacturingInterface({
                             value={mat.id}
                             disabled={available < needed}
                           >
-                            {qualityGrade.name} ({Math.round(mat.purity * 100)}%) - 
+                            ✨ {qualityGrade.name} ({Math.round(mat.purity * 100)}%) - 
                             {available} available / {needed} needed
                           </option>
                         );
