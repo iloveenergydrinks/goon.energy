@@ -87,6 +87,14 @@ export async function POST(request: NextRequest) {
         );
       }
       
+      // CRITICAL: Only accept refined minerals, reject raw ore
+      if (playerMaterial.isRefined === false) {
+        return NextResponse.json(
+          { error: `Cannot use raw ore: ${required.materialType} must be refined first` },
+          { status: 400 }
+        );
+      }
+      
       const requiredQuantity = Math.floor(required.quantity * materialMultiplier);
       const availableQuantity = parseInt(playerMaterial.quantity.toString());
       

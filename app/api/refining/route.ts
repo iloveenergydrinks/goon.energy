@@ -20,6 +20,34 @@ function calculateRefiningCycle(
   return { outputPurity, retentionRate };
 }
 
+// Calculate ISK cost for refining (exponential scaling)
+function calculateRefiningCost(
+  quantity: number,
+  currentPurity: number, // 0-100 scale
+  cycles: number,
+  materialTier: number
+): bigint {
+  // Base cost per unit
+  const basePerUnit = 10;
+  
+  // Tier multiplier (T5 costs more to refine)
+  const tierMultiplier = Math.pow(1.5, materialTier - 1);
+  
+  // Purity exponential: cost increases dramatically above 90%
+  const purityMultiplier = currentPurity < 90 
+    ? 1.0 
+    : Math.pow(10, (currentPurity - 90) / 10); // 90% = 1×, 95% = 3.16×, 98% = 10×, 99% = 31.6×
+  
+  // Cycle multiplier (more cycles = higher total cost)
+  const cycleMultiplier = Math.pow(1.5, cycles - 1);
+  
+  const totalCost = Math.floor(
+    quantity * basePerUnit * tierMultiplier * purityMultiplier * cycleMultiplier
+  );
+  
+  return BigInt(totalCost);
+}
+
 // GET /api/refining - Get player's refining jobs
 export async function GET(request: NextRequest) {
   try {
@@ -181,12 +209,37 @@ export async function POST(request: NextRequest) {
     const finalPurity = currentPurity / 100; // Convert back to 0-1 scale
     const currentTier = calculateMaterialTier(finalPurity);
 
+    // Calculate ISK cost
+    const iskCost = calculateRefiningCost(
+      quantity,
+      playerMaterial.purity * 100,
+      cycles,
+      playerMaterial.tier
+    );
+
+    // Check if player has enough ISK
+    const player = await prisma.player.findFirst({
+      where: { id: playerId }
+    });
+    
+    if (!player || player.isk < iskCost) {
+      return NextResponse.json(
+        { error: `Insufficient ORE: need ${iskCost.toString()}, have ${player?.isk.toString() || '0'}` },
+        { status: 400 }
+      );
+    }
+
     // Estimate time for the whole refining job
     const estimatedSeconds = estimateRefiningTimeSeconds(parseInt(BigInt(quantity).toString()), cycles, captainId);
     const estimatedCompletion = new Date(Date.now() + estimatedSeconds * 1000);
 
-    // Consume input now; grant output on completion
+    // Consume input and ISK now; grant output on completion
     await prisma.$transaction(async (tx) => {
+      // Deduct ISK
+      await tx.player.update({
+        where: { id: playerId },
+        data: { isk: { decrement: iskCost } }
+      });
       const newQuantity = playerMaterial.quantity - BigInt(quantity);
       if (newQuantity <= BigInt(0)) {
         await tx.playerMaterial.delete({ where: { id: materialId } });
@@ -219,6 +272,7 @@ export async function POST(request: NextRequest) {
       success: true,
       estimatedSeconds,
       estimatedCompletion: estimatedCompletion.toISOString(),
+      iskCost: iskCost.toString(),
       preview: {
         outputQuantity: currentQuantity.toString(),
         outputPurity: finalPurity,

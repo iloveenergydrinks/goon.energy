@@ -435,6 +435,91 @@ export default function IndustrialDashboard() {
               </div>
             </div>
 
+            {/* Material Properties Reference */}
+            <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-cyan-400 mb-3 flex items-center gap-2">
+                📊 Material Properties Guide
+              </h3>
+              <p className="text-sm text-neutral-400 mb-4">
+                Each material has unique attributes that affect specific module stats during manufacturing.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {/* Structural Metals */}
+                <div className="bg-neutral-800/50 rounded p-3">
+                  <div className="text-sm font-bold text-blue-400 mb-2">🔩 Structural Metals</div>
+                  <div className="space-y-2 text-xs">
+                    <div>
+                      <div className="font-semibold text-white">Titanium</div>
+                      <div className="text-green-400">→ HP, Armor, Structure</div>
+                      <div className="text-neutral-500">Heavy, stable, strong</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-white">Iron</div>
+                      <div className="text-green-400">→ Armor, Durability</div>
+                      <div className="text-neutral-500">Very heavy, cheap</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-white">Aluminum</div>
+                      <div className="text-green-400">→ Lightweight builds</div>
+                      <div className="text-neutral-500">Light, flexible, weak</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Energy Materials */}
+                <div className="bg-neutral-800/50 rounded p-3">
+                  <div className="text-sm font-bold text-purple-400 mb-2">⚡ Energy Materials</div>
+                  <div className="space-y-2 text-xs">
+                    <div>
+                      <div className="font-semibold text-white">Plasma</div>
+                      <div className="text-green-400">→ Recharge, Energy Systems</div>
+                      <div className="text-neutral-500">Reactive, unstable</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-white">Quantum</div>
+                      <div className="text-green-400">→ Power, Capacitor, Speed</div>
+                      <div className="text-neutral-500">Exotic, near-massless</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-white">Dark Matter</div>
+                      <div className="text-green-400">→ Exotic Effects, Energy</div>
+                      <div className="text-neutral-500">Unstable, powerful</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Electronics */}
+                <div className="bg-neutral-800/50 rounded p-3">
+                  <div className="text-sm font-bold text-yellow-400 mb-2">🖥️ Electronics</div>
+                  <div className="space-y-2 text-xs">
+                    <div>
+                      <div className="font-semibold text-white">Silicon</div>
+                      <div className="text-green-400">→ Sensors, Tracking, Range</div>
+                      <div className="text-neutral-500">Stable, brittle</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-white">Copper</div>
+                      <div className="text-green-400">→ Conductivity, Electronics</div>
+                      <div className="text-neutral-500">Heavy, reliable</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-white">Gold</div>
+                      <div className="text-green-400">→ Premium Conductivity</div>
+                      <div className="text-neutral-500">Very heavy, stable</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 p-3 bg-blue-900/20 border border-blue-700/50 rounded">
+                <p className="text-xs text-neutral-300">
+                  💡 <span className="text-white font-semibold">Crafting Formula:</span> finalStat = baseStat × (materialAttribute / 100) × purity
+                </p>
+                <p className="text-xs text-neutral-400 mt-1">
+                  Higher tier materials (T5) have 3× the attribute values of T1. Purity multiplies the final result.
+                </p>
+              </div>
+            </div>
+
             {/* Resource Distribution */}
             <ResourceDistribution />
             

@@ -121,6 +121,10 @@ export function ManufacturingInterface({
     const grouped: Record<string, PlayerMaterial[]> = {};
     
     for (const mat of playerMaterials) {
+      // Filter: only show refined minerals (reject ore)
+      const isRefined = (mat as any).isRefined;
+      if (isRefined === false) continue;
+      
       const key = mat.material.name;
       if (!grouped[key]) {
         grouped[key] = [];
