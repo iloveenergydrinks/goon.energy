@@ -608,8 +608,18 @@ export default function IndustrialDashboard() {
         
         {/* Mining Tab */}
         {activeTab === 'mining' && (
-          <div>
-            <h2 className="text-xl font-semibold text-white mb-6">Mining Operations</h2>
+          <div className="space-y-4">
+            <div className="border-2 border-orange-600 bg-black p-4 relative overflow-hidden">
+              <div className="absolute inset-0 opacity-5" style={{
+                backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #ff6b00 10px, #ff6b00 20px)'
+              }} />
+              <div className="relative z-10">
+                <h2 className="text-xl font-black tracking-widest text-orange-500 uppercase">⛏️ EXTRACTION OPS</h2>
+                <div className="text-xs text-neutral-500 font-mono mt-1">
+                  // RESOURCE HARVESTING OPERATIONS
+                </div>
+              </div>
+            </div>
             <MiningInterface />
           </div>
         )}
@@ -617,29 +627,32 @@ export default function IndustrialDashboard() {
         {/* Cargo Hold Tab */}
         {activeTab === 'materials' && (
           <>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
-                <h2 className="text-xl font-semibold text-white">Cargo Hold</h2>
-                <div className="flex gap-1 bg-neutral-800 rounded-lg p-1">
+            <div className="border-2 border-blue-600 bg-black p-4 flex items-center justify-between mb-4 relative overflow-hidden">
+              <div className="absolute inset-0 opacity-5" style={{
+                backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 10px, #3b82f6 10px, #3b82f6 20px)'
+              }} />
+              <div className="flex items-center gap-4 relative z-10">
+                <h2 className="text-xl font-black tracking-widest text-blue-500 uppercase">📦 CARGO BAY</h2>
+                <div className="flex gap-1">
                   <button
                     onClick={() => setCargoSubTab('materials')}
-                    className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${
+                    className={`px-4 py-2 border-2 text-xs font-black uppercase tracking-wider transition-all ${
                       cargoSubTab === 'materials' 
-                        ? 'bg-blue-600 text-white' 
-                        : 'text-neutral-400 hover:text-white'
+                        ? 'bg-blue-600 text-black border-blue-400' 
+                        : 'bg-black text-neutral-500 border-neutral-800 hover:border-blue-600'
                     }`}
                   >
-                    📦 Materials ({realMaterials.length})
+                    MATERIALS ({realMaterials.length})
                   </button>
                   <button
                     onClick={() => setCargoSubTab('components')}
-                    className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${
+                    className={`px-4 py-2 border-2 text-xs font-black uppercase tracking-wider transition-all ${
                       cargoSubTab === 'components' 
-                        ? 'bg-purple-600 text-white' 
-                        : 'text-neutral-400 hover:text-white'
+                        ? 'bg-purple-600 text-black border-purple-400' 
+                        : 'bg-black text-neutral-500 border-neutral-800 hover:border-purple-600'
                     }`}
                   >
-                    💎 Components ({playerComponents.length})
+                    COMPONENTS ({playerComponents.length})
                   </button>
                 </div>
               </div>
@@ -662,29 +675,17 @@ export default function IndustrialDashboard() {
                           loadPlayerData();
                         }
                       }}
-                      className="px-3 py-1.5 text-sm bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
-                      title="Consolidates materials within purity bands, preserving premium (85%+) stacks"
+                      className="px-4 py-2 border-2 border-purple-600 bg-purple-600 hover:bg-purple-500 text-black text-xs font-black uppercase tracking-wider transition-all"
+                      title="Consolidates materials within purity bands"
                     >
-                      🔀 Smart Consolidate
+                      🔀 CONSOLIDATE
                     </button>
                     <button 
                       onClick={loadPlayerData}
-                      className="px-3 py-1.5 text-sm border border-blue-700 text-blue-400 rounded-lg hover:border-blue-600 transition-colors"
+                      className="px-4 py-2 border-2 border-blue-700 bg-black text-blue-400 hover:border-blue-500 text-xs font-black uppercase tracking-wider transition-all"
                     >
-                      🔄 Refresh
+                      🔄 REFRESH
                     </button>
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={multiSelect}
-                        onChange={(e) => {
-                          setMultiSelect(e.target.checked);
-                          if (!e.target.checked) setSelectedMaterials([]);
-                        }}
-                        className="rounded border-neutral-600"
-                      />
-                      <span className="text-neutral-400">Multi-select</span>
-                    </label>
                   </>
                 )}
               </div>
@@ -974,8 +975,18 @@ export default function IndustrialDashboard() {
         
         {/* Manufacturing Tab */}
         {activeTab === 'manufacturing' && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-white">Manufacturing Bay</h2>
+          <div className="space-y-4">
+            <div className="border-2 border-green-600 bg-black p-4 relative overflow-hidden">
+              <div className="absolute inset-0 opacity-5" style={{
+                backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, #22c55e 2px, #22c55e 4px)'
+              }} />
+              <div className="relative z-10">
+                <h2 className="text-xl font-black tracking-widest text-green-500 uppercase">🏭 FABRICATION BAY</h2>
+                <div className="text-xs text-neutral-500 font-mono mt-1">
+                  // ASSEMBLY & MANUFACTURING
+                </div>
+              </div>
+            </div>
             <ManufacturingInterface
               blueprints={playerBlueprints}
               playerMaterials={playerData?.materials || []}
@@ -990,10 +1001,17 @@ export default function IndustrialDashboard() {
         
         {/* Inventory Tab */}
         {activeTab === 'inventory' && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-white">Module Inventory</h2>
-            <div className="text-sm text-neutral-400 mb-4">
-              Crafted modules: {playerModules.length}
+          <div className="space-y-4">
+            <div className="border-2 border-purple-600 bg-black p-4 relative overflow-hidden">
+              <div className="absolute inset-0 opacity-5" style={{
+                backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #a855f7 10px, #a855f7 20px)'
+              }} />
+              <div className="relative z-10">
+                <h2 className="text-xl font-black tracking-widest text-purple-500 uppercase">🏭 MODULE INVENTORY</h2>
+                <div className="text-xs text-neutral-500 font-mono mt-1">
+                  // FABRICATED UNITS: {playerModules.length}
+                </div>
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {playerModules.map((module) => (
