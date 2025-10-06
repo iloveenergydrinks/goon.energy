@@ -174,109 +174,199 @@ export function OverviewTab() {
           </div>
         </div>
         
-        <div className="mt-3 border border-orange-600 bg-orange-950/10 p-3 text-xs font-mono">
-          <div className="text-orange-400 font-bold mb-1">⚠️ CRUCIBLE RESTRICTION:</div>
-          <div className="text-neutral-400">
-            Can only mix materials with:<br/>
-            • Same name (Titanium + Titanium only)<br/>
-            • Same tier (T3 + T3 only)<br/>
-            • Same state (🪨 ore OR ✨ mineral, not both)<br/>
-            <br/>
-            <span className="text-white">Different purities CAN be mixed</span> → weighted average
+        <div className="mt-3 space-y-2">
+          <div className="border border-cyan-600 bg-cyan-950/10 p-3 text-xs font-mono">
+            <div className="text-cyan-400 font-bold mb-2">💡 WHY TWO NUMBERS?</div>
+            <div className="text-neutral-300 space-y-2">
+              <div>
+                <span className="text-white font-bold">Tier</span> = How good the material <span className="text-white">IS</span><br/>
+                <span className="text-white font-bold">Purity</span> = How clean the material <span className="text-white">IS</span>
+              </div>
+              
+              <div className="border-t border-cyan-900 pt-2">
+                <div className="text-white">Think of it like this:</div>
+                <div className="mt-1 space-y-1">
+                  <div>🏆 <span className="text-yellow-400">T5 Titanium</span> = premium grade steel (strong)</div>
+                  <div>🥉 <span className="text-neutral-500">T1 Titanium</span> = cheap grade steel (weak)</div>
+                  <div className="mt-2 text-neutral-500">Both are titanium, but T5 is inherently 3× stronger</div>
+                </div>
+              </div>
+              
+              <div className="border-t border-cyan-900 pt-2">
+                <div className="text-white">Then purity is contamination:</div>
+                <div className="mt-1 space-y-1">
+                  <div>✨ <span className="text-green-400">95% pure</span> = clean, almost full strength</div>
+                  <div>💩 <span className="text-red-400">30% pure</span> = dirty, only 30% usable</div>
+                  <div className="mt-2 text-neutral-500">Refining removes impurities → higher purity</div>
+                </div>
+              </div>
+              
+              <div className="border-t border-cyan-900 pt-2 text-green-400">
+                <div className="font-bold">Final strength used in crafting:</div>
+                <div className="mt-1 text-white">Tier strength × Purity</div>
+                <div className="text-neutral-400 mt-1">T5 (600) @ 95% = 570 effective strength</div>
+                <div className="text-neutral-400">T1 (200) @ 95% = 190 effective strength</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border border-orange-600 bg-orange-950/10 p-3 text-xs font-mono">
+            <div className="text-orange-400 font-bold mb-1">⚠️ REFINING CRUCIBLE:</div>
+            <div className="text-neutral-400 space-y-1">
+              <div className="text-white">You can batch-refine multiple stacks together IF:</div>
+              <div>✅ Same material (Titanium with Titanium)</div>
+              <div>✅ Same tier (T3 with T3) — can't average quality grades</div>
+              <div>✅ Same state (ore with ore, or mineral with mineral)</div>
+              <div className="mt-2 text-green-400">
+                ✅ Different purities OK → averages: 100@45% + 50@75% = 150@55%
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Material Properties */}
       <div className="border-2 border-purple-600 bg-black p-4">
-        <h3 className="text-sm font-black tracking-widest text-purple-500 uppercase mb-3">📊 MATERIAL ATTRIBUTES</h3>
+        <h3 className="text-sm font-black tracking-widest text-purple-500 uppercase mb-3">📊 WHAT MATERIALS DO</h3>
         
-        <div className="grid grid-cols-3 gap-3 mb-4 text-xs">
+        <div className="border border-purple-600 bg-purple-950/10 p-3 mb-3 text-xs font-mono">
+          <div className="text-purple-400 font-bold mb-2">💡 DIFFERENT MATERIALS = DIFFERENT EFFECTS</div>
+          <div className="text-neutral-300 space-y-2">
+            <div>
+              Each material is good at different things.<br/>
+              <span className="text-white">Blueprints tell you which material affects which stat.</span>
+            </div>
+            <div className="border-t border-purple-900 pt-2">
+              <div className="text-white">Example: Shield Generator blueprint says:</div>
+              <div className="mt-1 text-cyan-400">→ Use Titanium for Shield HP</div>
+              <div className="text-cyan-400">→ Use Plasma for Recharge Rate</div>
+              <div className="mt-2 text-neutral-500">
+                Why? Titanium is strong (good for armor/HP)<br/>
+                Plasma is reactive (good for energy systems)
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-3 gap-3 mb-3 text-xs">
           {/* Structural */}
           <div className="border border-neutral-700 bg-neutral-950 p-3">
-            <div className="text-blue-400 font-black uppercase mb-2">Structural</div>
-            <div className="space-y-1 text-neutral-400">
-              <div><span className="text-white">Titanium:</span> HP, Armor</div>
-              <div><span className="text-white">Iron:</span> Armor, Heavy</div>
-              <div><span className="text-white">Aluminum:</span> Light, Weak</div>
+            <div className="text-blue-400 font-black uppercase mb-2 text-xs">🔩 Structural</div>
+            <div className="space-y-2 text-neutral-400">
+              <div>
+                <div className="text-white font-bold">Titanium</div>
+                <div className="text-xs">Best for: HP, Armor</div>
+                <div className="text-xs text-neutral-600">Heavy but very strong</div>
+              </div>
+              <div>
+                <div className="text-white font-bold">Iron</div>
+                <div className="text-xs">Best for: Armor, Structure</div>
+                <div className="text-xs text-neutral-600">Cheap, heavy, decent</div>
+              </div>
             </div>
           </div>
           
           {/* Energy */}
           <div className="border border-neutral-700 bg-neutral-950 p-3">
-            <div className="text-purple-400 font-black uppercase mb-2">Energy</div>
-            <div className="space-y-1 text-neutral-400">
-              <div><span className="text-white">Plasma:</span> Recharge, Power</div>
-              <div><span className="text-white">Quantum:</span> Exotic, Fast</div>
-              <div><span className="text-white">Dark matter:</span> Unstable, High</div>
+            <div className="text-purple-400 font-black uppercase mb-2 text-xs">⚡ Energy</div>
+            <div className="space-y-2 text-neutral-400">
+              <div>
+                <div className="text-white font-bold">Plasma</div>
+                <div className="text-xs">Best for: Recharge, Power</div>
+                <div className="text-xs text-neutral-600">Reactive, fast energy</div>
+              </div>
+              <div>
+                <div className="text-white font-bold">Quantum</div>
+                <div className="text-xs">Best for: Speed, Power</div>
+                <div className="text-xs text-neutral-600">Exotic, expensive</div>
+              </div>
             </div>
           </div>
           
           {/* Electronics */}
           <div className="border border-neutral-700 bg-neutral-950 p-3">
-            <div className="text-yellow-400 font-black uppercase mb-2">Electronics</div>
-            <div className="space-y-1 text-neutral-400">
-              <div><span className="text-white">Silicon:</span> Sensors, Tracking</div>
-              <div><span className="text-white">Copper:</span> Conductivity</div>
-              <div><span className="text-white">Gold:</span> Premium Conduct</div>
+            <div className="text-yellow-400 font-black uppercase mb-2 text-xs">🖥️ Electronics</div>
+            <div className="space-y-2 text-neutral-400">
+              <div>
+                <div className="text-white font-bold">Silicon</div>
+                <div className="text-xs">Best for: Sensors, Tracking</div>
+                <div className="text-xs text-neutral-600">Stable, precise</div>
+              </div>
+              <div>
+                <div className="text-white font-bold">Copper</div>
+                <div className="text-xs">Best for: Wiring, Circuits</div>
+                <div className="text-xs text-neutral-600">Good conductor</div>
+              </div>
             </div>
-          </div>
-        </div>
-        
-        <div className="border border-neutral-700 bg-neutral-950 p-3 text-xs font-mono">
-          <div className="text-neutral-500 uppercase mb-1">Attribute System</div>
-          <div className="space-y-1 text-neutral-400">
-            <div>• <span className="text-white">6 Attributes:</span> strength, conductivity, density, reactivity, stability, elasticity</div>
-            <div>• <span className="text-white">Tier Scaling:</span> T1=1.0×, T2=1.5×, T3=2.0×, T4=2.5×, T5=3.0×</div>
-            <div>• <span className="text-white">View all:</span> /admin/materials</div>
           </div>
         </div>
       </div>
 
       {/* Manufacturing */}
       <div className="border-2 border-green-600 bg-black p-4">
-        <h3 className="text-sm font-black tracking-widest text-green-500 uppercase mb-3">🏭 MANUFACTURING</h3>
+        <h3 className="text-sm font-black tracking-widest text-green-500 uppercase mb-3">🏭 HOW CRAFTING WORKS</h3>
         
         <div className="space-y-3">
-          {/* Formula */}
+          {/* Simple Explanation */}
+          <div className="border border-green-600 bg-green-950/10 p-3 text-xs font-mono">
+            <div className="text-green-400 font-bold mb-2">💡 THE SIMPLE VERSION</div>
+            <div className="text-neutral-300 space-y-2">
+              <div>
+                <span className="text-white font-bold">Better materials = better modules.</span><br/>
+                Each blueprint recipe shows what you need:
+              </div>
+              <div className="border-t border-green-900 pt-2 bg-black p-2">
+                <div className="text-cyan-400">Shield Generator Mk1 needs:</div>
+                <div className="text-white mt-1">• 50× Titanium (for Shield HP)</div>
+                <div className="text-white">• 20× Plasma (for Recharge Rate)</div>
+              </div>
+              <div className="border-t border-green-900 pt-2">
+                <div className="text-white">The quality of YOUR materials determines the stats:</div>
+                <div className="mt-1 space-y-1">
+                  <div>
+                    <span className="text-yellow-400">T5 Titanium @ 95% purity</span> → Shield HP: <span className="text-green-400 font-bold">570</span>
+                  </div>
+                  <div>
+                    <span className="text-neutral-500">T1 Titanium @ 40% purity</span> → Shield HP: <span className="text-red-400">80</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Formula for nerds */}
           <div className="border border-neutral-700 bg-neutral-950 p-3">
-            <div className="text-xs text-neutral-500 uppercase font-bold mb-2">Core Formula</div>
-            <div className="font-mono text-sm text-white bg-black border border-neutral-800 p-2">
-              finalStat = baseStat × (materialAttribute / 100) × purity
+            <div className="text-xs text-neutral-500 uppercase font-bold mb-2">THE MATH (if you care)</div>
+            <div className="font-mono text-xs text-white bg-black border border-neutral-800 p-2 mb-2">
+              finalStat = baseStat × (tierAttribute / 100) × purity
+            </div>
+            <div className="text-xs text-neutral-500 font-mono">
+              baseStat = blueprint default (e.g., 100 HP)<br/>
+              tierAttribute = material's attribute for that tier<br/>
+              purity = your material's cleanliness (0-100%)
             </div>
           </div>
           
-          {/* Example Calculation */}
+          {/* Step by step */}
           <div className="border border-green-700 bg-green-950/20 p-3">
-            <div className="text-xs text-green-400 uppercase font-bold mb-2">Example: Shield Generator</div>
+            <div className="text-xs text-green-400 uppercase font-bold mb-2">STEP-BY-STEP EXAMPLE</div>
             <div className="space-y-2 text-xs font-mono">
-              <div className="grid grid-cols-3 gap-2">
-                <div className="text-neutral-500">Base shieldHP:</div>
-                <div className="text-white col-span-2">100</div>
+              <div className="text-white">Crafting Shield Generator with T3 Titanium @ 60%:</div>
+              
+              <div className="mt-2 space-y-1 text-neutral-400">
+                <div>1. Blueprint says: shieldHP starts at <span className="text-white">100</span></div>
+                <div>2. Titanium affects shieldHP via <span className="text-cyan-400">strength</span> attribute</div>
+                <div>3. T3 Titanium strength = 200 (base) × 2.0 (tier) = <span className="text-white">400</span></div>
+                <div>4. Your titanium is <span className="text-orange-400">60% pure</span></div>
+                <div className="border-t border-green-800 pt-2 mt-2">
+                  <div className="text-white">Math: 100 × (400 / 100) × 0.6</div>
+                  <div className="text-green-400 font-bold text-base">= 240 HP</div>
+                </div>
               </div>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="text-neutral-500">Material:</div>
-                <div className="text-white col-span-2">T3 Titanium (strength: 400)</div>
+              
+              <div className="mt-3 text-cyan-400 bg-black p-2 border-l-2 border-cyan-600">
+                If you used T5 @ 95%: 100 × (600/100) × 0.95 = <span className="font-bold">570 HP!</span>
               </div>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="text-neutral-500">Purity:</div>
-                <div className="text-white col-span-2">60%</div>
-              </div>
-              <div className="border-t border-green-800 pt-2 grid grid-cols-3 gap-2">
-                <div className="text-green-400 font-bold">Result:</div>
-                <div className="text-green-400 font-bold col-span-2">100 × (400/100) × 0.6 = 240 HP</div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Blueprint Mapping */}
-          <div className="border border-neutral-700 bg-neutral-950 p-3 text-xs font-mono">
-            <div className="text-neutral-500 uppercase mb-2">Material → Stat Mapping</div>
-            <div className="space-y-1 text-neutral-400">
-              <div>• Blueprints define which materials affect which stats</div>
-              <div>• Example: <span className="text-white">Titanium</span> → shieldHP, armor</div>
-              <div>• Example: <span className="text-white">Plasma</span> → rechargeRate, powerDraw</div>
-              <div>• Different materials = asymmetric module outputs</div>
             </div>
           </div>
         </div>

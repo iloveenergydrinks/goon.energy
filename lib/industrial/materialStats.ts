@@ -32,19 +32,45 @@ const TIER_MULTIPLIERS = {
   5: 3.0
 };
 
-// REMOVED: MATERIAL_ARCHETYPES - ALL MATERIALS NOW IN DATABASE
-// All materials managed through /admin/materials UI
-// For performance, this constant can be used as an in-memory cache, but DB is source of truth
+// Material archetypes - EMPTY, DB is source of truth
+// UI components should fetch and cache material stats on mount
 export const MATERIAL_ARCHETYPES: Partial<Record<MaterialType, MaterialTierStats>> = {};
 
-// DEPRECATED: Sync version for backwards compatibility
-// Tries archetype cache first, falls back to defaults
-// For accurate data, use getMaterialStatsAsync
+// Runtime cache for UI components (populated via fetchMaterialStatsCache)
+let materialStatsCache: Record<string, MaterialTierStats> = {};
+
+export function getMaterialStatsFromCache(materialType: string): MaterialTierStats | null {
+  return materialStatsCache[materialType] || null;
+}
+
+export function setMaterialStatsCache(materialType: string, stats: MaterialTierStats) {
+  materialStatsCache[materialType] = stats;
+}
+
+// Fetch material stats from API and populate cache (for client-side use)
+export async function fetchMaterialStatsCache() {
+  try {
+    const response = await fetch('/api/materials/stats');
+    if (response.ok) {
+      const stats = await response.json();
+      materialStatsCache = stats;
+      return materialStatsCache;
+    }
+  } catch (error) {
+    console.error('Failed to fetch material stats cache:', error);
+  }
+  return materialStatsCache;
+}
+
+// Sync version for UI previews - uses runtime cache
+// Cache is populated on component mount via fetchMaterialStatsCache
 export function getMaterialStats(materialType: string, tier: number): MaterialTierStats {
-  const archetype = MATERIAL_ARCHETYPES[materialType as MaterialType];
-  if (!archetype) {
-    // Return default/balanced stats
-    // UI preview will use this, backend will use async DB version
+  // Try runtime cache first (populated from DB)
+  const cached = materialStatsCache[materialType];
+  const baseStats = cached || MATERIAL_ARCHETYPES[materialType as MaterialType];
+  
+  if (!baseStats) {
+    // Fallback to defaults if not in cache yet
     return {
       strength: 100,
       conductivity: 100,
@@ -58,12 +84,12 @@ export function getMaterialStats(materialType: string, tier: number): MaterialTi
   const multiplier = TIER_MULTIPLIERS[tier as keyof typeof TIER_MULTIPLIERS] || 1.0;
   
   return {
-    strength: archetype.strength * multiplier,
-    conductivity: archetype.conductivity * multiplier,
-    density: archetype.density * multiplier,
-    reactivity: archetype.reactivity * multiplier,
-    stability: archetype.stability * multiplier,
-    elasticity: archetype.elasticity * multiplier
+    strength: baseStats.strength * multiplier,
+    conductivity: baseStats.conductivity * multiplier,
+    density: baseStats.density * multiplier,
+    reactivity: baseStats.reactivity * multiplier,
+    stability: baseStats.stability * multiplier,
+    elasticity: baseStats.elasticity * multiplier
   };
 }
 

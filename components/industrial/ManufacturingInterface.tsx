@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { getQualityGrade, getQualityBadgeStyles } from '@/lib/industrial/quality';
-import { getMaterialStats, getAttributeForStat, getMaterialStatsAsync } from '@/lib/industrial/materialStats';
+import { getMaterialStats, getAttributeForStat, getMaterialStatsAsync, fetchMaterialStatsCache } from '@/lib/industrial/materialStats';
 import { getCaptainEffects } from '@/lib/industrial/captains';
 
 interface Blueprint {
@@ -108,8 +108,10 @@ export function ManufacturingInterface({
     }
   }
 
-  // Start polling on mount so ETA shows even before first craft
+  // Load material stats cache and start polling on mount
   React.useEffect(() => {
+    fetchMaterialStatsCache().catch(console.error); // Populate cache from DB
+    
     if (!polling) {
       setPolling(true);
       pollJobs(true);
@@ -498,17 +500,74 @@ export function ManufacturingInterface({
                   <div className="space-y-2">
                     {Object.entries(craftingPreview.finalStats).map(([stat, value]) => {
                       const contributors = craftingPreview.statContributions?.[stat];
+                      
+                      // Calculate quality rating for this stat
+                      let qualityRating = null;
+                      let qualityColor = 'text-neutral-500';
+                      let qualityBar = 0;
+                      
+                      if (contributors && contributors.length > 0) {
+                        const avgPurity = contributors.reduce((sum: number, c: any) => sum + c.purity, 0) / contributors.length;
+                        const avgValue = contributors.reduce((sum: number, c: any) => sum + c.value, 0) / contributors.length;
+                        
+                        // Score based on: attribute value × purity (both contribute to final stat)
+                        // T1 base attr ~100-200, T5 base attr ~300-600
+                        // Score range: ~20 (T1 @ 20%) to ~600 (T5 @ 100%)
+                        const score = (avgValue / 100) * avgPurity * 100;
+                        qualityBar = Math.min(100, score / 3); // Scale for bar display
+                        
+                        // Realistic grading: T1@50% = ~50-100 score = D/C, T5@95% = ~285+ = S
+                        if (score >= 270) { qualityRating = 'S'; qualityColor = 'text-yellow-400'; }
+                        else if (score >= 200) { qualityRating = 'A'; qualityColor = 'text-purple-400'; }
+                        else if (score >= 140) { qualityRating = 'B'; qualityColor = 'text-blue-400'; }
+                        else if (score >= 80) { qualityRating = 'C'; qualityColor = 'text-green-400'; }
+                        else if (score >= 40) { qualityRating = 'D'; qualityColor = 'text-yellow-600'; }
+                        else { qualityRating = 'F'; qualityColor = 'text-red-400'; }
+                      }
+                      
                       return (
                         <div key={stat} className="space-y-1">
-                          <div className="flex justify-between text-sm">
-                            <span className="capitalize text-white">{stat.replace(/([A-Z])/g, ' $1').trim()}:</span>
-                            <span className="font-mono font-bold text-green-400">{value}</span>
-                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                              <div className="flex items-center gap-2">
+                                <span className="capitalize text-white text-xs uppercase tracking-wider">{stat.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                                {qualityRating && (
+                                  <span className={`text-xs px-1.5 py-0.5 border font-black ${qualityColor} ${
+                                    qualityRating === 'S' ? 'border-yellow-600 bg-yellow-950/20' :
+                                    qualityRating === 'A' ? 'border-purple-600 bg-purple-950/20' :
+                                    qualityRating === 'B' ? 'border-blue-600 bg-blue-950/20' :
+                                    qualityRating === 'C' ? 'border-green-600 bg-green-950/20' :
+                                    'border-neutral-700'
+                                  }`}>
+                                    {qualityRating}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="font-mono font-bold text-green-400 tabular-nums">{value}</span>
+                            </div>
+                            
+                            {/* Quality bar if has contributors */}
+                            {qualityRating && (
+                              <div className="h-1.5 bg-neutral-900 rounded-full overflow-hidden">
+                                <div 
+                                  className={`h-full transition-all ${
+                                    qualityRating === 'S' ? 'bg-yellow-500' :
+                                    qualityRating === 'A' ? 'bg-purple-500' :
+                                    qualityRating === 'B' ? 'bg-blue-500' :
+                                    qualityRating === 'C' ? 'bg-green-500' :
+                                    qualityRating === 'D' ? 'bg-yellow-600' :
+                                    'bg-red-500'
+                                  }`}
+                                  style={{ width: `${qualityBar}%` }}
+                                />
+                              </div>
+                            )}
+                            
+                          
                           {contributors && contributors.length > 0 && (
-                            <div className="text-xs text-neutral-500 pl-2">
+                            <div className="text-xs text-neutral-600 pl-2 font-mono">
                               {contributors.map((c: any, i: number) => (
                                 <div key={i}>
-                                  ← {c.material} ({c.attribute}: {c.value.toFixed(0)}, {(c.purity * 100).toFixed(0)}% purity)
+                                  ← {c.material} ({c.attribute}: {c.value.toFixed(0)} @ {(c.purity * 100).toFixed(0)}%)
                                 </div>
                               ))}
                             </div>
