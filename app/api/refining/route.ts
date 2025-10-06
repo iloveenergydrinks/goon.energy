@@ -120,18 +120,28 @@ export async function GET(request: NextRequest) {
 
     const jobs = await prisma.refiningJob.findMany({
       where: { playerId },
-      orderBy: { startedAt: 'desc' }
+      orderBy: { startedAt: 'desc' },
+      take: 20 // Limit to recent jobs for performance
     });
 
-    // Convert BigInt to string for JSON serialization
-    const serialized = jobs.map(job => ({
+    // Bulk fetch materials for enrichment (faster than N+1 queries)
+    const materialIds = [...new Set(jobs.map(j => j.materialId))];
+    const materials = await prisma.material.findMany({
+      where: { id: { in: materialIds } },
+      select: { id: true, name: true }
+    });
+    const materialMap = new Map(materials.map(m => [m.id, m.name]));
+
+    // Enrich with material names and convert BigInt
+    const enriched = jobs.map(job => ({
       ...job,
+      materialName: materialMap.get(job.materialId) || 'Unknown',
       inputQuantity: job.inputQuantity.toString(),
       outputQuantity: job.outputQuantity?.toString() || null,
       wasteQuantity: job.wasteQuantity?.toString() || null
     }));
 
-    return NextResponse.json(serialized);
+    return NextResponse.json(enriched);
   } catch (error) {
     console.error('Error fetching refining jobs:', error);
     return NextResponse.json({ error: 'Failed to fetch refining jobs' }, { status: 500 });

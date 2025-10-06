@@ -21,7 +21,8 @@ export function RefiningCrucible({ playerMaterials, facilities, onRefiningComple
   const [now, setNow] = useState<number>(Date.now());
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [completionMessage, setCompletionMessage] = useState<any>(null);
-  const [prevCompletedCount, setPrevCompletedCount] = useState(0);
+  const [seenCompletedIds, setSeenCompletedIds] = useState<Set<string>>(new Set());
+  const [activeJobs, setActiveJobs] = useState<any[]>([]);
 
   React.useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -37,37 +38,43 @@ export function RefiningCrucible({ playerMaterials, facilities, onRefiningComple
           const data = await res.json();
           const jobs = Array.isArray(data) ? data : [];
           const completed = jobs.filter((j: any) => j.status === 'completed');
+          const pending = jobs.filter((j: any) => j.status === 'pending' || j.status === 'processing');
           
-          // New completion detected
-          if (completed.length > prevCompletedCount) {
-            const latest = completed[completed.length - 1];
+          // Update active jobs for progress display
+          setActiveJobs(pending);
+          
+          // Find newly completed jobs (not yet seen)
+          const newlyCompleted = completed.filter((j: any) => !seenCompletedIds.has(j.id));
+          
+          if (newlyCompleted.length > 0) {
+            // Mark as seen IMMEDIATELY to prevent duplicate triggers
+            const newSeen = new Set(seenCompletedIds);
+            newlyCompleted.forEach((j: any) => newSeen.add(j.id));
+            setSeenCompletedIds(newSeen);
             
-            // Find the material name from the job
-            const material = await fetch(`/api/player/materials`).then(r => r.ok ? r.json() : null);
-            const materialName = material?.materials?.find((m: any) => m.materialId === latest.materialId)?.material?.name || 'Material';
+            const latest = newlyCompleted[0];
             
             setCompletionMessage({
-              materialName,
+              materialName: (latest as any).materialName || 'Material',
               quantity: latest.outputQuantity,
               purity: latest.outputPurity,
               tier: latest.outputTier,
-              isRefined: true // Refining always produces refined
+              isRefined: true
             });
             
-            setTimeout(() => setCompletionMessage(null), 15000); // 15 seconds
+            setTimeout(() => setCompletionMessage(null), 15000);
             if (onRefiningComplete) onRefiningComplete();
           }
-          
-          setPrevCompletedCount(completed.length);
         }
       } catch (e) {
         console.error('Failed to poll refining', e);
       }
     }
     
+    checkCompletions(); // Initial check
     const interval = setInterval(checkCompletions, 2000);
     return () => clearInterval(interval);
-  }, [prevCompletedCount, onRefiningComplete]);
+  }, [seenCompletedIds, onRefiningComplete]);
 
   // Group materials by name+tier for draggable list
   const materialGroups = useMemo(() => {
@@ -215,6 +222,49 @@ export function RefiningCrucible({ playerMaterials, facilities, onRefiningComple
 
   return (
     <div className="space-y-4">
+      {/* Active Job Progress */}
+      {activeJobs.length > 0 && !completionMessage && (
+        <div className="border-2 border-yellow-600 bg-yellow-950/10 p-4 relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10" style={{
+            backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 20px, #ca8a04 20px, #ca8a04 40px)',
+            animation: 'slide 2s linear infinite'
+          }} />
+          <style jsx>{`
+            @keyframes slide {
+              0% { background-position: 0 0; }
+              100% { background-position: 40px 0; }
+            }
+          `}</style>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-sm font-black tracking-wider text-yellow-400 uppercase">⚙️ REFINING IN PROGRESS</div>
+              <div className="text-xs font-mono text-yellow-500">{activeJobs.length} JOB{activeJobs.length > 1 ? 'S' : ''}</div>
+            </div>
+            {activeJobs.slice(0, 3).map((job: any) => {
+              const eta = job.estimatedCompletion ? new Date(job.estimatedCompletion).getTime() : null;
+              const remaining = eta ? Math.max(0, Math.floor((eta - now) / 1000)) : 0;
+              const minutes = Math.floor(remaining / 60);
+              const seconds = remaining % 60;
+              
+              return (
+                <div key={job.id} className="flex items-center justify-between text-xs font-mono bg-black border border-yellow-800 p-2 mt-2">
+                  <div className="text-neutral-400">
+                    {(job as any).materialName || 'Material'} × {job.cycleNumber} cycles
+                  </div>
+                  <div className="text-yellow-400 font-bold tabular-nums">
+                    {remaining > 0 ? (
+                      `⏱ ${minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`}`
+                    ) : (
+                      <span className="animate-pulse">FINALIZING...</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      
       {/* Completion Notification */}
       {completionMessage && (
         <div className="border-2 border-green-600 bg-green-950/20 p-4 relative overflow-hidden shadow-lg shadow-green-600/30">
@@ -304,8 +354,15 @@ export function RefiningCrucible({ playerMaterials, facilities, onRefiningComple
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-neutral-500 text-xs">{isExpanded ? '▼' : '▶'}</span>
-                      <div className="text-xs font-black uppercase tracking-wider">
-                        <span className={isOre ? 'text-orange-400' : 'text-blue-400'}>{key}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="text-xs font-black uppercase tracking-wider">
+                          <span className={isOre ? 'text-orange-400' : 'text-blue-400'}>{key}</span>
+                        </div>
+                        <span className={`text-xs px-1.5 py-0.5 font-black ${
+                          isOre ? 'bg-orange-600 text-black' : 'bg-blue-600 text-black'
+                        }`}>
+                          {isOre ? '🪨 ORE' : '✨ MINERAL'}
+                        </span>
                       </div>
                     </div>
                     <div className="text-xs font-mono">
