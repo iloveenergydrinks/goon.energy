@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     const roundedPurity = Math.round(actualPurity * 100) / 100;
     const oreReward = BigInt(Math.floor(Number(minedAmount) * tier * 10));
     
-    // Get or create material (use cache)
+    // Get material (use cache)
     let material = materialCache.get(node.resourceType);
     if (!material) {
       material = await prisma.material.findUnique({
@@ -102,17 +102,10 @@ export async function POST(request: NextRequest) {
       });
       
       if (!material) {
-        // Create material if doesn't exist
-        const category = node.tier >= 4 ? 'exotic' : node.tier >= 3 ? 'crystal' : 'metal';
-        material = await prisma.material.create({
-          data: {
-            id: node.resourceType,
-            name: node.resourceType.charAt(0).toUpperCase() + node.resourceType.slice(1).replace('_', ' '),
-            category,
-            baseValue: 100 * node.tier,
-            baseAttributes: {}
-          }
-        });
+        return NextResponse.json(
+          { error: `Material ${node.resourceType} not found. Add it in /admin/materials first.` },
+          { status: 404 }
+        );
       }
       materialCache.set(node.resourceType, material);
     }

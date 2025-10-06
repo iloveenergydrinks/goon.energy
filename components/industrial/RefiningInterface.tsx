@@ -204,59 +204,69 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
   };
   
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       {/* Left Column: Material Selection */}
-      <div className="lg:col-span-1 space-y-4">
-        <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-800/50 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-blue-400 mb-2">⚗️ Refining</h3>
-          <p className="text-xs text-neutral-300">
-            Each cycle: <span className="text-red-400">-20% quantity</span>, <span className="text-green-400">+purity</span> (diminishing returns)
-          </p>
+      <div className="lg:col-span-1 space-y-3">
+        {/* Industrial Header */}
+        <div className="border-2 border-orange-600 bg-black p-4 relative overflow-hidden">
+          <div className="absolute inset-0 opacity-5" style={{
+            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #ff6b00 10px, #ff6b00 20px)'
+          }} />
+          <div className="relative z-10">
+            <h3 className="text-sm font-black tracking-widest text-orange-500 uppercase mb-2">⚗️ REFINERY</h3>
+            <div className="text-xs text-neutral-400 font-mono">
+              <div className="flex items-center gap-2">
+                <span className="text-red-500">-20% QTY</span>
+                <span className="text-neutral-600">//</span>
+                <span className="text-green-500">+PURITY</span>
+              </div>
+            </div>
+          </div>
         </div>
         
-        {/* Filters */}
-        <div className="bg-neutral-900/50 border border-neutral-800 rounded-lg p-3">
+        {/* Filters - Industrial */}
+        <div className="border-2 border-neutral-700 bg-black p-3">
           <div className="flex flex-col gap-2">
-            <div className="flex gap-2">
+            <div className="grid grid-cols-3 gap-1">
               <button
                 onClick={() => setFilterType('ore')}
-                className={`flex-1 px-3 py-2 rounded text-xs font-medium transition-colors ${
+                className={`px-2 py-2 text-xs font-black tracking-wider uppercase transition-all border-2 ${
                   filterType === 'ore'
-                    ? 'bg-orange-600 text-white'
-                    : 'bg-neutral-800 text-neutral-400 hover:text-white'
+                    ? 'bg-orange-600 text-black border-orange-400'
+                    : 'bg-neutral-900 text-neutral-500 border-neutral-700 hover:border-orange-600 hover:text-orange-400'
                 }`}
               >
-                🪨 Ore Only
+                ORE
               </button>
               <button
                 onClick={() => setFilterType('refined')}
-                className={`flex-1 px-3 py-2 rounded text-xs font-medium transition-colors ${
+                className={`px-2 py-2 text-xs font-black tracking-wider uppercase transition-all border-2 ${
                   filterType === 'refined'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-neutral-800 text-neutral-400 hover:text-white'
+                    ? 'bg-blue-600 text-black border-blue-400'
+                    : 'bg-neutral-900 text-neutral-500 border-neutral-700 hover:border-blue-600 hover:text-blue-400'
                 }`}
               >
-                ✨ Minerals Only
+                MINERAL
               </button>
               <button
                 onClick={() => setFilterType('all')}
-                className={`flex-1 px-3 py-2 rounded text-xs font-medium transition-colors ${
+                className={`px-2 py-2 text-xs font-black tracking-wider uppercase transition-all border-2 ${
                   filterType === 'all'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-neutral-800 text-neutral-400 hover:text-white'
+                    ? 'bg-purple-600 text-black border-purple-400'
+                    : 'bg-neutral-900 text-neutral-500 border-neutral-700 hover:border-purple-600 hover:text-purple-400'
                 }`}
               >
-                All
+                ALL
               </button>
             </div>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2 bg-neutral-800 rounded text-xs text-white border border-neutral-700"
+              className="px-3 py-2 bg-neutral-900 border-2 border-neutral-700 text-xs text-white font-bold uppercase tracking-wider"
             >
-              <option value="tier">Sort by Tier</option>
-              <option value="purity">Sort by Purity</option>
-              <option value="quantity">Sort by Quantity</option>
+              <option value="tier">▼ TIER</option>
+              <option value="purity">▼ PURITY</option>
+              <option value="quantity">▼ QUANTITY</option>
             </select>
           </div>
         </div>
@@ -285,12 +295,12 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
                 }}
                 disabled={isRefining}
                 className={`
-                  p-3 rounded-lg border-2 text-left transition-all relative
+                  p-3 border-2 text-left transition-all relative bg-black
                   ${isSelected 
-                    ? 'border-blue-500 bg-blue-500/10 shadow-lg' 
+                    ? 'border-orange-500 shadow-lg shadow-orange-600/50' 
                     : isOre
-                      ? 'border-orange-700/50 bg-orange-900/10 hover:border-orange-600'
-                      : 'border-blue-700/50 bg-blue-900/10 hover:border-blue-600'
+                      ? 'border-orange-900 hover:border-orange-600'
+                      : 'border-blue-900 hover:border-blue-600'
                   }
                   ${isRefining ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
@@ -344,97 +354,116 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
       </div>
       
       {/* Right Column: Refining Configuration and Preview */}
-      <div className="lg:col-span-2 space-y-4">
+      <div className="lg:col-span-2 space-y-3">
       {selectedMaterial ? (
         <>
-          <div className="bg-neutral-900 rounded-lg border border-neutral-800 p-4">
-            <h3 className="text-lg font-semibold text-white mb-4">Configure Refining</h3>
+          {/* Config Panel */}
+          <div className="border-2 border-blue-600 bg-black p-4">
+            <h3 className="text-xs font-black tracking-widest text-blue-500 uppercase mb-4">// REFINERY CONFIG</h3>
           
-          {/* Quantity Input */}
-          <div>
-            <label className="text-xs text-neutral-400">Quantity to Refine</label>
-            <div className="flex items-center gap-2 mt-1">
-              <input
-                type="number"
-                min={1}
-                max={selectedMaterial.quantity}
-                value={refiningQuantity}
-                onChange={(e) => setRefiningQuantity(Math.min(
-                  selectedMaterial.quantity,
-                  Math.max(1, parseInt(e.target.value) || 0)
-                ))}
-                disabled={isRefining}
-                className="px-3 py-2 bg-neutral-800 rounded text-sm text-white border border-neutral-700 focus:border-blue-500 focus:outline-none"
-              />
-              <span className="text-xs text-neutral-500">
-                / {formatIndustrialNumber(selectedMaterial.quantity)} available
-              </span>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Quantity Input */}
+            <div>
+              <label className="text-xs text-neutral-500 font-bold tracking-wider uppercase">Input Quantity</label>
+              <div className="flex items-center gap-2 mt-2">
+                <input
+                  type="number"
+                  min={1}
+                  max={selectedMaterial.quantity}
+                  value={refiningQuantity}
+                  onChange={(e) => setRefiningQuantity(Math.min(
+                    selectedMaterial.quantity,
+                    Math.max(1, parseInt(e.target.value) || 0)
+                  ))}
+                  disabled={isRefining}
+                  className="w-full px-3 py-3 bg-neutral-950 border-2 border-neutral-700 text-sm text-white font-bold tabular-nums focus:border-orange-500 focus:outline-none"
+                />
+              </div>
+              <div className="text-xs text-neutral-600 mt-1 font-mono">
+                MAX: {formatIndustrialNumber(selectedMaterial.quantity)}
+              </div>
             </div>
-          </div>
           
-          {/* Facility Selection */}
-          <div>
-            <label className="text-xs text-neutral-400">Select Refining Facility</label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-1">
-              {facilities.map(facility => {
-                const isSelected = selectedFacility?.id === facility.id;
-                
-                return (
-                  <button
-                    key={facility.id}
-                    onClick={() => setSelectedFacility(facility)}
-                    disabled={isRefining}
-                    className={`
-                      p-3 rounded border text-left transition-all
-                      ${isSelected 
-                        ? 'border-green-500 bg-green-500/10' 
-                        : 'border-neutral-800 hover:border-neutral-600'
-                      }
-                      ${isRefining ? 'opacity-50 cursor-not-allowed' : ''}
-                    `}
-                  >
-                    <div className="text-xs font-medium text-white capitalize">{facility.type}</div>
-                    <div className="text-xs text-neutral-500 mt-1">
-                      Efficiency: {(facility.efficiency * 100).toFixed(0)}%
-                    </div>
-                  </button>
-                );
-              })}
+            {/* Facility Selection - Prominent */}
+            <div>
+              <label className="text-xs text-neutral-500 font-bold tracking-wider uppercase flex items-center gap-2">
+                {!selectedFacility && <span className="text-orange-500 animate-pulse">⚠</span>}
+                Facility Required
+              </label>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {facilities.map(facility => {
+                  const isSelected = selectedFacility?.id === facility.id;
+                  
+                  return (
+                    <button
+                      key={facility.id}
+                      onClick={() => setSelectedFacility(facility)}
+                      disabled={isRefining}
+                      className={`
+                        p-3 border-2 text-left transition-all
+                        ${isSelected 
+                          ? 'border-green-500 bg-green-600/20 shadow-lg shadow-green-600/30' 
+                          : !selectedFacility
+                            ? 'border-orange-600 bg-orange-900/10 hover:bg-orange-800/20 animate-pulse'
+                            : 'border-neutral-800 bg-black hover:border-neutral-600'
+                        }
+                        ${isRefining ? 'opacity-50 cursor-not-allowed' : ''}
+                      `}
+                    >
+                      <div className="text-xs font-black text-white uppercase tracking-wider">{facility.type}</div>
+                      <div className="text-xs text-green-400 mt-1 font-bold">
+                        {(facility.efficiency * 100).toFixed(0)}% EFF
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+              {!selectedFacility && (
+                <div className="text-xs text-orange-400 mt-2 font-mono animate-pulse">
+                  ⚠ SELECT FACILITY TO CONTINUE
+                </div>
+              )}
             </div>
-          </div>
           
-          {/* Cycles Configuration */}
-          <div>
-            <label className="text-xs text-neutral-400">Number of Refining Cycles</label>
-            <div className="flex items-center gap-4 mt-1">
-              <input
-                type="range"
-                min={1}
-                max={10}
-                value={plannedCycles}
-                onChange={(e) => setPlannedCycles(parseInt(e.target.value))}
-                disabled={isRefining}
-                className="flex-1"
-              />
-              <span className="text-sm font-medium text-white w-8">{plannedCycles}</span>
-            </div>
-            <div className="text-xs text-neutral-500 mt-1">
-              More cycles = higher purity but more material loss (diminishing returns)
+            {/* Cycles */}
+            <div>
+              <label className="text-xs text-neutral-500 font-bold tracking-wider uppercase">Cycles</label>
+              <div className="flex items-center gap-3 mt-2">
+                <div className="flex-1 flex gap-1">
+                  {[1, 2, 3, 5, 10].map(c => (
+                    <button
+                      key={c}
+                      onClick={() => setPlannedCycles(c)}
+                      disabled={isRefining}
+                      className={`flex-1 px-2 py-3 border-2 font-black text-xs transition-all ${
+                        plannedCycles === c
+                          ? 'bg-orange-600 text-black border-orange-400'
+                          : 'bg-neutral-950 text-neutral-500 border-neutral-800 hover:border-orange-700'
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="text-xs text-neutral-600 mt-1 font-mono">
+                // DIMINISHING RETURNS
+              </div>
             </div>
           </div>
 
           {/* Captain Selection */}
-          <div>
-            <label className="text-xs text-neutral-400">Assign Captain</label>
+          <div className="mt-3 pt-3 border-t border-neutral-800">
+            <label className="text-xs text-neutral-500 font-bold tracking-wider uppercase">Officer Assignment</label>
             <select
               value={captainId}
               onChange={(e) => setCaptainId(e.target.value)}
-              className="bg-neutral-800 rounded px-3 py-2 text-sm mt-1"
+              className="w-full mt-2 bg-neutral-950 border-2 border-neutral-700 px-3 py-3 text-xs font-bold uppercase tracking-wider focus:border-blue-500 focus:outline-none"
               disabled={isRefining}
             >
-              <option value="none">No Captain</option>
-              <option value="refiner_ace">Refiner Ace (+yield/purity, faster)</option>
-              <option value="balanced_veteran">Balanced Veteran (small bonuses)</option>
+              <option value="none">// NO OFFICER</option>
+              <option value="refiner_ace">REFINER ACE (+YIELD/PURITY)</option>
+              <option value="balanced_veteran">BALANCED VETERAN</option>
             </select>
           </div>
           
@@ -537,22 +566,22 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
             </div>
           )}
           
-          {/* Action Buttons */}
-          <div className="flex gap-3 mt-4">
+          {/* Action Buttons - Industrial */}
+          <div className="flex gap-2 mt-4">
             <button
               onClick={handleStartRefining}
               disabled={isRefining || !selectedFacility || (simulation.length > 0 && simulation[simulation.length - 1].outputQuantity < 1)}
               className={`
-                flex-1 py-3 rounded font-medium transition-colors
+                flex-1 py-4 border-2 font-black uppercase tracking-widest text-xs transition-all
                 ${isRefining || !selectedFacility || (simulation.length > 0 && simulation[simulation.length - 1].outputQuantity < 1)
-                  ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
-                  : 'bg-blue-500 hover:bg-blue-600 text-white'
+                  ? 'bg-neutral-900 text-neutral-700 border-neutral-800 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-500 text-black border-blue-400'
                 }
               `}
             >
-              {isRefining ? 'Refining...' : 
-               simulation.length > 0 && simulation[simulation.length - 1].outputQuantity < 1 ? 'Output too small!' :
-               `Start Refining (${plannedCycles} cycle${plannedCycles > 1 ? 's' : ''})`}
+              {isRefining ? '▶ PROCESSING...' : 
+               simulation.length > 0 && simulation[simulation.length - 1].outputQuantity < 1 ? '⚠ OUTPUT < 1 UNIT' :
+               `▶ INITIATE REFINING [${plannedCycles}×]`}
             </button>
             
             <button
@@ -562,9 +591,9 @@ export function RefiningInterface({ materials, facilities, playerMaterials = [],
                 setRefiningResult(null);
               }}
               disabled={isRefining}
-              className="px-6 py-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded font-medium transition-colors"
+              className="px-6 py-4 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 border-2 border-neutral-800 font-black uppercase text-xs tracking-wider transition-all"
             >
-              Cancel
+              × ABORT
             </button>
           </div>
           </div>

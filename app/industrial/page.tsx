@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { MaterialCard, MaterialComparison } from '@/components/industrial/MaterialCard';
 import { RefiningInterface } from '@/components/industrial/RefiningInterface';
 import { MiningInterface } from '@/components/industrial/MiningInterface';
+import { OverviewTab } from '@/components/industrial/OverviewTab';
 import { CargoInventory } from '@/components/industrial/CargoInventory';
 import { MaterialStackDetails } from '@/components/industrial/MaterialStackDetails';
 import { ManufacturingInterface } from '@/components/industrial/ManufacturingInterface';
@@ -110,13 +111,14 @@ export default function IndustrialDashboard() {
           const grouped: Record<string, Material & { stacks: any[] }> = {};
           
           data.materials.forEach((pm: any) => {
-            const key = `${pm.material.name}_T${pm.tier}`;
+            const materialName = pm.material?.name || `Material ${pm.materialId.substring(0, 8)}`;
+            const key = `${materialName}_T${pm.tier}`;
             
             if (!grouped[key]) {
               grouped[key] = {
             id: pm.id,
-            name: pm.material.name,
-            category: pm.material.category,
+            name: materialName,
+            category: pm.material?.category || 'unknown',
             tier: pm.tier,
                 purity: 0, // Will calculate weighted average
                 displayGrade: '',
@@ -220,48 +222,55 @@ export default function IndustrialDashboard() {
   ];
   
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
-      {/* Header */}
-      <div className="border-b border-neutral-800 bg-neutral-900/50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+    <div className="min-h-screen bg-black text-white font-mono">
+      {/* Industrial Header with Stripes */}
+      <div className="border-b-4 border-orange-600 bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950 relative overflow-hidden">
+        {/* Warning stripes background */}
+        <div className="absolute inset-0 opacity-5" style={{
+          backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #ff6b00 10px, #ff6b00 20px)'
+        }} />
+        
+        <div className="max-w-7xl mx-auto px-4 py-6 relative z-10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
               <a
                 href="/"
-                className="text-neutral-400 hover:text-white transition-colors"
+                className="text-orange-500 hover:text-orange-400 transition-colors border-2 border-orange-600 px-3 py-2"
                 title="Back to Ship Builder"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                  <path strokeLinecap="square" strokeLinejoin="miter" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
               </a>
               <div>
-                <h1 className="text-2xl font-bold text-white">Industrial Complex</h1>
-                <p className="text-sm text-neutral-500 mt-1">
-                  Refine, Research, Manufacture
+                <h1 className="text-3xl font-black tracking-wider text-orange-500 uppercase" style={{ fontFamily: 'monospace, sans-serif', letterSpacing: '0.15em' }}>
+                  INDUSTRIAL COMPLEX
+                </h1>
+                <p className="text-xs text-neutral-500 mt-1 tracking-widest uppercase">
+                  // EXTRACTION • PROCESSING • FABRICATION
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-6">
-              {/* Player Resources Quick View */}
-              <div className="flex items-center gap-4 text-sm">
-                <div>
-                  <span className="text-neutral-500">ORE:</span>
-                  <span className="text-amber-400 ml-2 font-medium">
-                    {formatIndustrialNumber(playerStats.isk)} ORE
-                  </span>
+              {/* Player Resources - Industrial Display */}
+              <div className="flex items-center gap-6">
+                <div className="border-2 border-orange-600 bg-black px-4 py-2">
+                  <div className="text-xs text-orange-500 font-bold tracking-widest">ORE</div>
+                  <div className="text-xl font-black text-orange-400 tabular-nums">
+                    {formatIndustrialNumber(playerStats.isk)}
+                  </div>
                 </div>
-                <div>
-                  <span className="text-neutral-500">Materials:</span>
-                  <span className="text-blue-400 ml-2 font-medium">
+                <div className="border-2 border-blue-600 bg-black px-4 py-2">
+                  <div className="text-xs text-blue-500 font-bold tracking-widest">CARGO</div>
+                  <div className="text-xl font-black text-blue-400 tabular-nums">
                     {formatIndustrialNumber(playerStats.totalMaterials)}
-                  </span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-neutral-500">Blueprints:</span>
-                  <span className="text-purple-400 ml-2 font-medium">
+                <div className="border-2 border-purple-600 bg-black px-4 py-2">
+                  <div className="text-xs text-purple-500 font-bold tracking-widest">BP</div>
+                  <div className="text-xl font-black text-purple-400 tabular-nums">
                     {playerStats.totalBlueprints}
-                  </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -269,23 +278,23 @@ export default function IndustrialDashboard() {
         </div>
       </div>
       
-      {/* Navigation Tabs */}
-      <div className="border-b border-neutral-800 bg-neutral-900/30">
+      {/* Navigation Tabs - Industrial Style */}
+      <div className="border-b-2 border-neutral-800 bg-black">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex gap-1">
+          <div className="flex gap-0">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`
-                  px-4 py-3 text-sm font-medium transition-colors border-b-2
+                  px-6 py-4 text-xs font-black tracking-widest uppercase transition-all border-b-4 relative
                   ${activeTab === tab.id
-                    ? 'text-white border-blue-500 bg-neutral-900/50'
-                    : 'text-neutral-400 border-transparent hover:text-neutral-200 hover:bg-neutral-900/30'
+                    ? 'text-orange-400 border-orange-600 bg-neutral-950'
+                    : 'text-neutral-600 border-transparent hover:text-neutral-400 hover:border-neutral-700'
                   }
                 `}
               >
-                <span className="mr-2">{tab.icon}</span>
+                <span className="mr-2 text-base">{tab.icon}</span>
                 {tab.label}
               </button>
             ))}
@@ -295,8 +304,11 @@ export default function IndustrialDashboard() {
       
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Overview Tab - System Briefing */}
-        {activeTab === 'overview' && (
+        {/* Overview Tab */}
+        {activeTab === 'overview' && <OverviewTab />}
+        
+        {/* OLD OVERVIEW HIDDEN - Remove later */}
+        {false && activeTab === 'overview' && (
           <div className="max-w-4xl mx-auto space-y-6">
             {/* Main Title */}
             <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-800/50 rounded-lg p-6">

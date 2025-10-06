@@ -55,63 +55,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Enough nodes already exist' });
     }
     
-    // Define node templates
-    const nodeTemplates = [
-      {
-        name: 'Rich Titanium Asteroid',
-        type: 'asteroid',
-        tier: 1,
-        resourceType: 'titanium',
-        totalAmount: BigInt(10000),
-        baseYield: 50,
-        purity: 0.25
-      },
-      {
-        name: 'Dense Iron Deposit',
-        type: 'asteroid',
-        tier: 1,
-        resourceType: 'iron',
-        totalAmount: BigInt(15000),
-        baseYield: 75,
-        purity: 0.30
-      },
-      {
-        name: 'Plasma Gas Nebula',
-        type: 'gas_cloud',
-        tier: 2,
-        resourceType: 'plasma',
-        totalAmount: BigInt(8000),
-        baseYield: 40,
-        purity: 0.45
-      },
-      {
-        name: 'Silicon Crystal Formation',
-        type: 'asteroid',
-        tier: 2,
-        resourceType: 'silicon',
-        totalAmount: BigInt(6000),
-        baseYield: 30,
-        purity: 0.50
-      },
-      {
-        name: 'Quantum Crystal Cluster',
-        type: 'salvage',
-        tier: 3,
-        resourceType: 'quantum',
-        totalAmount: BigInt(3000),
-        baseYield: 20,
-        purity: 0.65
-      },
-      {
-        name: 'Dark Matter Anomaly',
-        type: 'gas_cloud',
-        tier: 4,
-        resourceType: 'dark_matter',
-        totalAmount: BigInt(1000),
-        baseYield: 10,
-        purity: 0.80
-      }
-    ];
+    // Get all materials from database and generate nodes dynamically
+    const allMaterials = await prisma.material.findMany();
+    
+    // Generate node templates from materials
+    const nodeTemplates = allMaterials.map((material) => {
+      // Assign tier based on material baseValue (higher value = higher tier)
+      const tier = Math.min(5, Math.max(1, Math.ceil((material.baseValue || 100) / 200)));
+      
+      // Determine node type based on material category
+      const nodeTypeMap: Record<string, string> = {
+        'metal': 'asteroid',
+        'gas': 'gas_cloud',
+        'crystal': 'salvage',
+        'composite': 'asteroid',
+        'exotic': 'gas_cloud'
+      };
+      const nodeType = nodeTypeMap[material.category] || 'asteroid';
+      
+      // Scale amounts and yields by tier (higher tier = rarer)
+      const totalAmount = BigInt(Math.floor(15000 / tier));
+      const baseYield = Math.floor(100 / tier);
+      const basePurity = 0.2 + (tier * 0.1);
+      
+      return {
+        name: `${material.name} ${nodeType === 'asteroid' ? 'Asteroid' : nodeType === 'gas_cloud' ? 'Nebula' : 'Cluster'}`,
+        type: nodeType,
+        tier,
+        resourceType: material.id, // Use material ID as resourceType
+        totalAmount,
+        baseYield,
+        purity: basePurity
+      };
+    });
     
     // Generate nodes with random positions
     const newNodes = await Promise.all(
@@ -133,30 +109,8 @@ export async function POST(request: NextRequest) {
       })
     );
     
-    // Also ensure base materials exist
-    const materialTypes = ['titanium', 'iron', 'plasma', 'silicon', 'quantum', 'dark_matter'];
-    const categories = ['metal', 'metal', 'gas', 'crystal', 'crystal', 'exotic'];
-    
-    for (let i = 0; i < materialTypes.length; i++) {
-      await prisma.material.upsert({
-        where: { id: materialTypes[i] },
-        update: {},
-        create: {
-          id: materialTypes[i],
-          name: materialTypes[i].charAt(0).toUpperCase() + materialTypes[i].slice(1).replace('_', ' '),
-          category: categories[i],
-          baseValue: 100 * (i + 1),
-          baseAttributes: {
-            strength: 0.5 + Math.random() * 0.3,
-            conductivity: 0.4 + Math.random() * 0.4,
-            density: 0.3 + Math.random() * 0.5,
-            reactivity: 0.4 + Math.random() * 0.4,
-            stability: 0.5 + Math.random() * 0.3,
-            elasticity: 0.3 + Math.random() * 0.4
-          }
-        }
-      });
-    }
+    // Materials are now managed through /admin/materials
+    // No auto-creation needed
     
     return NextResponse.json({ 
       message: `Generated ${newNodes.length} new nodes`,

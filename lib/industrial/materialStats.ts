@@ -32,94 +32,19 @@ const TIER_MULTIPLIERS = {
   5: 3.0
 };
 
-// Material archetypes - defines what each material is good at
-export const MATERIAL_ARCHETYPES: Record<MaterialType, MaterialTierStats> = {
-  // === STRUCTURAL METALS ===
-  'Titanium': {
-    strength: 200,      // Excellent for HP/armor
-    conductivity: 40,   // Poor conductor
-    density: 120,       // Medium-heavy
-    reactivity: 50,     // Slow to process
-    stability: 150,     // Very stable
-    elasticity: 100     // Moderate flexibility
-  },
-  'Iron': {
-    strength: 150,      // Good structure
-    conductivity: 60,   // Poor conductor
-    density: 140,       // Heavy
-    reactivity: 40,     // Slow
-    stability: 120,     // Stable
-    elasticity: 80      // Less flexible
-  },
-  'Aluminum': {
-    strength: 80,       // Weak structure
-    conductivity: 90,   // Decent conductor
-    density: 60,        // Very light
-    reactivity: 100,    // Fast to process
-    stability: 100,     // Moderate stability
-    elasticity: 120     // Very flexible
-  },
-  
-  // === ENERGY MATERIALS ===
-  'Plasma': {
-    strength: 30,       // Weak structure
-    conductivity: 180,  // Excellent conductor
-    density: 50,        // Very light
-    reactivity: 200,    // Extremely reactive
-    stability: 80,      // Unstable
-    elasticity: 60      // Not flexible
-  },
-  'Quantum': {
-    strength: 40,       // Weak structure
-    conductivity: 250,  // Supreme conductor
-    density: 20,        // Nearly massless
-    reactivity: 250,    // Instant reaction
-    stability: 60,      // Very unstable
-    elasticity: 50      // Brittle
-  },
-  'Dark matter': {
-    strength: 100,      // Moderate structure
-    conductivity: 200,  // Excellent conductor
-    density: 10,        // Exotic (near-zero mass)
-    reactivity: 220,    // Highly reactive
-    stability: 40,      // Extremely unstable
-    elasticity: 180     // Exotic properties
-  },
-  
-  // === ELECTRONICS ===
-  'Silicon': {
-    strength: 60,       // Weak/brittle
-    conductivity: 150,  // Good conductor (semiconductor)
-    density: 80,        // Light
-    reactivity: 130,    // Fast processing
-    stability: 140,     // Very stable
-    elasticity: 40      // Brittle
-  },
-  'Copper': {
-    strength: 100,      // Moderate structure
-    conductivity: 180,  // Excellent conductor
-    density: 130,       // Medium-heavy
-    reactivity: 110,    // Moderate reaction
-    stability: 130,     // Stable
-    elasticity: 90      // Moderate
-  },
-  'Gold': {
-    strength: 70,       // Soft/weak
-    conductivity: 220,  // Superior conductor
-    density: 150,       // Very heavy
-    reactivity: 100,    // Moderate
-    stability: 160,     // Extremely stable (doesn't corrode)
-    elasticity: 110     // Malleable
-  }
-};
+// REMOVED: MATERIAL_ARCHETYPES - ALL MATERIALS NOW IN DATABASE
+// All materials managed through /admin/materials UI
+// For performance, this constant can be used as an in-memory cache, but DB is source of truth
+export const MATERIAL_ARCHETYPES: Partial<Record<MaterialType, MaterialTierStats>> = {};
 
-// Get material stats for a specific tier
-// Now supports DB-only materials via async fetch
+// DEPRECATED: Sync version for backwards compatibility
+// Tries archetype cache first, falls back to defaults
+// For accurate data, use getMaterialStatsAsync
 export function getMaterialStats(materialType: string, tier: number): MaterialTierStats {
   const archetype = MATERIAL_ARCHETYPES[materialType as MaterialType];
   if (!archetype) {
-    // Return default/balanced stats for unknown materials
-    // Note: For DB-only materials, use getMaterialStatsAsync instead
+    // Return default/balanced stats
+    // UI preview will use this, backend will use async DB version
     return {
       strength: 100,
       conductivity: 100,
@@ -142,13 +67,33 @@ export function getMaterialStats(materialType: string, tier: number): MaterialTi
   };
 }
 
-// Async version that falls back to database for custom materials
+// PRIMARY: Database-first material stats
+// Always queries DB, uses archetype as fallback cache only
 export async function getMaterialStatsAsync(materialType: string, tier: number): Promise<MaterialTierStats> {
-  // Try code-defined archetypes first (faster)
-  const archetype = MATERIAL_ARCHETYPES[materialType as MaterialType];
+  // Query database first (source of truth)
+  const { prisma } = await import('@/lib/prisma');
+  const material = await prisma.material.findFirst({
+    where: { name: materialType }
+  });
   
+  const multiplier = TIER_MULTIPLIERS[tier as keyof typeof TIER_MULTIPLIERS] || 1.0;
+  
+  if (material && material.baseAttributes) {
+    // Use DB attributes (primary source)
+    const baseAttrs = material.baseAttributes as any;
+    return {
+      strength: (baseAttrs.strength || 100) * multiplier,
+      conductivity: (baseAttrs.conductivity || 100) * multiplier,
+      density: (baseAttrs.density || 100) * multiplier,
+      reactivity: (baseAttrs.reactivity || 100) * multiplier,
+      stability: (baseAttrs.stability || 100) * multiplier,
+      elasticity: (baseAttrs.elasticity || 100) * multiplier
+    };
+  }
+  
+  // Fallback to archetype cache if DB lookup fails
+  const archetype = MATERIAL_ARCHETYPES[materialType as MaterialType];
   if (archetype) {
-    const multiplier = TIER_MULTIPLIERS[tier as keyof typeof TIER_MULTIPLIERS] || 1.0;
     return {
       strength: archetype.strength * multiplier,
       conductivity: archetype.conductivity * multiplier,
@@ -159,34 +104,14 @@ export async function getMaterialStatsAsync(materialType: string, tier: number):
     };
   }
   
-  // Fall back to database
-  const { prisma } = await import('@/lib/prisma');
-  const material = await prisma.material.findFirst({
-    where: { name: materialType }
-  });
-  
-  if (!material || !material.baseAttributes) {
-    // Ultimate fallback
-    return {
-      strength: 100,
-      conductivity: 100,
-      density: 100,
-      reactivity: 100,
-      stability: 100,
-      elasticity: 100
-    };
-  }
-  
-  const baseAttrs = material.baseAttributes as any;
-  const multiplier = TIER_MULTIPLIERS[tier as keyof typeof TIER_MULTIPLIERS] || 1.0;
-  
+  // Ultimate fallback
   return {
-    strength: (baseAttrs.strength || 100) * multiplier,
-    conductivity: (baseAttrs.conductivity || 100) * multiplier,
-    density: (baseAttrs.density || 100) * multiplier,
-    reactivity: (baseAttrs.reactivity || 100) * multiplier,
-    stability: (baseAttrs.stability || 100) * multiplier,
-    elasticity: (baseAttrs.elasticity || 100) * multiplier
+    strength: 100 * multiplier,
+    conductivity: 100 * multiplier,
+    density: 100 * multiplier,
+    reactivity: 100 * multiplier,
+    stability: 100 * multiplier,
+    elasticity: 100 * multiplier
   };
 }
 

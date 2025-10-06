@@ -35,6 +35,21 @@ export async function createBlueprint(data: {
     }
   });
   
+  // Auto-unlock for demo player
+  const demoPlayer = await prisma.player.findFirst({
+    where: { id: 'demo-player' }
+  });
+  
+  if (demoPlayer) {
+    await prisma.playerBlueprint.create({
+      data: {
+        playerId: demoPlayer.id,
+        blueprintId: blueprint.id,
+        unlocked: true
+      }
+    }).catch(() => {}); // Ignore if already exists
+  }
+  
   revalidatePath("/admin/blueprints");
   return blueprint;
 }

@@ -298,8 +298,10 @@ export function ManufacturingInterface({
   return (
     <div className="grid grid-cols-3 gap-4">
       {/* Blueprint Selection */}
-      <div className="col-span-1 space-y-2">
-        <h3 className="text-lg font-bold mb-2">Select Blueprint</h3>
+      <div className="col-span-1 space-y-3">
+        <div className="border-2 border-orange-600 bg-black px-3 py-2">
+          <h3 className="text-xs font-black tracking-widest text-orange-500 uppercase">// BLUEPRINTS</h3>
+        </div>
         <div className="space-y-2 max-h-[600px] overflow-y-auto">
           {isLoading ? (
             <div className="text-center py-8">
@@ -324,10 +326,10 @@ export function ManufacturingInterface({
                   setSelectedBlueprint(blueprint);
                   setSelectedMaterials({});
                 }}
-                className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                className={`p-3 border-2 cursor-pointer transition-all bg-black ${
                   selectedBlueprint?.id === blueprint.id
-                    ? 'border-blue-500 bg-blue-500/10'
-                    : 'border-neutral-700 hover:border-neutral-600'
+                    ? 'border-orange-500 shadow-lg shadow-orange-600/30'
+                    : 'border-neutral-800 hover:border-orange-700'
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -359,8 +361,8 @@ export function ManufacturingInterface({
         {selectedBlueprint ? (
           <>
             {/* Material Selection */}
-            <div className="bg-neutral-900 rounded-lg p-4">
-              <h3 className="text-lg font-bold mb-3">Select Materials</h3>
+            <div className="border-2 border-neutral-700 bg-black p-4">
+              <h3 className="text-xs font-black tracking-widest text-orange-500 uppercase mb-3">// MATERIAL INPUT</h3>
               <div className="space-y-3">
                 {(selectedBlueprint.requiredMaterials as any[]).map(required => (
                   <div key={required.materialType} className="flex items-center gap-3">
@@ -447,34 +449,36 @@ export function ManufacturingInterface({
               )}
 
               {/* Captain & Batch Size */}
-              <div className="mt-4 flex items-center gap-4">
-                <label className="text-sm">Batch Size:</label>
-                <div className="flex gap-2">
-                  {[1, 5, 10, 25].map(size => (
-                    <button
-                      key={size}
-                      onClick={() => setBatchSize(size)}
-                      className={`px-3 py-1 rounded text-sm ${
-                        batchSize === size
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-neutral-700 hover:bg-neutral-600'
-                      }`}
-                    >
-                      ×{size}
-                    </button>
-                  ))}
+              {/* Batch & Officer - Industrial Grid */}
+              <div className="mt-4 grid grid-cols-2 gap-4 pt-4 border-t-2 border-neutral-800">
+                <div>
+                  <label className="text-xs text-neutral-500 font-bold tracking-wider uppercase mb-2 block">Batch Size</label>
+                  <div className="grid grid-cols-4 gap-1">
+                    {[1, 5, 10, 25].map(size => (
+                      <button
+                        key={size}
+                        onClick={() => setBatchSize(size)}
+                        className={`px-2 py-3 border-2 font-black text-xs transition-all ${
+                          batchSize === size
+                            ? 'bg-orange-600 text-black border-orange-400'
+                            : 'bg-neutral-950 text-neutral-500 border-neutral-800 hover:border-orange-700'
+                        }`}
+                      >
+                        ×{size}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="ml-auto flex items-center gap-2">
-                  <label className="text-sm text-neutral-400">Captain:</label>
+                <div>
+                  <label className="text-xs text-neutral-500 font-bold tracking-wider uppercase mb-2 block">Officer</label>
                   <select
                     value={captainId}
                     onChange={(e) => setCaptainId(e.target.value)}
-                    className="bg-neutral-800 rounded px-3 py-2 text-sm"
+                    className="w-full bg-neutral-950 border-2 border-neutral-700 px-3 py-3 text-xs font-bold uppercase tracking-wider focus:border-orange-500 focus:outline-none"
                   >
-                    <option value="none">No Captain</option>
-                    <option value="assembly_maestro">Assembly Maestro (+Quality, faster)</option>
-                    <option value="balanced_veteran">Balanced Veteran (small bonuses)</option>
-                    <option value="refiner_ace">Refiner Ace (refining focused)</option>
+                    <option value="none">// NONE</option>
+                    <option value="assembly_maestro">ASSEMBLY MAESTRO</option>
+                    <option value="balanced_veteran">BALANCED VETERAN</option>
                   </select>
                 </div>
               </div>
@@ -482,12 +486,15 @@ export function ManufacturingInterface({
 
             {/* Crafting Preview */}
             {craftingPreview && (
-              <div className="bg-neutral-900 rounded-lg p-4">
-                <h3 className="text-lg font-bold mb-3">Output Preview</h3>
+              <div className="border-2 border-green-600 bg-black p-4 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 opacity-5" style={{
+                  backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 5px, #22c55e 5px, #22c55e 10px)'
+                }} />
+                <h3 className="text-xs font-black tracking-widest text-green-500 uppercase mb-3 relative z-10">// OUTPUT PROJECTION</h3>
 
                 {/* Final Stats with Material Contributions */}
-                <div className="bg-neutral-800 rounded p-3 mb-3">
-                  <div className="text-sm font-semibold mb-2">Module Stats:</div>
+                <div className="border border-neutral-700 bg-neutral-950 p-3 mb-3 relative z-10">
+                  <div className="text-xs font-black tracking-wider text-neutral-400 uppercase mb-2">STATS:</div>
                   <div className="space-y-2">
                     {Object.entries(craftingPreview.finalStats).map(([stat, value]) => {
                       const contributors = craftingPreview.statContributions?.[stat];
@@ -516,13 +523,13 @@ export function ManufacturingInterface({
                 <button
                   onClick={handleCraft}
                   disabled={!craftingPreview.canCraft || isCrafting}
-                  className={`w-full mt-4 py-3 rounded-lg font-bold transition-all ${
+                  className={`w-full mt-4 py-4 border-2 font-black uppercase tracking-widest text-sm transition-all ${
                     craftingPreview.canCraft && !isCrafting
-                      ? 'bg-blue-600 hover:bg-blue-500 text-white'
-                      : 'bg-neutral-700 text-neutral-400 cursor-not-allowed'
+                      ? 'bg-green-600 hover:bg-green-500 text-black border-green-400'
+                      : 'bg-neutral-900 text-neutral-600 border-neutral-800 cursor-not-allowed'
                   }`}
                 >
-                  {isCrafting ? 'Crafting...' : `Craft ${batchSize > 1 ? `${batchSize}× ` : ''}${selectedBlueprint.name}`}
+                  {isCrafting ? '▶ FABRICATING...' : `▶ FABRICATE ${batchSize > 1 ? `×${batchSize} ` : ''}${selectedBlueprint.name.toUpperCase()}`}
                 </button>
 
                 {/* Estimated Time Preview */}

@@ -307,15 +307,9 @@ function BlueprintFormModal({
                       className="w-full bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-xs"
                     >
                       <option value="">Select...</option>
-                      <option value="Titanium">Titanium</option>
-                      <option value="Iron">Iron</option>
-                      <option value="Aluminum">Aluminum</option>
-                      <option value="Plasma">Plasma</option>
-                      <option value="Quantum">Quantum</option>
-                      <option value="Dark matter">Dark matter</option>
-                      <option value="Silicon">Silicon</option>
-                      <option value="Copper">Copper</option>
-                      <option value="Gold">Gold</option>
+                      {materials.map(m => (
+                        <option key={m.id} value={m.name}>{m.name}</option>
+                      ))}
                     </select>
                   </div>
                   

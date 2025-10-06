@@ -100,31 +100,32 @@ export default function MaterialsAdmin() {
                     </div>
                   </div>
 
-                  {archetype && (
+                  {/* Show attributes from DB or archetype */}
+                  {(attrs || archetype) && (
                     <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 text-xs">
                       <div className="bg-neutral-800/50 p-2 rounded">
                         <div className="text-neutral-500">Strength</div>
-                        <div className="font-bold">{archetype.strength}</div>
+                        <div className="font-bold">{attrs?.strength || archetype?.strength || 100}</div>
                       </div>
                       <div className="bg-neutral-800/50 p-2 rounded">
                         <div className="text-neutral-500">Conductivity</div>
-                        <div className="font-bold">{archetype.conductivity}</div>
+                        <div className="font-bold">{attrs?.conductivity || archetype?.conductivity || 100}</div>
                       </div>
                       <div className="bg-neutral-800/50 p-2 rounded">
                         <div className="text-neutral-500">Density</div>
-                        <div className="font-bold">{archetype.density}</div>
+                        <div className="font-bold">{attrs?.density || archetype?.density || 100}</div>
                       </div>
                       <div className="bg-neutral-800/50 p-2 rounded">
                         <div className="text-neutral-500">Reactivity</div>
-                        <div className="font-bold">{archetype.reactivity}</div>
+                        <div className="font-bold">{attrs?.reactivity || archetype?.reactivity || 100}</div>
                       </div>
                       <div className="bg-neutral-800/50 p-2 rounded">
                         <div className="text-neutral-500">Stability</div>
-                        <div className="font-bold">{archetype.stability}</div>
+                        <div className="font-bold">{attrs?.stability || archetype?.stability || 100}</div>
                       </div>
                       <div className="bg-neutral-800/50 p-2 rounded">
                         <div className="text-neutral-500">Elasticity</div>
-                        <div className="font-bold">{archetype.elasticity}</div>
+                        <div className="font-bold">{attrs?.elasticity || archetype?.elasticity || 100}</div>
                       </div>
                     </div>
                   )}
@@ -192,25 +193,36 @@ function MaterialAttributeModal({
   const isNew = material.id === 'new';
   const archetype = isNew ? null : MATERIAL_ARCHETYPES[material.name as keyof typeof MATERIAL_ARCHETYPES];
   
+  // Use DB baseAttributes if available, otherwise archetype, otherwise defaults
+  const dbAttrs = material.baseAttributes as any;
+  const initialAttributes = dbAttrs && Object.keys(dbAttrs).length > 0 ? {
+    strength: dbAttrs.strength || 100,
+    conductivity: dbAttrs.conductivity || 100,
+    density: dbAttrs.density || 100,
+    reactivity: dbAttrs.reactivity || 100,
+    stability: dbAttrs.stability || 100,
+    elasticity: dbAttrs.elasticity || 100
+  } : archetype ? {
+    strength: archetype.strength,
+    conductivity: archetype.conductivity,
+    density: archetype.density,
+    reactivity: archetype.reactivity,
+    stability: archetype.stability,
+    elasticity: archetype.elasticity
+  } : {
+    strength: 100,
+    conductivity: 100,
+    density: 100,
+    reactivity: 100,
+    stability: 100,
+    elasticity: 100
+  };
+  
   const [formData, setFormData] = useState({
     name: material.name || '',
     category: material.category || 'metal',
     baseValue: material.baseValue || 100,
-    attributes: archetype ? {
-      strength: archetype.strength,
-      conductivity: archetype.conductivity,
-      density: archetype.density,
-      reactivity: archetype.reactivity,
-      stability: archetype.stability,
-      elasticity: archetype.elasticity
-    } : {
-      strength: 100,
-      conductivity: 100,
-      density: 100,
-      reactivity: 100,
-      stability: 100,
-      elasticity: 100
-    }
+    attributes: initialAttributes
   });
 
   const [customAttributes, setCustomAttributes] = useState<{name: string; value: number}[]>([]);
@@ -325,15 +337,15 @@ function MaterialAttributeModal({
             {Object.entries(formData.attributes).map(([key, value]) => (
               <label key={key} className="block">
                 <span className="text-xs text-neutral-400 capitalize">{key}</span>
-                <input
-                  type="number"
-                  value={value}
-                  onChange={e => setFormData({
-                    ...formData,
-                    attributes: { ...formData.attributes, [key]: parseInt(e.target.value) || 0 }
-                  })}
-                  className="mt-1 w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm"
-                />
+                  <input
+                      type="number"
+                      value={value || 0}
+                      onChange={e => setFormData({
+                        ...formData,
+                        attributes: { ...formData.attributes, [key]: parseInt(e.target.value) || 0 }
+                      })}
+                      className="mt-1 w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm"
+                    />
               </label>
             ))}
           </div>

@@ -35,8 +35,18 @@ export async function createMaterial(data: {
   baseAttributes: any;
   tierStats?: any;
 }) {
+  if (!data.name || data.name.trim() === '') {
+    throw new Error('Material name is required');
+  }
+  
   const material = await prisma.material.create({
-    data
+    data: {
+      name: data.name.trim(),
+      category: data.category,
+      baseValue: data.baseValue,
+      baseAttributes: data.baseAttributes,
+      tierStats: data.tierStats
+    }
   });
   
   revalidatePath("/admin/materials");
