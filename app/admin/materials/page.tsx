@@ -47,9 +47,23 @@ export default function MaterialsAdmin() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Material Manager</h1>
-          <div className="text-sm text-neutral-400">
-            Configure material attributes and tier scaling
-          </div>
+          <button
+            onClick={() => {
+              setEditingMaterial({
+                id: 'new',
+                name: '',
+                category: 'metal',
+                baseValue: 100,
+                baseAttributes: {},
+                tierStats: null,
+                createdAt: new Date(),
+                updatedAt: new Date()
+              } as any);
+            }}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded font-medium"
+          >
+            + Create Material
+          </button>
         </div>
 
         {loading ? (
@@ -165,20 +179,121 @@ function MaterialAttributeModal({
   onClose: () => void;
   onSave: () => void;
 }) {
-  const stats = getMaterialStats(material.name, selectedTier);
+  const isNew = material.id === 'new';
+  const archetype = isNew ? null : MATERIAL_ARCHETYPES[material.name as keyof typeof MATERIAL_ARCHETYPES];
+  
+  const [formData, setFormData] = useState({
+    name: material.name || '',
+    category: material.category || 'metal',
+    baseValue: material.baseValue || 100,
+    attributes: archetype ? {
+      strength: archetype.strength,
+      conductivity: archetype.conductivity,
+      density: archetype.density,
+      reactivity: archetype.reactivity,
+      stability: archetype.stability,
+      elasticity: archetype.elasticity
+    } : {
+      strength: 100,
+      conductivity: 100,
+      density: 100,
+      reactivity: 100,
+      stability: 100,
+      elasticity: 100
+    }
+  });
+
+  const [customAttributes, setCustomAttributes] = useState<{name: string; value: number}[]>([]);
+  
+  const stats = archetype ? getMaterialStats(material.name, selectedTier) : {
+    strength: formData.attributes.strength * (selectedTier === 1 ? 1.0 : selectedTier === 2 ? 1.5 : selectedTier === 3 ? 2.0 : selectedTier === 4 ? 2.5 : 3.0),
+    conductivity: formData.attributes.conductivity * (selectedTier === 1 ? 1.0 : selectedTier === 2 ? 1.5 : selectedTier === 3 ? 2.0 : selectedTier === 4 ? 2.5 : 3.0),
+    density: formData.attributes.density * (selectedTier === 1 ? 1.0 : selectedTier === 2 ? 1.5 : selectedTier === 3 ? 2.0 : selectedTier === 4 ? 2.5 : 3.0),
+    reactivity: formData.attributes.reactivity * (selectedTier === 1 ? 1.0 : selectedTier === 2 ? 1.5 : selectedTier === 3 ? 2.0 : selectedTier === 4 ? 2.5 : 3.0),
+    stability: formData.attributes.stability * (selectedTier === 1 ? 1.0 : selectedTier === 2 ? 1.5 : selectedTier === 3 ? 2.0 : selectedTier === 4 ? 2.5 : 3.0),
+    elasticity: formData.attributes.elasticity * (selectedTier === 1 ? 1.0 : selectedTier === 2 ? 1.5 : selectedTier === 3 ? 2.0 : selectedTier === 4 ? 2.5 : 3.0)
+  };
+
+  async function handleSave() {
+    try {
+      const allAttributes = { ...formData.attributes };
+      customAttributes.forEach(attr => {
+        if (attr.name) allAttributes[attr.name] = attr.value;
+      });
+
+      const data = {
+        name: formData.name,
+        category: formData.category,
+        baseValue: formData.baseValue,
+        baseAttributes: allAttributes
+      };
+
+      if (isNew) {
+        await createMaterial(data);
+      } else {
+        await updateMaterial(material.id, data);
+      }
+      onSave();
+    } catch (error) {
+      console.error('Failed to save material:', error);
+      alert('Failed to save material');
+    }
+  }
   
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-neutral-900 rounded-lg border border-neutral-800 p-6 max-w-2xl w-full">
-        <h2 className="text-2xl font-bold mb-4">{material.name} - Attributes</h2>
+      <div className="bg-neutral-900 rounded-lg border border-neutral-800 p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <h2 className="text-2xl font-bold mb-4">
+          {isNew ? 'Create Material' : `${material.name} - Attributes`}
+        </h2>
         
+        {/* Basic Info */}
+        {isNew && (
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <label className="block">
+              <span className="text-xs text-neutral-400">Name</span>
+              <input
+                value={formData.name}
+                onChange={e => setFormData({...formData, name: e.target.value})}
+                className="mt-1 w-full bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-sm"
+                placeholder="e.g., Chromium"
+              />
+            </label>
+            <label className="block">
+              <span className="text-xs text-neutral-400">Category</span>
+              <select
+                value={formData.category}
+                onChange={e => setFormData({...formData, category: e.target.value})}
+                className="mt-1 w-full bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-sm"
+              >
+                <option value="metal">Metal</option>
+                <option value="gas">Gas</option>
+                <option value="crystal">Crystal</option>
+                <option value="composite">Composite</option>
+                <option value="exotic">Exotic</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-xs text-neutral-400">Base Value (ISK)</span>
+              <input
+                type="number"
+                value={formData.baseValue}
+                onChange={e => setFormData({...formData, baseValue: parseInt(e.target.value)})}
+                className="mt-1 w-full bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-sm"
+              />
+            </label>
+          </div>
+        )}
+
+        {/* Tier Preview */}
         <div className="mb-4">
-          <label className="text-sm text-neutral-400">View Tier:</label>
+          <label className="text-sm text-neutral-400">View Tier Scaling:</label>
           <div className="flex gap-2 mt-2">
             {[1, 2, 3, 4, 5].map(tier => (
               <button
                 key={tier}
                 onClick={() => onTierChange(tier)}
+                type="button"
                 className={`px-3 py-1 rounded text-sm ${
                   selectedTier === tier
                     ? 'bg-blue-600 text-white'
@@ -191,53 +306,123 @@ function MaterialAttributeModal({
           </div>
         </div>
 
+        {/* Base Attributes (T1 values) */}
         <div className="bg-neutral-800/50 rounded p-4 mb-4">
           <div className="text-sm font-semibold mb-3">
-            Tier {selectedTier} Stats (multiplier: {selectedTier === 1 ? '1.0' : selectedTier === 2 ? '1.5' : selectedTier === 3 ? '2.0' : selectedTier === 4 ? '2.5' : '3.0'}×)
+            Base Attributes (T1 = 1.0× multiplier)
           </div>
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-neutral-400">Strength:</span>
-              <span className="font-mono font-bold">{Math.round(stats.strength)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-neutral-400">Conductivity:</span>
-              <span className="font-mono font-bold">{Math.round(stats.conductivity)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-neutral-400">Density:</span>
-              <span className="font-mono font-bold">{Math.round(stats.density)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-neutral-400">Reactivity:</span>
-              <span className="font-mono font-bold">{Math.round(stats.reactivity)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-neutral-400">Stability:</span>
-              <span className="font-mono font-bold">{Math.round(stats.stability)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-neutral-400">Elasticity:</span>
-              <span className="font-mono font-bold">{Math.round(stats.elasticity)}</span>
-            </div>
+          <div className="grid grid-cols-2 gap-3">
+            {Object.entries(formData.attributes).map(([key, value]) => (
+              <label key={key} className="block">
+                <span className="text-xs text-neutral-400 capitalize">{key}</span>
+                <input
+                  type="number"
+                  value={value}
+                  onChange={e => setFormData({
+                    ...formData,
+                    attributes: { ...formData.attributes, [key]: parseInt(e.target.value) || 0 }
+                  })}
+                  className="mt-1 w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm"
+                />
+              </label>
+            ))}
           </div>
         </div>
 
-        <div className="p-3 bg-blue-900/20 border border-blue-700/50 rounded text-xs text-neutral-300">
-          <p className="mb-2">
-            💡 Attributes are defined in <code className="text-blue-400">lib/industrial/materialStats.ts</code>
-          </p>
+        {/* Custom Attributes */}
+        <div className="bg-neutral-800/50 rounded p-4 mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-semibold">Custom Attributes</span>
+            <button
+              type="button"
+              onClick={() => setCustomAttributes([...customAttributes, { name: '', value: 100 }])}
+              className="px-2 py-1 bg-green-600/20 text-green-400 rounded text-xs"
+            >
+              + Add Custom
+            </button>
+          </div>
+          {customAttributes.length === 0 ? (
+            <div className="text-xs text-neutral-500">No custom attributes. Add one above.</div>
+          ) : (
+            <div className="space-y-2">
+              {customAttributes.map((attr, idx) => (
+                <div key={idx} className="grid grid-cols-12 gap-2">
+                  <div className="col-span-5">
+                    <input
+                      type="text"
+                      placeholder="Attribute name"
+                      value={attr.name}
+                      onChange={e => {
+                        const newAttrs = [...customAttributes];
+                        newAttrs[idx].name = e.target.value;
+                        setCustomAttributes(newAttrs);
+                      }}
+                      className="w-full bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-xs"
+                    />
+                  </div>
+                  <div className="col-span-6">
+                    <input
+                      type="number"
+                      placeholder="Value"
+                      value={attr.value}
+                      onChange={e => {
+                        const newAttrs = [...customAttributes];
+                        newAttrs[idx].value = parseInt(e.target.value) || 0;
+                        setCustomAttributes(newAttrs);
+                      }}
+                      className="w-full bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-xs"
+                    />
+                  </div>
+                  <div className="col-span-1">
+                    <button
+                      type="button"
+                      onClick={() => setCustomAttributes(customAttributes.filter((_, i) => i !== idx))}
+                      className="px-2 py-1 bg-red-600/20 text-red-400 rounded text-xs"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Preview at Selected Tier */}
+        <div className="bg-neutral-800/50 rounded p-4 mb-4">
+          <div className="text-sm font-semibold mb-3">
+            Tier {selectedTier} Preview (×{selectedTier === 1 ? '1.0' : selectedTier === 2 ? '1.5' : selectedTier === 3 ? '2.0' : selectedTier === 4 ? '2.5' : '3.0'})
+          </div>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            {Object.entries(stats).map(([key, value]) => (
+              <div key={key} className="flex justify-between">
+                <span className="text-neutral-400 capitalize">{key}:</span>
+                <span className="font-mono font-bold text-green-400">{Math.round(value as number)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="p-3 bg-yellow-900/20 border border-yellow-700/50 rounded text-xs text-neutral-300">
+          <p className="font-semibold mb-1">⚠️ Advanced: Code-Level Editing</p>
           <p>
-            To modify, edit the MATERIAL_ARCHETYPES constant and tier multipliers in that file.
+            For precise control, edit <code className="text-yellow-400">lib/industrial/materialStats.ts</code> directly.
+            This UI updates the database only; game logic reads from materialStats.ts.
           </p>
         </div>
 
         <div className="flex gap-3 mt-4">
           <button
-            onClick={onClose}
-            className="flex-1 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 rounded font-medium"
+            onClick={handleSave}
+            className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-medium"
           >
-            Close
+            {isNew ? 'Create Material' : 'Save Changes'}
+          </button>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 rounded font-medium"
+          >
+            Cancel
           </button>
         </div>
       </div>
