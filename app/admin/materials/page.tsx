@@ -148,11 +148,9 @@ export default function MaterialsAdmin() {
                         );
                       })}
                     </div>
-                    {!archetype && (
-                      <div className="text-xs text-yellow-400 mt-1">
-                        ⚠️ Add to materialStats.ts for full tier support
-                      </div>
-                    )}
+                    <div className="text-xs text-green-400 mt-1">
+                      ✓ Using {archetype ? 'code-defined' : 'database'} attributes
+                    </div>
                   </div>
                 </div>
               );
@@ -415,12 +413,13 @@ function MaterialAttributeModal({
           </div>
         </div>
 
-        <div className="p-3 bg-yellow-900/20 border border-yellow-700/50 rounded text-xs text-neutral-300">
-          <p className="font-semibold mb-1">⚠️ Advanced: Code-Level Editing</p>
+        <div className="p-3 bg-blue-900/20 border border-blue-700/50 rounded text-xs text-neutral-300">
+          <p className="font-semibold mb-1">ℹ️ Material System</p>
           <p>
-            For precise control, edit <code className="text-yellow-400">lib/industrial/materialStats.ts</code> directly.
-            This UI updates the database only; game logic reads from materialStats.ts.
+            Materials are DB-first. For performance optimization, add frequently-used materials to 
+            <code className="text-blue-400"> lib/industrial/materialStats.ts</code> MATERIAL_ARCHETYPES.
           </p>
+          <p className="mt-1">DB-only materials work but may be slightly slower (requires DB query per craft).</p>
         </div>
 
         <div className="flex gap-3 mt-4">
