@@ -10,6 +10,8 @@ const adminLinks = [
   { href: "/admin/modules", label: "Manage Modules" },
   { href: "/admin/module-types", label: "Manage Module Types" },
   { href: "/admin/slots", label: "Manage Custom Slots" },
+  { href: "/admin/blueprints", label: "Manage Blueprints", section: "Industrial" },
+  { href: "/admin/materials", label: "Manage Materials", section: "Industrial" },
   { href: "/admin/instructions", label: "System Instructions" },
 ];
 
