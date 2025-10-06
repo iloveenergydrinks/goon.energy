@@ -114,10 +114,12 @@ export const MATERIAL_ARCHETYPES: Record<MaterialType, MaterialTierStats> = {
 };
 
 // Get material stats for a specific tier
+// Now supports DB-only materials via async fetch
 export function getMaterialStats(materialType: string, tier: number): MaterialTierStats {
   const archetype = MATERIAL_ARCHETYPES[materialType as MaterialType];
   if (!archetype) {
     // Return default/balanced stats for unknown materials
+    // Note: For DB-only materials, use getMaterialStatsAsync instead
     return {
       strength: 100,
       conductivity: 100,
@@ -137,6 +139,54 @@ export function getMaterialStats(materialType: string, tier: number): MaterialTi
     reactivity: archetype.reactivity * multiplier,
     stability: archetype.stability * multiplier,
     elasticity: archetype.elasticity * multiplier
+  };
+}
+
+// Async version that falls back to database for custom materials
+export async function getMaterialStatsAsync(materialType: string, tier: number): Promise<MaterialTierStats> {
+  // Try code-defined archetypes first (faster)
+  const archetype = MATERIAL_ARCHETYPES[materialType as MaterialType];
+  
+  if (archetype) {
+    const multiplier = TIER_MULTIPLIERS[tier as keyof typeof TIER_MULTIPLIERS] || 1.0;
+    return {
+      strength: archetype.strength * multiplier,
+      conductivity: archetype.conductivity * multiplier,
+      density: archetype.density * multiplier,
+      reactivity: archetype.reactivity * multiplier,
+      stability: archetype.stability * multiplier,
+      elasticity: archetype.elasticity * multiplier
+    };
+  }
+  
+  // Fall back to database
+  const { prisma } = await import('@/lib/prisma');
+  const material = await prisma.material.findFirst({
+    where: { name: materialType }
+  });
+  
+  if (!material || !material.baseAttributes) {
+    // Ultimate fallback
+    return {
+      strength: 100,
+      conductivity: 100,
+      density: 100,
+      reactivity: 100,
+      stability: 100,
+      elasticity: 100
+    };
+  }
+  
+  const baseAttrs = material.baseAttributes as any;
+  const multiplier = TIER_MULTIPLIERS[tier as keyof typeof TIER_MULTIPLIERS] || 1.0;
+  
+  return {
+    strength: (baseAttrs.strength || 100) * multiplier,
+    conductivity: (baseAttrs.conductivity || 100) * multiplier,
+    density: (baseAttrs.density || 100) * multiplier,
+    reactivity: (baseAttrs.reactivity || 100) * multiplier,
+    stability: (baseAttrs.stability || 100) * multiplier,
+    elasticity: (baseAttrs.elasticity || 100) * multiplier
   };
 }
 

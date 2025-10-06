@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { getQualityGrade, getQualityBadgeStyles } from '@/lib/industrial/quality';
-import { getMaterialStats, getAttributeForStat } from '@/lib/industrial/materialStats';
+import { getMaterialStats, getAttributeForStat, getMaterialStatsAsync } from '@/lib/industrial/materialStats';
 import { getCaptainEffects } from '@/lib/industrial/captains';
 
 interface Blueprint {
@@ -67,6 +67,7 @@ export function ManufacturingInterface({
   const [jobs, setJobs] = useState<any[]>([]);
   const [polling, setPolling] = useState<boolean>(false);
   const [now, setNow] = useState<number>(Date.now());
+  const [previewStats, setPreviewStats] = useState<any>(null);
 
   // Update current time every second for live countdown
   React.useEffect(() => {
@@ -198,11 +199,11 @@ export function ManufacturingInterface({
         continue;
       }
       
-      // Find which materials affect this stat
+      // Find which materials affect this stat (use sync getMaterialStats for preview - will show defaults for DB-only)
       const contributors: any[] = [];
       for (const detail of materialDetails) {
         if (detail.affects && detail.affects.includes(statName) && detail.tier && detail.purity) {
-          const materialStats = getMaterialStats(detail.type, detail.tier);
+          const materialStats = getMaterialStats(detail.type, detail.tier); // Sync version for preview
           const attribute = getAttributeForStat(statName);
           const attributeValue = materialStats[attribute];
           

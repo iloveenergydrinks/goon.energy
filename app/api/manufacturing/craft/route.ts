@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getQualityGrade } from '@/lib/industrial/quality';
 import { estimateManufacturingTimeSeconds } from '@/lib/industrial/time';
 import { getCaptainEffects } from '@/lib/industrial/captains';
-import { getMaterialStats, getAttributeForStat } from '@/lib/industrial/materialStats';
+import { getMaterialStatsAsync, getAttributeForStat } from '@/lib/industrial/materialStats';
 
 export async function POST(request: NextRequest) {
   try {
@@ -154,8 +154,8 @@ export async function POST(request: NextRequest) {
       
       if (!playerMaterial) continue;
       
-      // Get material base stats for this tier
-      const materialStats = getMaterialStats(required.materialType, playerMaterial.tier);
+      // Get material base stats for this tier (async to support DB-only materials)
+      const materialStats = await getMaterialStatsAsync(required.materialType, playerMaterial.tier);
       
       // For each stat this material affects
       const affectedStats = required.affects || [];
