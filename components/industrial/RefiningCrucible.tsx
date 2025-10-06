@@ -19,11 +19,55 @@ export function RefiningCrucible({ playerMaterials, facilities, onRefiningComple
   const [isRefining, setIsRefining] = useState(false);
   const [captainId, setCaptainId] = useState<string>('none');
   const [now, setNow] = useState<number>(Date.now());
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [completionMessage, setCompletionMessage] = useState<any>(null);
+  const [prevCompletedCount, setPrevCompletedCount] = useState(0);
 
   React.useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // Poll for completed jobs and show notification
+  React.useEffect(() => {
+    async function checkCompletions() {
+      try {
+        const res = await fetch('/api/refining');
+        if (res.ok) {
+          const data = await res.json();
+          const jobs = Array.isArray(data) ? data : [];
+          const completed = jobs.filter((j: any) => j.status === 'completed');
+          
+          // New completion detected
+          if (completed.length > prevCompletedCount) {
+            const latest = completed[completed.length - 1];
+            
+            // Find the material name from the job
+            const material = await fetch(`/api/player/materials`).then(r => r.ok ? r.json() : null);
+            const materialName = material?.materials?.find((m: any) => m.materialId === latest.materialId)?.material?.name || 'Material';
+            
+            setCompletionMessage({
+              materialName,
+              quantity: latest.outputQuantity,
+              purity: latest.outputPurity,
+              tier: latest.outputTier,
+              isRefined: true // Refining always produces refined
+            });
+            
+            setTimeout(() => setCompletionMessage(null), 15000); // 15 seconds
+            if (onRefiningComplete) onRefiningComplete();
+          }
+          
+          setPrevCompletedCount(completed.length);
+        }
+      } catch (e) {
+        console.error('Failed to poll refining', e);
+      }
+    }
+    
+    const interval = setInterval(checkCompletions, 2000);
+    return () => clearInterval(interval);
+  }, [prevCompletedCount, onRefiningComplete]);
 
   // Group materials by name+tier for draggable list
   const materialGroups = useMemo(() => {
@@ -170,9 +214,56 @@ export function RefiningCrucible({ playerMaterials, facilities, onRefiningComple
   };
 
   return (
-    <div className="grid grid-cols-12 gap-4">
-      {/* Left: Available Materials */}
-      <div className="col-span-4 space-y-3">
+    <div className="space-y-4">
+      {/* Completion Notification */}
+      {completionMessage && (
+        <div className="border-2 border-green-600 bg-green-950/20 p-4 relative overflow-hidden shadow-lg shadow-green-600/30">
+          <div className="absolute inset-0 opacity-10" style={{
+            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #22c55e 10px, #22c55e 20px)'
+          }} />
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm font-black tracking-wider text-green-400 uppercase">✓ REFINING COMPLETE</div>
+              <button
+                onClick={() => setCompletionMessage(null)}
+                className="text-neutral-500 hover:text-white text-xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+            
+            {/* Material Name */}
+            <div className="mb-3 pb-3 border-b border-green-800">
+              <div className="text-xs text-neutral-500 uppercase">Produced:</div>
+              <div className="text-xl font-black text-cyan-400 uppercase tracking-wider">
+                ✨ {completionMessage.materialName}
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-4 text-xs font-mono">
+              <div>
+                <div className="text-neutral-500 uppercase">Quantity:</div>
+                <div className="text-white font-bold text-2xl tabular-nums">{completionMessage.quantity}</div>
+              </div>
+              <div>
+                <div className="text-neutral-500 uppercase">Purity:</div>
+                <div className="text-green-400 font-bold text-2xl tabular-nums">{(completionMessage.purity * 100).toFixed(1)}%</div>
+              </div>
+              <div>
+                <div className="text-neutral-500 uppercase">Tier:</div>
+                <div className="text-cyan-400 font-bold text-2xl tabular-nums">T{completionMessage.tier}</div>
+              </div>
+            </div>
+            <div className="text-xs text-neutral-500 mt-3 font-mono uppercase tracking-wider">
+              → ADDED TO CARGO BAY
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <div className="grid grid-cols-12 gap-4">
+        {/* Left: Available Materials */}
+        <div className="col-span-4 space-y-3">
         <div className="border-2 border-blue-600 bg-black p-3">
           <h3 className="text-xs font-black tracking-widest text-blue-500 uppercase">
             AVAILABLE STOCK
@@ -180,45 +271,98 @@ export function RefiningCrucible({ playerMaterials, facilities, onRefiningComple
           </h3>
         </div>
         
-        <div className="space-y-2 max-h-[600px] overflow-y-auto">
+        <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
           {Object.keys(materialGroups).length === 0 && crucible.length > 0 && (
-            <div className="text-center py-8 text-neutral-600 text-xs font-mono">
+            <div className="text-center py-8 text-neutral-600 text-xs font-mono border-2 border-dashed border-neutral-800 bg-neutral-950">
               ALL COMPATIBLE STACKS<br/>ADDED TO CRUCIBLE
             </div>
           )}
-          {Object.entries(materialGroups).map(([key, stacks]) => (
-            <div key={key} className="space-y-1">
-              <div className="text-xs text-neutral-600 font-mono uppercase">{key}</div>
-              {stacks.map((mat: any) => {
-                const inCrucible = crucible.includes(mat.id);
-                const qualityInfo = getQualityGrade(mat.purity);
-                
-                return (
-                  <button
-                    key={mat.id}
-                    onClick={() => inCrucible ? handleRemoveFromCrucible(mat.id) : handleAddToCrucible(mat.id)}
-                    disabled={isRefining}
-                    className={`w-full p-2 border-2 text-left transition-all ${
-                      inCrucible
-                        ? 'border-orange-500 bg-orange-900/20 opacity-50'
-                        : 'border-neutral-800 bg-black hover:border-orange-600'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between text-xs">
-                      <div>
-                        <div className={`font-bold ${mat.isRefined === false ? 'text-orange-400' : 'text-blue-400'}`}>
-                          {getMaterialDisplayName(mat.name, mat.isRefined)}
-                        </div>
-                        <div className="text-neutral-500 font-mono">{qualityInfo.shortName} {(mat.purity * 100).toFixed(1)}%</div>
+          {Object.entries(materialGroups).map(([key, stacks]) => {
+            // Calculate group totals for header
+            const totalQty = stacks.reduce((sum, s) => sum + s.quantity, 0);
+            const avgPurity = stacks.reduce((sum, s) => sum + (s.purity * s.quantity), 0) / totalQty;
+            const isOre = stacks[0]?.isRefined === false;
+            const isExpanded = expandedGroups.has(key);
+            
+            return (
+              <div key={key} className="space-y-1">
+                {/* Material Group Header - Clickable */}
+                <button
+                  onClick={() => {
+                    const newExpanded = new Set(expandedGroups);
+                    if (isExpanded) {
+                      newExpanded.delete(key);
+                    } else {
+                      newExpanded.add(key);
+                    }
+                    setExpandedGroups(newExpanded);
+                  }}
+                  className={`w-full border-2 p-2 text-left transition-all ${
+                    isOre ? 'border-orange-700 bg-orange-950/10 hover:bg-orange-950/20' : 'border-blue-700 bg-blue-950/10 hover:bg-blue-950/20'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500 text-xs">{isExpanded ? '▼' : '▶'}</span>
+                      <div className="text-xs font-black uppercase tracking-wider">
+                        <span className={isOre ? 'text-orange-400' : 'text-blue-400'}>{key}</span>
                       </div>
-                      <div className="font-bold tabular-nums">{mat.quantity}</div>
                     </div>
-                    {inCrucible && <div className="text-xs text-orange-400 mt-1 font-mono">→ IN CRUCIBLE</div>}
-                  </button>
-                );
-              })}
-            </div>
-          ))}
+                    <div className="text-xs font-mono">
+                      <span className="text-neutral-500">{stacks.length}</span>
+                      <span className="mx-2 text-neutral-700">|</span>
+                      <span className="text-white font-bold">{formatIndustrialNumber(totalQty)}</span>
+                      <span className="mx-2 text-neutral-700">|</span>
+                      <span className={`font-bold ${isOre ? 'text-orange-400' : 'text-blue-400'}`}>
+                        {(avgPurity * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+                </button>
+                
+                {/* Stacks within group - Collapsible */}
+                {isExpanded && (
+                  <div className="space-y-1 pl-2">
+                  {stacks.map((mat: any) => {
+                    const inCrucible = crucible.includes(mat.id);
+                    const qualityInfo = getQualityGrade(mat.purity);
+                    
+                    return (
+                      <button
+                        key={mat.id}
+                        onClick={() => inCrucible ? handleRemoveFromCrucible(mat.id) : handleAddToCrucible(mat.id)}
+                        disabled={isRefining}
+                        className={`w-full p-2 border transition-all flex items-center justify-between ${
+                          inCrucible
+                            ? 'border-orange-500 bg-orange-600/20 opacity-60'
+                            : 'border-neutral-800 bg-neutral-950 hover:border-orange-600 hover:bg-orange-950/10'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 text-xs">
+                          <div className={`w-2 h-2 ${
+                            qualityInfo.grade === 'QT' || qualityInfo.grade === 'PS' ? 'bg-yellow-500' :
+                            qualityInfo.grade === 'PR' ? 'bg-purple-500' :
+                            qualityInfo.grade === 'RF' ? 'bg-blue-500' :
+                            qualityInfo.grade === 'ST' ? 'bg-green-500' :
+                            'bg-neutral-600'
+                          }`} />
+                          <div>
+                            <div className="text-neutral-400 font-mono">{qualityInfo.shortName}</div>
+                            <div className="text-white font-bold tabular-nums">{(mat.purity * 100).toFixed(1)}%</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="text-white font-bold tabular-nums">{mat.quantity}</div>
+                          {inCrucible && <div className="text-xs text-orange-400 font-mono">✓</div>}
+                        </div>
+                      </button>
+                    );
+                  })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -490,6 +634,7 @@ export function RefiningCrucible({ playerMaterials, facilities, onRefiningComple
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );
