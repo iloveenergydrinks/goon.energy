@@ -78,17 +78,7 @@ export function OverviewTab() {
               <div className="text-white font-bold">T4 Node → T3/T4/T5 Ore</div>
             </div>
           </div>
-          
-          <div className="border border-neutral-700 bg-neutral-950 p-3">
-            <div className="text-neutral-500 uppercase text-xs mb-2">Main Game Mining:</div>
-            <ul className="space-y-1 text-neutral-400">
-              <li>→ Fit mining lasers to ship modules</li>
-              <li>→ Travel to asteroid belts / gas clouds</li>
-              <li>→ Lock target, activate lasers (real-time)</li>
-              <li>→ Ore fills cargo (capacity limited)</li>
-              <li>→ Return to station to unload</li>
-            </ul>
-          </div>
+        
         </div>
       </div>
 
@@ -140,6 +130,59 @@ export function OverviewTab() {
                 // RED: QUANTITY | GREEN: PURITY
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tier vs Purity Explanation */}
+      <div className="border-2 border-yellow-600 bg-black p-4">
+        <h3 className="text-sm font-black tracking-widest text-yellow-500 uppercase mb-3">⚠️ TIER VS PURITY</h3>
+        
+        <div className="grid grid-cols-2 gap-4 text-xs font-mono">
+          {/* Tier */}
+          <div className="border border-neutral-700 bg-neutral-950 p-3">
+            <div className="text-yellow-400 font-black uppercase mb-2">TIER (T1-T5)</div>
+            <div className="space-y-2 text-neutral-400">
+              <div><span className="text-white">What:</span> Material quality grade</div>
+              <div><span className="text-white">Determines:</span> Base attribute values</div>
+              <div><span className="text-white">Source:</span> Mining drop (node tier)</div>
+              <div><span className="text-white">Changeable:</span> <span className="text-red-400">NO - Permanent</span></div>
+              <div className="border-t border-neutral-800 pt-2 mt-2">
+                <div className="text-neutral-600">Example:</div>
+                <div>T1: 200 strength (×1.0)</div>
+                <div>T3: 400 strength (×2.0)</div>
+                <div>T5: 600 strength (×3.0)</div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Purity */}
+          <div className="border border-neutral-700 bg-neutral-950 p-3">
+            <div className="text-cyan-400 font-black uppercase mb-2">PURITY (0-100%)</div>
+            <div className="space-y-2 text-neutral-400">
+              <div><span className="text-white">What:</span> Contamination level</div>
+              <div><span className="text-white">Determines:</span> Final stat multiplier</div>
+              <div><span className="text-white">Source:</span> Random on mining</div>
+              <div><span className="text-white">Changeable:</span> <span className="text-green-400">YES - Refining</span></div>
+              <div className="border-t border-neutral-800 pt-2 mt-2">
+                <div className="text-neutral-600">Example:</div>
+                <div>40% purity → ×0.4 mult</div>
+                <div>70% purity → ×0.7 mult</div>
+                <div>100% purity → ×1.0 mult</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-3 border border-orange-600 bg-orange-950/10 p-3 text-xs font-mono">
+          <div className="text-orange-400 font-bold mb-1">⚠️ CRUCIBLE RESTRICTION:</div>
+          <div className="text-neutral-400">
+            Can only mix materials with:<br/>
+            • Same name (Titanium + Titanium only)<br/>
+            • Same tier (T3 + T3 only)<br/>
+            • Same state (🪨 ore OR ✨ mineral, not both)<br/>
+            <br/>
+            <span className="text-white">Different purities CAN be mixed</span> → weighted average
           </div>
         </div>
       </div>

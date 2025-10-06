@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { MaterialCard, MaterialComparison } from '@/components/industrial/MaterialCard';
 import { RefiningInterface } from '@/components/industrial/RefiningInterface';
+import { RefiningCrucible } from '@/components/industrial/RefiningCrucible';
 import { MiningInterface } from '@/components/industrial/MiningInterface';
 import { OverviewTab } from '@/components/industrial/OverviewTab';
 import { CargoInventory } from '@/components/industrial/CargoInventory';
@@ -952,16 +953,20 @@ export default function IndustrialDashboard() {
         
         {/* Refining Tab */}
         {activeTab === 'refining' && (
-          <div>
-            <h2 className="text-xl font-semibold text-white mb-6">Refining Bay</h2>
-            <RefiningInterface
-              materials={[]}
-              facilities={refiningFacilities}
+          <div className="space-y-4">
+            <div className="border-2 border-orange-600 bg-black p-4 relative overflow-hidden">
+              <div className="absolute inset-0 opacity-5" style={{
+                backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #ff6b00 10px, #ff6b00 20px)'
+              }} />
+              <h2 className="text-xl font-black tracking-widest text-orange-500 uppercase relative z-10">⚗️ REFINING CRUCIBLE</h2>
+              <div className="text-xs text-neutral-500 font-mono relative z-10 mt-1">// BATCH PROCESSING SYSTEM</div>
+            </div>
+            
+            <RefiningCrucible
               playerMaterials={playerData?.materials || []}
+              facilities={refiningFacilities}
               onRefiningComplete={() => {
-                // Reload materials after refining
                 loadPlayerData();
-                setSelectedMaterials([]);
               }}
             />
           </div>
