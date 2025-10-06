@@ -130,17 +130,29 @@ export default function MaterialsAdmin() {
                   )}
 
                   <div className="mt-3 text-xs text-neutral-500">
-                    <div className="font-semibold mb-1">Tier Scaling:</div>
+                    <div className="font-semibold mb-1">Tier Scaling (Strength):</div>
                     <div className="flex gap-2">
                       {[1, 2, 3, 4, 5].map(tier => {
-                        const stats = archetype ? getMaterialStats(mat.name, tier) : null;
+                        const tierMult = tier === 1 ? 1.0 : tier === 2 ? 1.5 : tier === 3 ? 2.0 : tier === 4 ? 2.5 : 3.0;
+                        let baseStrength = 100;
+                        if (archetype) {
+                          baseStrength = archetype.strength;
+                        } else if (attrs?.strength) {
+                          baseStrength = attrs.strength;
+                        }
+                        const scaledValue = Math.round(baseStrength * tierMult);
                         return (
                           <div key={tier} className="px-2 py-1 bg-neutral-800 rounded">
-                            T{tier}: {stats ? `${Math.round(stats.strength)}` : '?'}
+                            T{tier}: {scaledValue}
                           </div>
                         );
                       })}
                     </div>
+                    {!archetype && (
+                      <div className="text-xs text-yellow-400 mt-1">
+                        ⚠️ Add to materialStats.ts for full tier support
+                      </div>
+                    )}
                   </div>
                 </div>
               );
